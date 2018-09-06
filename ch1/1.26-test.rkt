@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.26.rkt")
+(require rackunit "1.26.rkt")
 (require rackunit/text-ui)
 
 (define up-test

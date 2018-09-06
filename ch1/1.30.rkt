@@ -1,16 +1,21 @@
 #lang eopl
 
-; merge function
-(require "exe1.28.rkt")
-
 (define sort
-  (lambda (loi)
+  (lambda (pred loi)
     (if (null? loi)
         '()
         (if (= (length loi) 1)
             loi
             (let ((split-lists (split loi)))
-              (merge (sort (car split-lists)) (sort (cadr split-lists))))))))
+              (merge pred (sort pred (car split-lists)) (sort pred (cadr split-lists))))))))
+
+(define merge
+  (lambda (pred loi1 loi2)
+    (cond
+      ((null? loi1) loi2)
+      ((null? loi2) loi1)
+      ((pred (car loi1) (car loi2)) (cons (car loi1) (merge pred (cdr loi1) loi2)))
+      (else (cons (car loi2) (merge pred loi1 (cdr loi2)))))))
 
 (define split
   (lambda (loi)
@@ -29,4 +34,4 @@
        (cons (car loi) (collect-n (cdr loi) (+ idx 1) beg end)))
       (else '()))))
 
-(provide sort)
+(provide sort merge)

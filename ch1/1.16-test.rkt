@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.16.rkt")
+(require rackunit "1.16.rkt")
 (require rackunit/text-ui)
 
 (define invert-test

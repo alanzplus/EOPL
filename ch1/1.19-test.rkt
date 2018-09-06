@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.19.rkt")
+(require rackunit "1.19.rkt")
 (require rackunit/text-ui)
 
 (define list-set-test

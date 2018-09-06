@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.18.rkt")
+(require rackunit "1.18.rkt")
 (require rackunit/text-ui)
 
 (define swapper-test

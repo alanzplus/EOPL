@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.25.rkt")
+(require rackunit "1.25.rkt")
 (require rackunit/text-ui)
 
 (define exists-test

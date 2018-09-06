@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.15.rkt")
+(require rackunit "1.15.rkt")
 (require rackunit/text-ui)
 
 (define duple-test

@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.23.rkt")
+(require rackunit "1.23.rkt")
 (require rackunit/text-ui)
 
 (define list-index-test

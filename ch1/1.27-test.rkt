@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.27.rkt")
+(require rackunit "1.27.rkt")
 (require rackunit/text-ui)
 
 (define flatten-test

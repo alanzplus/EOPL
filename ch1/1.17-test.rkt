@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.17.rkt")
+(require rackunit "1.17.rkt")
 (require rackunit/text-ui)
 
 (define down-test

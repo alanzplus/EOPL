@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.24.rkt")
+(require rackunit "1.24.rkt")
 (require rackunit/text-ui)
 
 (define every-test

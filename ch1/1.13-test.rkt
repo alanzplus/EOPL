@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.13.rkt")
+(require rackunit "1.13.rkt")
 (require rackunit/text-ui)
 
 (define subst-test

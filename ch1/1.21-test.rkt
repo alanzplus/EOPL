@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.21.rkt")
+(require rackunit "1.21.rkt")
 (require rackunit/text-ui)
 
 (define product-test

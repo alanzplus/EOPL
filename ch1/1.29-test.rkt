@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.29.rkt")
+(require rackunit "1.29.rkt")
 (require rackunit/text-ui)
 
 (define sort-test

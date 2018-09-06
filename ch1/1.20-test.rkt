@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.20.rkt")
+(require rackunit "1.20.rkt")
 (require rackunit/text-ui)
 
 (define count-occurrences-test

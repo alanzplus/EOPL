@@ -1,6 +1,6 @@
 #lang eopl
 
-(require rackunit "exe1.22.rkt")
+(require rackunit "1.22.rkt")
 (require rackunit/text-ui)
 
 (define filter-in-test
