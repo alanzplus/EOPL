@@ -10,7 +10,7 @@
 
 (define leaf?
   (lambda (node)
-    (and (not (null? node)) (number? (car node)))))
+    (and (eqv? (length node) 1) (number? (car node)))))
 
 (define lson
   (lambda (node)
