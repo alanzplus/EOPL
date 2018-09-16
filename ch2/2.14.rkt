@@ -23,7 +23,6 @@
             #t
             (has-binding? search-var saved-env))))))
         
-
 (define apply-env
   (lambda (env search-var)
     ((car env) search-var)))
