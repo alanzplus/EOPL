@@ -18,7 +18,6 @@
 (define red-blue-tree-test
   (test-suite
     "Tests for red blue tree"
-    (check-equal? (mark-leaves-with-red-depth input-tree) expected-tree)
-    ))
+    (check-equal? (mark-leaves-with-red-depth input-tree) expected-tree)))
 
 (run-tests red-blue-tree-test)
