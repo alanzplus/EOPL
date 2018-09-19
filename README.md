@@ -1,14 +1,31 @@
 # Essentials of Programming Lanugage
 A repository contains the notes and exericises of __Friedman__'s great book __Essentials of Programing Lanugage__ 3rd Edition.
 
-The code is implemented using Drracket with eopl packages.
+The code is implemented using Drracket with eopl packages. [Reference](https://docs.racket-lang.org/eopl/index.html?q=sllgen#%28part._top%29)
 
 Each implementation is associated with a test using Racket Unit Testing Framework.
 
-## Parser
-`parser` folder contains the specifiation for
+## Requirement
 
-* `LET`
+## Parser
+The `parser` folder constains the __scanner and parser__ specification of languages used in the book.
+
+There also a `xxx-read-print-ast.rkt` for each language specification.
+
+Example of running `racket -t let-read-print-ask.rkt`
+
+```bash
+ƛ if let x = 5 in -(x,3) then zero?(0) else -(3,4)
+#(struct:a-program
+  #(struct:if-exp
+    #(struct:let-exp
+      x
+      #(struct:const-exp 5)
+      #(struct:diff-exp #(struct:var-exp x) #(struct:const-exp 3)))
+    #(struct:zero?-exp #(struct:const-exp 0))
+    #(struct:diff-exp #(struct:const-exp 3) #(struct:const-exp 4))))
+#<void>
+```
 
 ## Chapter 1 Inductive Sets Of Data
 
@@ -50,7 +67,7 @@ Each implementation is associated with a test using Racket Unit Testing Framewor
 * 1.35.rkt
 * 1.36.rkt
 
-## Chapter 2 
+## Chapter 2 Data Abstraction
 
 ### TODO
 * implement other examples (lc-exp parser)
