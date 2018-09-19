@@ -5,6 +5,11 @@ The code is implemented using Drracket with eopl packages.
 
 Each implementation is associated with a test using Racket Unit Testing Framework.
 
+## Parser
+`parser` folder contains the specifiation for
+
+* `LET`
+
 ## Chapter 1 Inductive Sets Of Data
 
 ### Examples
@@ -73,3 +78,8 @@ Each implementation is associated with a test using Racket Unit Testing Framewor
 * 2.24.rkt
 * 2.25.rkt
 * 2.26.rkt
+
+## Chapter 3 Expression
+
+### TODO
+* exe3.2
