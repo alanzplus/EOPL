@@ -1,11 +1,9 @@
 # Essentials of Programming Lanugage
 A repository contains the notes and exericises of __Friedman__'s great book __Essentials of Programing Lanugage__ 3rd Edition.
 
-The code is implemented using Drracket with eopl packages. [Reference](https://docs.racket-lang.org/eopl/index.html?q=sllgen#%28part._top%29)
+The code is implemented using [DrRacket](https://download.racket-lang.org/) with eopl packages. [Reference](https://docs.racket-lang.org/eopl/index.html?q=sllgen#%28part._top%29)
 
 Each implementation is associated with a test using Racket Unit Testing Framework.
-
-## Requirement
 
 ## Parser
 The `parser` folder constains the __scanner and parser__ specification of languages used in the book.
