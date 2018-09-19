@@ -44,3 +44,32 @@ Each implementation is associated with a test using Racket Unit Testing Framewor
 * 1.34.rkt
 * 1.35.rkt
 * 1.36.rkt
+
+## Chapter 2 
+
+### TODO
+* implement other examples (lc-exp parser)
+
+### Examples
+* env-data-structure.rkt
+* env-procedural.rkt
+
+### Exercises
+* 2.1.rkt
+* 2.3.rkt
+* 2.5.rkt
+* 2.11.rkt
+* 2.12.rkt
+* 2.13.rkt
+* 2.14.rkt
+* 2.15.rkt
+* 2.16.rkt
+* 2.17.rkt
+* 2.18.rkt
+* 2.19.rkt
+* 2.21.rkt
+* 2.22.rkt
+* 2.23.rkt
+* 2.24.rkt
+* 2.25.rkt
+* 2.26.rkt
