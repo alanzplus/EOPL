@@ -99,4 +99,16 @@ Example of running `racket -t let-read-print-ask.rkt`
 ## Chapter 3 Expression
 
 ### TODO
-* exe3.2
+* 3.2
+* 3.3
+* 3.4
+* 3.5
+
+### Examples
+* let-interpreter.rkt
+
+### Exercises
+* 3.6.rkt
+* 3.7.rkt
+* 3.8.rkt
+

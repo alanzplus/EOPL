@@ -55,15 +55,45 @@
       (a-program (exp1)
         (value-of exp1 (init-env))))))
 
+(define arithmetic
+  (lambda (operator exp1 exp2 env)
+    (let ((num1 (expval->num (value-of exp1 env)))
+          (num2 (expval->num (value-of exp2 env))))
+         (num-val (operator num1 num2)))))
+
+(define predicate
+  (lambda (operator exp1 exp2 env)
+    (let ((num1 (expval->num (value-of exp1 env)))
+          (num2 (expval->num (value-of exp2 env))))
+         (bool-val (operator num1 num2)))))
+
 (define value-of
   (lambda (exp env)
     (cases expression exp
+      (minus-exp (exp1) (num-val (- (expval->num (value-of exp1 env)))))
+      (add-exp (exp1 exp2) (arithmetic + exp1 exp2 env))
+      (diff-exp (exp1 exp2) (arithmetic - exp1 exp2 env))
+      (mul-exp (exp1 exp2) (arithmetic * exp1 exp2 env))
+      (div-exp (exp1 exp2) (arithmetic (lambda (e1 e2) (floor (/ e1 e2))) exp1 exp2 env))
+      (equal?-exp (exp1 exp2)
+        (let ((val1 (value-of exp1 env))
+              (val2 (value-of exp2 env)))
+              (cases expval val1
+                (bool-val (bool1)
+                  (cases expval val2
+                    (bool-val (bool2)
+                      (bool-val (eqv? bool1 bool2)))
+                    (else (bool-val #f))))
+                (num-val (num1)
+                  (cases expval val2
+                    (num-val (num2)
+                      (bool-val (eqv? num1 num2)))
+                    (else (bool-val #f))))
+                (else (bool-val #f)))))
+      (greater?-exp (exp1 exp2) (predicate > exp1 exp2 env))
+      (less?-exp (exp1 exp2) (predicate < exp1 exp2 env))
       (const-exp (num) (num-val num))
       (var-exp (var) (apply-env var env))
-      (diff-exp (exp1 exp2)
-        (let ((num1 (expval->num (value-of exp1 env)))
-              (num2 (expval->num (value-of exp2 env))))
-              (num-val (- num1 num2))))
       (zero?-exp (exp1)
         (bool-val (zero? (expval->num (value-of exp1 env)))))
       (if-exp (exp1 exp2 exp3)
