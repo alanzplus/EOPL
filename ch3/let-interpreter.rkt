@@ -1,7 +1,6 @@
 #lang eopl
 
 (require "../parser/let-spec.rkt")
-(require "../common/env.rkt")
 
 ; program ::= expression
 ; expression ::= number
@@ -24,6 +23,22 @@
 (provide expval->bool)
 (provide expval->list)
 (provide expval->proc)
+
+(define empty-env
+  (lambda ()
+    (lambda (search-var)
+      (eopl:error "No binding found for ~s" search-var))))
+
+(define extend-env
+  (lambda (saved-var saved-val saved-env)
+    (lambda (search-var)
+      (if (eqv? search-var saved-var)
+          saved-val
+          (apply-env saved-env search-var)))))
+
+(define apply-env
+  (lambda (env search-var)
+    (env search-var)))
 
 (define extend-env-rec
   (lambda (p-name b-var-list p-body saved-env)
