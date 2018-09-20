@@ -25,6 +25,15 @@
 (provide expval->list)
 (provide expval->proc)
 
+(define extend-env-rec
+  (lambda (p-name b-var-list p-body saved-env)
+    (letrec ((rec-env
+              (lambda (search-var)
+                (if (eqv? search-var p-name)
+                    (proc-val (procedure b-var-list p-body rec-env))
+                    (apply-env saved-env search-var)))))
+            rec-env)))
+
 (define-datatype expval expval?
   (num-val
     (num number?))
@@ -42,13 +51,22 @@
     (procedure? val)))
 
 (define procedure
-  (lambda (var body env)
-    (lambda (val)
-      (value-of body (extend-env var val env)))))
+  (lambda (var-list body env)
+    (lambda (val-list)
+      (value-of body (extend-env-list var-list val-list env)))))
+
+(define extend-env-list
+  (lambda (var-list val-list env)
+    (if (and (null? var-list) (null? val-list))
+        env
+        (extend-env
+          (car var-list)
+          (car val-list)
+          (extend-env-list (cdr var-list) (cdr val-list) env)))))
 
 (define apply-procedure
-  (lambda (proc1 val)
-    (proc1 val)))
+  (lambda (proc1 val-list)
+    (proc1 val-list)))
 
 (define expval->num
   (lambda (val)
@@ -110,13 +128,15 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
-      (letproc-exp (fname var fbody body)
-        (value-of body (extend-env fname (proc-val (procedure var fbody env)) env)))
-      (call-exp (exp1 exp2)
+      (letrec-exp (p-name b-var-list p-body letrec-body)
+        (value-of letrec-body (extend-env-rec p-name b-var-list p-body env)))
+      (letproc-exp (p-name b-var-list p-body letproc-body)
+        (value-of letproc-body (extend-env p-name (proc-val (procedure b-var-list p-body env)) env)))
+      (call-exp (exp1 exp-list)
         (let ((proc (expval->proc (value-of exp1 env)))
-              (arg (value-of exp2 env)))
-             (apply-procedure proc arg)))
-      (proc-exp (var body) (proc-val (procedure var body env)))
+              (args (map (lambda (arg) (value-of arg env)) exp-list)))
+             (apply-procedure proc args)))
+      (proc-exp (var-list body) (proc-val (procedure var-list body env)))
       (list-exp (exp-list)
         (list-val (map (lambda (ele) (value-of ele env)) exp-list)))
       (cons-exp (exp1 exp2)

@@ -1,5 +1,9 @@
 #lang eopl
 
+(provide empty-env)
+(provide extend-env)
+(provide apply-env)
+
 (define empty-env
   (lambda ()
     (lambda (search-var)
@@ -15,7 +19,3 @@
 (define apply-env
   (lambda (env search-var)
     (env search-var)))
-
-(provide empty-env)
-(provide extend-env)
-(provide apply-env)
