@@ -14,14 +14,21 @@
 (provide run)
 (provide num-val)
 (provide bool-val)
+(provide list-val)
+(provide empty-list-val)
 (provide expval->num)
 (provide expval->bool)
+(provide expval->list)
 
 (define-datatype expval expval?
   (num-val
     (num number?))
   (bool-val
-    (bool boolean?)))
+    (bool boolean?))
+  (list-val
+    (listval list?))
+  (empty-list-val)
+)
 
 (define expval->num
   (lambda (val)
@@ -34,6 +41,13 @@
     (cases expval val
       (bool-val (bool) bool)
       (else (eopl:error "expected bool-val")))))
+
+(define expval->list
+  (lambda (val)
+    (cases expval val
+      (list-val (alist) alist)
+      (empty-list-val () '())
+      (else (eopl:error "expected list-val")))))
 
 (define run
   (lambda (text)
@@ -70,6 +84,28 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
+      (list-exp (exp1 exp2)
+        (let ((val1 (value-of exp1 env))
+              (val2 (value-of exp2 env)))
+             (list-val (list val1 val2))))
+      (cdr-exp (exp1)
+        (let ((val1 (value-of exp1 env)))
+             (cases expval val1
+              (list-val (alist) (list-val (cdr alist)))
+              (empty-list-val () (eopl:error "list is empty"))
+              (else (eopl:error "not a list")))))
+      (car-exp (exp1)
+        (let ((val1 (value-of exp1 env)))
+             (cases expval val1
+              (list-val (alist) (car alist))
+              (empty-list-val () (eopl:error "list is empty"))
+              (else (eopl:error "not a list")))))
+      (null?-exp (exp1)
+        (cases expval (value-of exp1 env)
+          (list-val (alist) (bool-val (null? alist)))
+          (empty-list-val () (bool-val #t))
+          (else eopl:error "~s not evaluated to a list" exp1)))
+      (emptylist-exp () (empty-list-val))
       (minus-exp (exp1) (num-val (- (expval->num (value-of exp1 env)))))
       (add-exp (exp1 exp2) (arithmetic + exp1 exp2 env))
       (diff-exp (exp1 exp2) (arithmetic - exp1 exp2 env))
@@ -93,7 +129,7 @@
       (greater?-exp (exp1 exp2) (predicate > exp1 exp2 env))
       (less?-exp (exp1 exp2) (predicate < exp1 exp2 env))
       (const-exp (num) (num-val num))
-      (var-exp (var) (apply-env var env))
+      (var-exp (var) (apply-env env var))
       (zero?-exp (exp1)
         (bool-val (zero? (expval->num (value-of exp1 env)))))
       (if-exp (exp1 exp2 exp3)
@@ -102,4 +138,4 @@
             (value-of exp3 env)))
       (let-exp (var exp1 body)
           (let ((val1 (value-of exp1 env)))
-               (value-of body (extend-env var val1 env)))))))
+                (value-of body (extend-env var val1 env)))))))

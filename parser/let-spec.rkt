@@ -21,6 +21,11 @@
 (provide equal?-exp)
 (provide greater?-exp)
 (provide less?-exp)
+(provide emptylist-exp)
+(provide list-exp)
+(provide null?-exp)
+(provide car-exp)
+(provide cdr-exp)
 
 (define let-scanner-spec
   '(
@@ -45,6 +50,11 @@
    (expression ("if" expression "then" expression "else" expression) if-exp)
    (expression ("let" identifier "=" expression "in" expression) let-exp)
    (expression ("minus(" expression ")") minus-exp)
+   (expression ("emptylist") emptylist-exp)
+   (expression ("cons(" expression "," expression ")") list-exp)
+   (expression ("null?(" expression ")") null?-exp)
+   (expression ("car(" expression ")") car-exp)
+   (expression ("cdr(" expression ")") cdr-exp)
   ))
 
 (sllgen:make-define-datatypes let-scanner-spec let-grammer-spec)

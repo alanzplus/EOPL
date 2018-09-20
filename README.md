@@ -109,4 +109,5 @@ Example of running `racket -t let-read-print-ask.rkt`
 * 3.6.rkt
 * 3.7.rkt
 * 3.8.rkt
+* 3.9.rkt
 
