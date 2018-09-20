@@ -27,6 +27,9 @@
 (provide car-exp)
 (provide cdr-exp)
 (provide list-exp)
+(provide proc-exp)
+(provide call-exp)
+(provide letproc-exp)
 
 (define let-scanner-spec
   '(
@@ -57,6 +60,9 @@
    (expression ("car(" expression ")") car-exp)
    (expression ("cdr(" expression ")") cdr-exp)
    (expression ("list(" (separated-list expression ",") ")") list-exp)
+   (expression ("proc (" identifier ")" expression ) proc-exp)
+   (expression ("(" expression expression ")") call-exp)
+   (expression ("letproc" identifier "= (" identifier ")" expression "in" expression) letproc-exp)
   ))
 
 (sllgen:make-define-datatypes let-scanner-spec let-grammer-spec)

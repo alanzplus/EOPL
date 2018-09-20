@@ -3,8 +3,7 @@ A repository contains the notes and exericises of __Friedman__'s great book __Es
 
 The code is implemented using [DrRacket](https://download.racket-lang.org/) with eopl packages. [Reference](https://docs.racket-lang.org/eopl/index.html?q=sllgen#%28part._top%29)
 
-Each implementation is associated with a test using Racket Unit Testing Framework.
-
+Each implementation is associated with a test using Racket Unit Testing Framework.  
 ## Parser
 The `parser` folder constains the __scanner and parser__ specification of languages used in the book.
 
@@ -119,3 +118,5 @@ Example of running `racket -t let-read-print-ask.rkt`
 * 3.8.rkt
 * 3.9.rkt
 * 3.10.rkt
+* 3.19.rkt
+* 3.20.rkt

@@ -16,10 +16,14 @@
 (provide num-val)
 (provide bool-val)
 (provide list-val)
+(provide proc-val)
+(provide procedure)
+(provide apply-procedure)
 (provide empty-list-val)
 (provide expval->num)
 (provide expval->bool)
 (provide expval->list)
+(provide expval->proc)
 
 (define-datatype expval expval?
   (num-val
@@ -29,7 +33,22 @@
   (list-val
     (listval list?))
   (empty-list-val)
+  (proc-val
+    (proc proc?))
 )
+
+(define proc?
+  (lambda (val)
+    (procedure? val)))
+
+(define procedure
+  (lambda (var body env)
+    (lambda (val)
+      (value-of body (extend-env var val env)))))
+
+(define apply-procedure
+  (lambda (proc1 val)
+    (proc1 val)))
 
 (define expval->num
   (lambda (val)
@@ -49,6 +68,12 @@
       (list-val (alist) alist)
       (empty-list-val () '())
       (else (eopl:error "expected list-val")))))
+
+(define expval->proc
+  (lambda (val)
+    (cases expval val
+      (proc-val (proc) proc)
+      (else (eopl:error "expected proc-val")))))
 
 (define run
   (lambda (text)
@@ -85,6 +110,13 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
+      (letproc-exp (fname var fbody body)
+        (value-of body (extend-env fname (proc-val (procedure var fbody env)) env)))
+      (call-exp (exp1 exp2)
+        (let ((proc (expval->proc (value-of exp1 env)))
+              (arg (value-of exp2 env)))
+             (apply-procedure proc arg)))
+      (proc-exp (var body) (proc-val (procedure var body env)))
       (list-exp (exp-list)
         (list-val (map (lambda (ele) (value-of ele env)) exp-list)))
       (cons-exp (exp1 exp2)
