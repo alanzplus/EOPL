@@ -64,7 +64,7 @@
    (expression ("proc (" (arbno identifier) ")" expression ) proc-exp)
    (expression ("(" expression (arbno expression) ")") call-exp)
    (expression ("letproc" identifier "= (" (arbno identifier) ")" expression "in" expression) letproc-exp)
-   (expression ("letrec" identifier "(" (arbno identifier) ") = " expression "in" expression) letrec-exp)
+   (expression ("letrec" (arbno identifier "(" (arbno identifier) ") = " expression) "in" expression) letrec-exp)
   ))
 
 (sllgen:make-define-datatypes let-scanner-spec let-grammer-spec)

@@ -123,4 +123,6 @@ Example of running `racket -t let-read-print-ask.rkt`
 * 3.19.rkt
 * 3.20.rkt
 * 3.31.rkt
+* 3.32.rkt
+* 3.33.rkt
 * 3.34.rkt

@@ -40,13 +40,32 @@
   (lambda (env search-var)
     (env search-var)))
 
+(define index-of
+  (lambda (alist ele)
+    (index-of-aux alist ele 0)))
+
+(define index-of-aux
+  (lambda (alist ele idx)
+    (if (null? alist)
+        -1
+        (if (eqv? (car alist) ele)
+            idx
+            (index-of-aux (cdr alist) ele (+ 1 idx))))))
+
+(define get
+  (lambda (alist idx)
+    (if (eqv? idx 0)
+        (car alist)
+        (get (cdr alist) (- idx 1)))))
+
 (define extend-env-rec
-  (lambda (p-name b-var-list p-body saved-env)
+  (lambda (p-name-list b-var-list p-body-list saved-env)
     (letrec ((rec-env
               (lambda (search-var)
-                (if (eqv? search-var p-name)
-                    (proc-val (procedure b-var-list p-body rec-env))
-                    (apply-env saved-env search-var)))))
+                (let ((idx (index-of p-name-list search-var)))
+                     (if (eqv? idx -1)
+                         (apply-env saved-env search-var)
+                         (proc-val (procedure (get b-var-list idx) (get p-body-list idx) rec-env)))))))
             rec-env)))
 
 (define-datatype expval expval?
@@ -143,8 +162,8 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
-      (letrec-exp (p-name b-var-list p-body letrec-body)
-        (value-of letrec-body (extend-env-rec p-name b-var-list p-body env)))
+      (letrec-exp (p-name-list b-var-list p-body-list letrec-body)
+        (value-of letrec-body (extend-env-rec p-name-list b-var-list p-body-list env)))
       (letproc-exp (p-name b-var-list p-body letproc-body)
         (value-of letproc-body (extend-env p-name (proc-val (procedure b-var-list p-body env)) env)))
       (call-exp (exp1 exp-list)
