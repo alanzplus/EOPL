@@ -38,6 +38,9 @@
     (check-equal?
       (run "cdr(cons(cons(3,4),emptylist))")
       (list-val (list (empty-list-val))))
+    (check-equal?
+      (run "let x = 4 in list(x, -(x, 1), -(x,3))")
+      (list-val (list (num-val 4) (num-val 3) (num-val 1))))
   ))
 
 (run-tests let-test)

@@ -10,6 +10,7 @@
 ; expression ::= if expression then expression else expression
 ; expression ::= identifier
 ; expression ::= let identifier = expression in expression
+; TODO complete the specs
 
 (provide run)
 (provide num-val)
@@ -84,7 +85,9 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
-      (list-exp (exp1 exp2)
+      (list-exp (exp-list)
+        (list-val (map (lambda (ele) (value-of ele env)) exp-list)))
+      (cons-exp (exp1 exp2)
         (let ((val1 (value-of exp1 env))
               (val2 (value-of exp2 env)))
              (list-val (list val1 val2))))
