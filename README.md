@@ -109,6 +109,7 @@ Example of running `racket -t let-read-print-ask.rkt`
 * 3.17
 * 3.18
 * 3.22 - 3.29
+* 3.30
 
 ### Examples
 * let-interpreter.rkt
@@ -121,3 +122,5 @@ Example of running `racket -t let-read-print-ask.rkt`
 * 3.10.rkt
 * 3.19.rkt
 * 3.20.rkt
+* 3.31.rkt
+* 3.34.rkt
