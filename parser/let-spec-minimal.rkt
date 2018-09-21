@@ -16,6 +16,10 @@
 (provide diff-exp)
 (provide proc-exp)
 (provide call-exp)
+(provide nameless-var-exp)
+(provide nameless-let-exp)
+(provide nameless-proc-exp)
+(provide expression?)
 
 (define let-scanner-spec
   '(
@@ -35,6 +39,9 @@
    (expression ("let" identifier "=" expression "in" expression) let-exp)
    (expression ("proc (" identifier ")" expression ) proc-exp)
    (expression ("(" expression expression ")") call-exp)
+   (expression ("%lexref" number) nameless-var-exp)
+   (expression ("%let" expression "in" expression) nameless-let-exp)
+   (expression ("%lexproc" expression) nameless-proc-exp)
   ))
 
 (sllgen:make-define-datatypes let-scanner-spec let-grammer-spec)
