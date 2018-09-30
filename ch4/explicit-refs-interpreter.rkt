@@ -7,15 +7,16 @@
 (provide bool-val)
 (provide list-val)
 (provide proc-val)
+(provide ref-val)
 (provide procedure)
 (provide apply-procedure)
 (provide empty-list-val)
 (provide expval->num)
 (provide expval->bool)
 (provide expval->proc)
+(provide expval->ref)
 
 ; Environment
-
 (define empty-env
   (lambda ()
     (lambda (search-var)
@@ -42,6 +43,8 @@
   (empty-list-val)
   (proc-val
     (proc proc?))
+  (ref-val
+    (ref reference?))
 )
 
 (define proc?
@@ -75,6 +78,12 @@
       (proc-val (proc) proc)
       (else (eopl:error "expected proc-val")))))
 
+(define expval->ref
+  (lambda (val)
+    (cases expval val
+      (ref-val (ref) ref)
+      (else (eopl:error "expected ref-val")))))
+
 ; Initilization
       
 (define init-env
@@ -89,10 +98,11 @@
 
 (define run
   (lambda (text)
-    (value-of-program (let-scan-parse text))))
+    (value-of-program (scan-parse text))))
 
 (define value-of-program
   (lambda (pgm)
+    (initialize-store!)
     (cases program pgm
       (a-program (exp1)
         (value-of exp1 (init-env))))))
@@ -101,6 +111,21 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
+      (newref-exp (exp1)
+        (ref-val (newref (value-of exp1 env))))
+      (deref-exp (exp1)
+        (deref (expval->ref (value-of exp1 env))))
+      (setref-exp (exp1 exp2)
+        (let ((ref (expval->ref (value-of exp1 env))))
+          (let ((val2 (value-of exp2 env)))
+            (begin
+              (setref! ref val2)
+              (num-val 23)))))
+      (begin-exp (exp-first other-exps)
+        (let ((first-val (value-of exp-first env)))
+          (let ((other-vals (map (lambda (ele) (value-of ele env)) other-exps)))
+            (let ((exps (cons first-val other-vals)))
+              (list-ref exps (- (length exps) 1))))))
       (call-exp (exp1 exp2)
         (let ((proc (expval->proc (value-of exp1 env)))
               (arg (value-of exp2 env)))
@@ -124,3 +149,47 @@
       (let-exp (var exp1 body)
           (let ((val1 (value-of exp1 env)))
                 (value-of body (extend-env var val1 env)))))))
+
+(define the-store 'uninitialized)
+
+(define empty-store
+  (lambda () '()))
+
+(define get-sotre
+  (lambda () the-store))
+
+(define initialize-store!
+  (lambda ()
+    (set! the-store (empty-store))))
+
+(define reference?
+  (lambda (v)
+    (integer? v)))
+
+(define newref
+  (lambda (val)
+    (let
+      ((next-ref (length the-store)))
+      (set! the-store (append the-store (list val)))
+      next-ref)))
+
+(define deref
+  (lambda (ref)
+    (list-ref the-store ref)))
+
+(define setref!
+  (lambda (ref val)
+    (set! the-store
+      (letrec
+        ((setref-inner
+          (lambda (store1 ref1)
+            (cond
+              ((null? store1)
+               (eopl:error "cannot set store using reference ~s" ref1))
+              ((zero? ref1)
+               (cons val (cdr store1)))
+              (else
+                (cons
+                  (car store1)
+                  (setref-inner (cdr store1) (- ref1 1))))))))
+        (setref-inner the-store ref)))))
