@@ -92,9 +92,27 @@
       (a-program (exp1)
         (translation-of exp1 (init-senv))))))
 
+(define find-first
+  (lambda (lst idx senv)
+    (if (null? lst)
+        -1
+        (if (expval->bool (value-of (car lst) senv))
+            idx
+            (find-first (cdr lst) (+ 1 idx) senv)))))
+
+(define get
+  (lambda (lst idx)
+    (if (eqv? idx 0)
+        (car lst)
+        (get (cdr lst) (- idx 1)))))
+
 (define translation-of
   (lambda (exp senv)
     (cases expression exp
+      (cond-exp (predicate-lst action-lst)
+        (cond-exp
+          (map (lambda (ele) (translation-of ele senv)) predicate-lst)
+          (map (lambda (ele) (translation-of ele senv)) action-lst)))
       (const-exp (num) (const-exp num))
       (diff-exp (exp1 exp2)
         (diff-exp
@@ -129,6 +147,11 @@
 (define value-of
   (lambda (exp nameless-env)
     (cases expression exp
+      (cond-exp (predicate-lst action-lst)
+        (let ((idx (find-first predicate-lst 0 nameless-env)))
+          (if (eqv? idx -1)
+              (eopl:error "predicates in cond evaluated to false")
+              (value-of (get action-lst idx) nameless-env))))
       (const-exp (num) (num-val num))
       (diff-exp (exp1 exp2)
         (num-val
@@ -176,5 +199,7 @@
       (a-program (exp1)
         (value-of exp1 (init-nameless-env))))))
 
-(eopl:pretty-print
-  (run "let fn = proc (x) x in -((fn 3),2)"))
+(run "cond
+    zero?(1) ==> 1
+    zero?(0) ==> 4
+  end")

@@ -20,6 +20,7 @@
 (provide nameless-let-exp)
 (provide nameless-proc-exp)
 (provide expression?)
+(provide cond-exp)
 
 (define let-scanner-spec
   '(
@@ -39,6 +40,7 @@
    (expression ("let" identifier "=" expression "in" expression) let-exp)
    (expression ("proc (" identifier ")" expression ) proc-exp)
    (expression ("(" expression expression ")") call-exp)
+   (expression ("cond" (arbno expression "==>" expression) "end") cond-exp)
    (expression ("%lexref" number) nameless-var-exp)
    (expression ("%let" expression "in" expression) nameless-let-exp)
    (expression ("%lexproc" expression) nameless-proc-exp)

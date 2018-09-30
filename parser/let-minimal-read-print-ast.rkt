@@ -1,5 +1,5 @@
 #lang eopl
 
-(require "let-spec.rkt")
+(require "let-spec-minimal.rkt")
 
 (let-read-print-ast)

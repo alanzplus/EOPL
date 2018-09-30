@@ -126,3 +126,10 @@ Example of running `racket -t let-read-print-ask.rkt`
 * 3.32.rkt
 * 3.33.rkt
 * 3.34.rkt
+
+## TODO
+* only keep parser template in parser 
+older
+* only keep interpreter template in interpreter folder
+* move templates to template folder
+* delete parser and interpreter folder
