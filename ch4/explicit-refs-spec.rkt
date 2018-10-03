@@ -21,6 +21,7 @@
 (provide newref-exp)
 (provide deref-exp)
 (provide setref-exp)
+(provide list-exp)
 
 (define scanner-spec
   '(
@@ -44,6 +45,7 @@
    (expression ("deref(" expression ")") deref-exp)
    (expression ("newref(" expression ")") newref-exp)
    (expression ("begin" expression (arbno ";" expression) "end") begin-exp)
+   (expression ("list(" (separated-list expression ",") ")") list-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)

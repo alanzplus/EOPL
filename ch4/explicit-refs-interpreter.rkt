@@ -15,6 +15,7 @@
 (provide expval->bool)
 (provide expval->proc)
 (provide expval->ref)
+(provide expval->list)
 
 ; Environment
 (define empty-env
@@ -84,6 +85,12 @@
       (ref-val (ref) ref)
       (else (eopl:error "expected ref-val")))))
 
+(define expval->list
+  (lambda (val)
+    (cases expval val
+      (list-val (lst) lst)
+      (else (eopl:error "expected ref-val")))))
+
 ; Initilization
       
 (define init-env
@@ -126,6 +133,8 @@
           (let ((other-vals (map (lambda (ele) (value-of ele env)) other-exps)))
             (let ((exps (cons first-val other-vals)))
               (list-ref exps (- (length exps) 1))))))
+      (list-exp (lst)
+        (list-val (map (lambda (ele) (value-of ele env)) lst)))
       (call-exp (exp1 exp2)
         (let ((proc (expval->proc (value-of exp1 env)))
               (arg (value-of exp2 env)))
