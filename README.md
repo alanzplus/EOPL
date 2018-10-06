@@ -128,8 +128,9 @@ Example of running `racket -t let-read-print-ask.rkt`
 * 3.34.rkt
 
 ## TODO
-* only keep parser template in parser 
-older
-* only keep interpreter template in interpreter folder
-* move templates to template folder
-* delete parser and interpreter folder
+
+* Create interpreter temaplte folder
+* Create minimal let spec and intepreter in interpreter folder
+
+** datatype represetntation of environment
+** contains let and letrec
