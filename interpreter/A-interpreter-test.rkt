@@ -1,12 +1,11 @@
 #lang eopl
 
-(require rackunit "minimal-template.rkt")
+(require rackunit "A-interpreter.rkt")
 (require rackunit/text-ui)
 
-
-(define minimal-interpereter-test
+(define A-interpreter-test
   (test-suite
-    "Tests for minimal interpreter test"
+    "Tests for A interpreter"
     (check-equal?
       (run "3")
       (num-val 3))
@@ -17,8 +16,11 @@
       (run "let x = 3 in -(1,x)")
       (num-val -2))
     (check-equal?
-      (run "let f = proc (x) -(x,4) in (f 10)")
+      (run "let f = proc(x) -(x,4) in (f 10)")
       (num-val 6))
+    (check-equal?
+      (run "letrec sum(x) = if zero?(x) then 0 else -((sum -(x,1)), 1) in (sum 5)")
+      (num-val -5))
   ))
 
-(run-tests minimal-interpereter-test)
+(run-tests A-interpreter-test)
