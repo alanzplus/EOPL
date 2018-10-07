@@ -47,7 +47,7 @@
     (check-equal?
       (scan-parse "pair(1,3)")
       (a-program
-        (pair-exp (const-exp 1) (const-exp 3))))
+        (newpair-exp (const-exp 1) (const-exp 3))))
     (check-equal?
       (scan-parse "left(loc)")
       (a-program

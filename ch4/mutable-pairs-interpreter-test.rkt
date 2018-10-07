@@ -24,6 +24,30 @@
     (check-equal?
       (run "letrec sum(x) = if zero?(x) then 0 else -((sum -(x,1)), 1) in (sum 5)")
       (num-val -5))
+    (check-equal?
+      (run "let x = 3 in let p = pair(11,x) in left(p)")
+      (num-val 11))
+    (check-equal?
+      (run "let x = 3 in let p = pair(11,x) in right(p)")
+      (num-val 3))
+    (check-equal?
+      (run "let p = pair(11,12) in setleft(p, 100)")
+      (num-val 100))
+    (check-equal?
+      (run "let p = pair(11,12) in setright(p, 100)")
+      (num-val 100))
+    (check-equal?
+      (run "let p = pair(11,12) in let t = setleft(p, 100) in left(p)")
+      (num-val 100))
+    (check-equal?
+      (run "let p = pair(11,12) in let t = setleft(p, 100) in right(p)")
+      (num-val 12))
+    (check-equal?
+      (run "let p = pair(11,12) in let t = setright(p, 100) in right(p)")
+      (num-val 100))
+    (check-equal?
+      (run "let p = pair(11,12) in let t = setright(p, 100) in left(p)")
+      (num-val 11))
   ))
 
 (run-tests mutable-pairs-interpreter-test)

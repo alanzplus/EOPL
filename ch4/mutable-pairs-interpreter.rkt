@@ -1,14 +1,17 @@
 #lang eopl
 
-(require "./implicit-refs-spec.rkt")
+(require "./mutable-pairs-spec.rkt")
 
 (provide run)
 (provide num-val)
 (provide bool-val)
 (provide proc-val)
+(provide mutpair-val)
 (provide expval->num)
 (provide expval->bool)
 (provide expval->proc)
+(provide expval->mutpair)
+(provide a-pair)
 (provide procedure)
 (provide apply-procedure)
 (provide newref)
@@ -23,7 +26,9 @@
   (bool-val
     (bool boolean?))
   (proc-val
-    (proc proc?)))
+    (proc proc?))
+  (mutpair-val
+    (mp mutpair?)))
 
 ; ExpVal -> num
 (define expval->num
@@ -45,6 +50,13 @@
     (cases expval val
       (proc-val (proc) proc)
       (else (eopl:error "expected proc-val")))))
+
+; ExpVal -> MutPair
+(define expval->mutpair
+  (lambda (val)
+    (cases expval val
+      (mutpair-val (mp) mp)
+      (else (eopl:error "expected mutpair-val")))))
 
 ; -----------------------------------------------------------------------------
 ; Procedure Representation
@@ -158,6 +170,47 @@
     (set! the-store (empty-store))))
 
 ; -----------------------------------------------------------------------------
+; Mutable Pairs
+; -----------------------------------------------------------------------------
+(define-datatype mutpair mutpair?
+  (a-pair
+    (left-loc reference?)
+    (right-loc reference?)))
+
+; ExpVal x ExpVal -> MutPair
+(define make-pair
+  (lambda (left right)
+    (a-pair (newref left) (newref right))))
+
+; MutPair -> ExpVal
+(define left
+  (lambda (p)
+    (cases mutpair p
+      (a-pair (left-loc right-loc)
+        (deref left-loc)))))
+
+; MutPair -> ExpVal
+(define right
+  (lambda (p)
+    (cases mutpair p
+      (a-pair (left-loc right-loc)
+        (deref right-loc)))))
+
+; MutPair x ExpVal -> Unspecified
+(define setleft
+  (lambda (p val)
+    (cases mutpair p
+      (a-pair (left-loc right-loc)
+        (setref! left-loc val)))))
+
+; MutPair x ExpVal -> Unspecified
+(define setright
+  (lambda (p val)
+    (cases mutpair p
+      (a-pair (left-loc right-loc)
+        (setref! right-loc val)))))
+
+; -----------------------------------------------------------------------------
 ; Interpreter
 ; -----------------------------------------------------------------------------
 
@@ -178,6 +231,28 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
+      (newpair-exp (exp1 exp2)
+        (let ((val1 (value-of exp1 env))
+              (val2 (value-of exp2 env)))
+             (mutpair-val (make-pair val1 val2))))
+      (left-exp (exp1)
+        (let ((p (expval->mutpair (value-of exp1 env))))
+          (left p)))
+      (right-exp (exp1)
+        (let ((p (expval->mutpair (value-of exp1 env))))
+          (right p)))
+      (setleft-exp (exp1 exp2)
+        (let ((p (expval->mutpair (value-of exp1 env)))
+              (val (value-of exp2 env)))
+             (begin
+              (setleft p val)
+              val)))
+      (setright-exp (exp1 exp2)
+        (let ((p (expval->mutpair (value-of exp1 env)))
+              (val (value-of exp2 env)))
+             (begin
+              (setright p val)
+              val)))
       (assign-exp (var exp1)
         (let ((val (value-of exp1 env)))
              (begin
