@@ -171,6 +171,7 @@ end
 ## Chapter 3 Expression
 
 ### TODO
+
 * 3.2
 * 3.3
 * 3.4
@@ -187,9 +188,11 @@ end
 * 3.30
 
 ### Examples
+
 * let-interpreter.rkt
 
 ### Exercises
+
 * 3.6.rkt
 * 3.7.rkt
 * 3.8.rkt
@@ -201,6 +204,44 @@ end
 * 3.32.rkt
 * 3.33.rkt
 * 3.34.rkt
+
+## Chapter 4 State
+
+### TODO
+
+* 4.9
+* 4.12
+* 4.13
+* 4.19
+* 4.20
+* 4.21
+* 4.22
+* 4.23
+* 4.24
+* 4.25
+* 4.26
+* 4.27
+* 4.29
+* 4.30
+* 4.32
+* 4.33
+* 4.34
+* 4.35
+* 4.36
+* 4.37
+* 4.40
+* 4.42
+
+### Examples
+
+* explicit-refs-interpreter.rkt
+* implicit-refs-interpreter.rkt
+* mutable-pairs-interpreter.rkt
+
+### Exercises
+
+* 4.10.rkt
+* 4.11.rkt
 
 ## TODO For Interpreter
 
