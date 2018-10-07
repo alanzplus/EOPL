@@ -4,12 +4,14 @@ A repository contains the notes and exericises of __Friedman__'s great book __Es
 The code is implemented using [DrRacket](https://download.racket-lang.org/) with eopl packages. [Reference](https://docs.racket-lang.org/eopl/index.html?q=sllgen#%28part._top%29)
 
 Each implementation is associated with a test using Racket Unit Testing Framework.  
-## Parser
-The `parser` folder constains the __scanner and parser__ specification of languages used in the book.
 
-There also a `xxx-read-print-ast.rkt` for each language specification.
+## Interpreter
 
-Example of running `racket -t let-read-print-ask.rkt`
+Folder `interpreter` contains the minial template spec and implementation for different interpter.
+
+`xx-sepc-repl.rkt` contains the AST REPL for each specification.
+
+Example of running `racket -r A-spec-repl.rkt`
 
 ```bash
 ƛ if let x = 5 in -(x,3) then zero?(0) else -(3,4)
@@ -23,10 +25,6 @@ Example of running `racket -t let-read-print-ask.rkt`
     #(struct:diff-exp #(struct:const-exp 3) #(struct:const-exp 4))))
 #<void>
 ```
-
-## Interpreter
-
-Folder `interpreter` contains the minial template spec and implementation for different interpter.
 
 ### A Interpreter
 
@@ -193,3 +191,8 @@ Procedure Call Expression
 * 3.32.rkt
 * 3.33.rkt
 * 3.34.rkt
+
+## TODO
+
+* Move Explicit Reference Implementation to new template
+* Move implementations of interpreter in chapter 3 to new template
