@@ -1,13 +1,10 @@
 #lang eopl
 
-(provide scanner-spec)
-(provide grammer-spec)
-(provide scan)
-(provide scan-parse)
-(provide read-print-ast)
-(provide program)
+(provide identifier?)
 (provide a-program)
+(provide program)
 (provide expression)
+(provide expression?)
 (provide var-exp)
 (provide const-exp)
 (provide zero?-exp)
@@ -16,8 +13,17 @@
 (provide diff-exp)
 (provide proc-exp)
 (provide call-exp)
-(provide expression?)
+(provide letrec-exp)
 (provide assign-exp)
+(provide scanner-spec)
+(provide grammer-spec)
+(provide just-scan)
+(provide scan-parse)
+(provide repl-ast)
+
+(define identifier?
+  (lambda (x)
+    (symbol? x)))
 
 (define scanner-spec
   '(
@@ -35,20 +41,21 @@
    (expression ("zero?" "(" expression ")") zero?-exp)
    (expression ("if" expression "then" expression "else" expression) if-exp)
    (expression ("let" identifier "=" expression "in" expression) let-exp)
-   (expression ("proc (" identifier ")" expression ) proc-exp)
+   (expression ("proc(" identifier ")" expression ) proc-exp)
    (expression ("(" expression expression ")") call-exp)
+   (expression ("letrec" identifier "(" identifier ")" "=" expression "in" expression) letrec-exp)
    (expression ("set" identifier "=" expression) assign-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)
 
-(define scan
+(define just-scan
   (sllgen:make-string-scanner scanner-spec grammer-spec))
 
 (define scan-parse
   (sllgen:make-string-parser scanner-spec grammer-spec))
 
-(define read-print-ast
+(define repl-ast
   (sllgen:make-rep-loop
     "ƛ "
     (lambda (tree) (eopl:pretty-print tree))
