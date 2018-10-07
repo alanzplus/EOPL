@@ -44,6 +44,26 @@
       (scan-parse "set x = 3")
       (a-program
         (assign-exp 'x (const-exp 3))))
+    (check-equal?
+      (scan-parse "pair(1,3)")
+      (a-program
+        (pair-exp (const-exp 1) (const-exp 3))))
+    (check-equal?
+      (scan-parse "left(loc)")
+      (a-program
+        (left-exp (var-exp 'loc))))
+    (check-equal?
+      (scan-parse "right(loc)")
+      (a-program
+        (right-exp (var-exp 'loc))))
+    (check-equal?
+      (scan-parse "setleft(loc,3)")
+      (a-program
+        (setleft-exp (var-exp 'loc) (const-exp 3))))
+    (check-equal?
+      (scan-parse "setright(loc,3)")
+      (a-program
+        (setright-exp (var-exp 'loc) (const-exp 3))))
   ))
 
 (run-tests mutable-pairs-spec-test)
