@@ -121,6 +121,10 @@
 (define value-of
   (lambda (exp env)
     (cases expression exp
+      (begin-exp (exp1 other-exps)
+        (let ((exp-list (cons exp1 other-exps)))
+          (let ((val-list (map (lambda (ele) (value-of ele env)) exp-list)))
+            (list-ref val-list (- (length val-list) 1)))))
       (letrec-exp (p-name p-var p-body letrec-body)
         (value-of letrec-body (extend-env-rec p-name p-var p-body env)))
       (call-exp (exp1 exp2)

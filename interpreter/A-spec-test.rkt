@@ -40,6 +40,17 @@
           'x
           (call-exp (var-exp 'rec) (var-exp 'x))
           (call-exp (var-exp 'rec) (const-exp 10)))))
+    (check-equal?
+      (scan-parse "begin a end")
+      (a-program
+        (begin-exp (var-exp 'a) '())))
+    (check-equal?
+      (scan-parse
+        "begin
+          a;
+          b
+        end")
+      (a-program (begin-exp (var-exp 'a) (list (var-exp 'b)))))
   ))
 
 (run-tests A-spec-test)

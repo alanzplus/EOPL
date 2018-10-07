@@ -88,6 +88,16 @@ Procedure Call Expression
 (expression expression)
 ```
 
+Begin Expression
+
+```bash
+begin
+  exp1;
+  exp2;
+  ...
+end
+```
+
 ## Chapter 1 Inductive Sets Of Data
 
 ### Examples

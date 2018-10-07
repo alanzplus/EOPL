@@ -21,6 +21,9 @@
     (check-equal?
       (run "letrec sum(x) = if zero?(x) then 0 else -((sum -(x,1)), 1) in (sum 5)")
       (num-val -5))
+    (check-equal?
+      (run "let x = 3 in begin x; 4; x end")
+      (num-val 3))
   ))
 
 (run-tests A-interpreter-test)

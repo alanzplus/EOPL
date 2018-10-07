@@ -14,6 +14,7 @@
 (provide proc-exp)
 (provide call-exp)
 (provide letrec-exp)
+(provide begin-exp)
 (provide scanner-spec)
 (provide grammer-spec)
 (provide just-scan)
@@ -43,6 +44,7 @@
    (expression ("proc(" identifier ")" expression ) proc-exp)
    (expression ("(" expression expression ")") call-exp)
    (expression ("letrec" identifier "(" identifier ")" "=" expression "in" expression) letrec-exp)
+   (expression ("begin" expression (arbno ";" expression) "end") begin-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)
