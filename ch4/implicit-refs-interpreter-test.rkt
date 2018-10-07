@@ -5,7 +5,7 @@
 
 (define implicit-refs-interpreter-test
   (test-suite
-    "Tests for Implicit Reference interpreter"
+    "implicit-refs-interpreter-test"
     (check-equal?
       (run "3")
       (num-val 3))

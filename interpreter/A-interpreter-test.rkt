@@ -5,7 +5,7 @@
 
 (define A-interpreter-test
   (test-suite
-    "Tests for A interpreter"
+    "A-interpreter-test"
     (check-equal?
       (run "3")
       (num-val 3))

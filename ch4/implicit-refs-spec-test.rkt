@@ -5,7 +5,7 @@
 
 (define implicit-refs-spec-test
   (test-suite
-    "Tests for A spec"
+    "implicit-refs-spec-test"
     (check-equal?
       (scan-parse "a")
       (a-program (var-exp 'a)))

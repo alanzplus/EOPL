@@ -5,7 +5,7 @@
 
 (define A-spec-test
   (test-suite
-    "Tests for A spec"
+    "A-spec-test"
     (check-equal?
       (scan-parse "a")
       (a-program (var-exp 'a)))
