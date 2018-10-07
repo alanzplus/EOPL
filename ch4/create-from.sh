@@ -2,7 +2,7 @@
 set -e
 
 if (($# != 2)); then
-    echo "Usage: create-from $SOUNCE_NAME $TARGET_NAME"
+    echo 'Usage: create-from $SOUNCE_NAME $TARGET_NAME'
     exit -1
 fi
 
