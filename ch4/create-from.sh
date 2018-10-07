@@ -14,11 +14,9 @@ create-from() {
     local readonly dst=$2
     for fn in "${src}"*; do 
         if [[ $fn =~ .*-test.* ]]; then
-            cp $fn "${dst}-test.rkt"
-            sed -i s/"${src}"/"${dst}"/g "${dst}-test.rkt"
+            sed s/"${src}"/"${dst}"/g "${fn}" > "${dst}-test.rkt"
         else
-            cp $fn "${dst}.rkt"
-            sed -i s/"${src}"/"${dst}"/g "${dst}.rkt"
+            sed s/"${src}"/"${dst}"/g "${fn}" > "${dst}.rkt"
         fi
     done
 }
