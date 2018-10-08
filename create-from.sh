@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 set -e
 
-if (($# != 2)); then
-    echo 'Usage: create-from $SOUNCE_NAME $TARGET_NAME'
+if (($# != 3)); then
+    echo 'Usage: create-from $SOURCE_DIR $SOUNCE_NAME $TARGET_NAME'
     exit -1
 fi
 
-readonly source=$1
-readonly target=$2
+readonly source_dir=$1
+readonly source=$2
+readonly target=$3
 
 # Fix bug of spec reference in interpreter
 create-from() {
     local readonly src=$1
     local readonly dst=$2
-    for fn in "${src}"*; do 
+    for fn in "${source_dir}/${src}"*; do 
         if [[ $fn =~ .*-test.* ]]; then
             sed s/"${src}"/"${dst}"/g "${fn}" > "${dst}-test.rkt"
         else
