@@ -49,6 +49,10 @@
       (a-program
         (let2-exp 'a (var-exp 'b) 'c (const-exp 3) (diff-exp (var-exp 'a) (var-exp 'c)))))
     (check-equal?
+      (scan-parse "let3 a = b , c = 3 , d = 10 in -(-(a,c), d)")
+      (a-program
+        (let3-exp 'a (var-exp 'b) 'c (const-exp 3) 'd (const-exp 10) (diff-exp (diff-exp (var-exp 'a) (var-exp 'c)) (var-exp 'd)))))
+    (check-equal?
       (scan-parse
         "begin
           a;

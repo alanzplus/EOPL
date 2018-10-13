@@ -146,6 +146,33 @@
     (body expression?)
     (env environment?)
     (cont continuation?))
+  (let3-cont1
+    (var1 identifier?)
+    (var2 identifier?)
+    (exp2 expression?)
+    (var3 identifier?)
+    (exp3 expression?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (let3-cont2
+    (var1 identifier?)
+    (val1 expval?)
+    (var2 identifier?)
+    (var3 identifier?)
+    (exp3 expression?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (let3-cont3
+    (var1 identifier?)
+    (val1 expval?)
+    (var2 identifier?)
+    (val2 expval?)
+    (var3 identifier?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
 )
 
 (define apply-cont
@@ -188,6 +215,12 @@
         (value-of/k exp2 env (let2-cont2 var1 val var2 body env saved-cont)))
       (let2-cont2 (var1 val1 var2 body env saved-cont)
         (value-of/k body (extend-env var2 val (extend-env var1 val1 env)) saved-cont))
+      (let3-cont1 (var1 var2 exp2 var3 exp3 body env saved-cont)
+        (value-of/k exp2 env (let3-cont2 var1 val var2 var3 exp3 body env saved-cont)))
+      (let3-cont2 (var1 val1 var2 var3 exp3 body env saved-cont)
+        (value-of/k exp3 env (let3-cont3 var1 val1 var2 val var3 body env saved-cont)))
+      (let3-cont3 (var1 val1 var2 val2 var3 body env saved-cont)
+        (value-of/k body (extend-env var3 val (extend-env var2 val2 (extend-env var1 val1 env))) saved-cont))
 )))
 
 ; -----------------------------------------------------------------------------
@@ -244,5 +277,8 @@
       (let2-exp (var1 exp1 var2 exp2 body)
         (value-of/k
           exp1 env (let2-cont1 var1 var2 exp2 body env cont)))
+      (let3-exp (var1 exp1 var2 exp2 var3 exp3 body)
+        (value-of/k
+          exp1 env (let3-cont1 var1 var2 exp2 var3 exp3 body env cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))
