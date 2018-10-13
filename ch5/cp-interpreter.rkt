@@ -198,6 +198,13 @@
     (cont continuation?))
   (null?-cont
     (cont continuation?))
+  (list-first-cont
+    (val expval?)
+    (cont continuation?))
+  (list-rest-cont
+    (exps expression?)
+    (env environment?)
+    (cont continuation?))
 )
 
 (define apply-cont
@@ -205,7 +212,10 @@
     (cases continuation cont
       (end-cont ()
         (begin
-          (eopl:printf "End of computation.~%")
+          (eopl:printf "---------------------\n")
+          (eopl:printf "End of computation. Final answer: \n")
+          (eopl:pretty-print val)
+          (eopl:printf "---------------------\n\n")
           val))
       (zero-cont (saved-cont)
         (apply-cont saved-cont
@@ -258,6 +268,10 @@
         (cases expval val
           (list-val (alist) (apply-cont saved-cont (bool-val (null? alist))))
           (else (eopl:error "expected list-val"))))
+      (list-rest-cont (exps env saved-cont)
+          (value-of/k exps env (list-first-cont val saved-cont)))
+      (list-first-cont (val1 saved-cont)
+          (apply-cont saved-cont (list-val (cons val1 (expval->list val)))))
       (else (eopl:error "unkonw type of continuation. ~s" cont))
 )))
 
@@ -328,5 +342,12 @@
         (value-of/k exp1 env (null?-cont cont)))
       (emptylist-exp ()
         (apply-cont cont (list-val '())))
+      (list-exp (exps)
+        (if (null? exps)
+            (apply-cont cont (list-val '()))
+            (value-of/k
+              (car exps)
+              env
+              (list-rest-cont (list-exp (cdr exps)) env cont))))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))

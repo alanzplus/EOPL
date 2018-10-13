@@ -12,6 +12,7 @@
 (provide let-exp)
 (provide let2-exp)
 (provide let3-exp)
+(provide list-exp)
 (provide diff-exp)
 (provide proc-exp)
 (provide call-exp)
@@ -59,6 +60,7 @@
    (expression ("cdr(" expression ")") cdr-exp)
    (expression ("null?(" expression ")") null?-exp)
    (expression ("emptylist") emptylist-exp)
+   (expression ("list(" (arbno expression) ")") list-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)

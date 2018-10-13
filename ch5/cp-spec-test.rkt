@@ -59,21 +59,16 @@
           b
         end")
       (a-program (begin-exp (var-exp 'a) (list (var-exp 'b)))))
-    #(struct:a-program
-  #(struct:let-exp
-    l
-    #(struct:cons-exp
-      #(struct:const-exp 1)
-      #(struct:cons-exp #(struct:const-exp 2) #(struct:emptylist-exp)))
-    #(struct:cons-exp
-      #(struct:car-exp #(struct:var-exp l))
-      #(struct:cdr-exp #(struct:var-exp l)))))
     (check-equal?
       (scan-parse "let l = cons(1 cons(2 emptylist)) in cons(car(l) cdr(l))")
       (a-program
         (let-exp 'l
                  (cons-exp (const-exp 1) (cons-exp (const-exp 2) (emptylist-exp)))
                  (cons-exp (car-exp (var-exp 'l)) (cdr-exp (var-exp 'l))))))
+    (check-equal?
+      (scan-parse "list(1 2 3)")
+      (a-program
+        (list-exp (list (const-exp 1) (const-exp 2) (const-exp 3)))))
 ))
 
 (run-tests cp-spec-test)
