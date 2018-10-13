@@ -6,9 +6,11 @@
 (provide num-val)
 (provide bool-val)
 (provide proc-val)
+(provide list-val)
 (provide expval->num)
 (provide expval->bool)
 (provide expval->proc)
+(provide expval->list)
 (provide procedure)
 (provide apply-procedure/k)
 
@@ -21,7 +23,10 @@
   (bool-val
     (bool boolean?))
   (proc-val
-    (proc proc?)))
+    (proc proc?))
+  (list-val
+    (alist list?))
+)
 
 ; ExpVal -> num
 (define expval->num
@@ -43,6 +48,13 @@
     (cases expval val
       (proc-val (proc) proc)
       (else (eopl:error "expected proc-val")))))
+
+; ExpVal -> list
+(define expval->list
+  (lambda (val)
+    (cases expval val
+      (list-val (alist) alist)
+      (else (eopl:error "expected list-val")))))
 
 ; -----------------------------------------------------------------------------
 ; Procedure Representation
@@ -173,6 +185,19 @@
     (body expression?)
     (env environment?)
     (cont continuation?))
+  (cons-cont1
+    (exp2 expression?)
+    (env environment?)
+    (cont continuation?))
+  (cons-cont2
+    (val expval?)
+    (cont continuation?))
+  (car-cont
+    (cont continuation?))
+  (cdr-cont
+    (cont continuation?))
+  (null?-cont
+    (cont continuation?))
 )
 
 (define apply-cont
@@ -221,6 +246,19 @@
         (value-of/k exp3 env (let3-cont3 var1 val1 var2 val var3 body env saved-cont)))
       (let3-cont3 (var1 val1 var2 val2 var3 body env saved-cont)
         (value-of/k body (extend-env var3 val (extend-env var2 val2 (extend-env var1 val1 env))) saved-cont))
+      (cons-cont1 (exp2 env saved-cont)
+        (value-of/k exp2 env (cons-cont2 val saved-cont)))
+      (cons-cont2 (val1 saved-cont)
+        (apply-cont saved-cont (list-val (list val1 val))))
+      (car-cont (saved-cont)
+        (apply-cont saved-cont (car (expval->list val))))
+      (cdr-cont (saved-cont)
+        (apply-cont saved-cont (cadr (expval->list val))))
+      (null?-cont (saved-cont)
+        (cases expval val
+          (list-val (alist) (apply-cont saved-cont (bool-val (null? alist))))
+          (else (eopl:error "expected list-val"))))
+      (else (eopl:error "unkonw type of continuation. ~s" cont))
 )))
 
 ; -----------------------------------------------------------------------------
@@ -280,5 +318,15 @@
       (let3-exp (var1 exp1 var2 exp2 var3 exp3 body)
         (value-of/k
           exp1 env (let3-cont1 var1 var2 exp2 var3 exp3 body env cont)))
+      (cons-exp (exp1 exp2)
+        (value-of/k exp1 env (cons-cont1 exp2 env cont)))
+      (car-exp (exp1)
+        (value-of/k exp1 env (car-cont cont)))
+      (cdr-exp (exp1)
+        (value-of/k exp1 env (cdr-cont cont)))
+      (null?-exp (exp1)
+        (value-of/k exp1 env (null?-cont cont)))
+      (emptylist-exp ()
+        (apply-cont cont (list-val '())))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))
