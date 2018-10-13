@@ -270,6 +270,11 @@ end
 
 * cp-interpreter.rkt
 
+### Exercises
+
+* 5.1.rkt
+* 5.2.rkt
+
 ## TODO For Interpreter
 
 * Add `begin` to `A` interpreter
