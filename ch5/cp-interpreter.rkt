@@ -132,6 +132,20 @@
   (rand-cont
     (val expval?)
     (cont continuation?))
+  (let2-cont1
+    (var1 identifier?)
+    (var2 identifier?)
+    (exp2 expression?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (let2-cont2
+    (var1 identifier?)
+    (val1 expval?)
+    (var2 identifier?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
 )
 
 (define apply-cont
@@ -170,6 +184,10 @@
       (rand-cont (val1 saved-cont)
         (let ((p (expval->proc val1)))
           (apply-procedure/k p val saved-cont)))
+      (let2-cont1 (var1 var2 exp2 body env saved-cont)
+        (value-of/k exp2 env (let2-cont2 var1 val var2 body env saved-cont)))
+      (let2-cont2 (var1 val1 var2 body env saved-cont)
+        (value-of/k body (extend-env var2 val (extend-env var1 val1 env)) saved-cont))
 )))
 
 ; -----------------------------------------------------------------------------
@@ -223,5 +241,8 @@
           exp1
           env
           (rator-cont exp2 env cont)))
+      (let2-exp (var1 exp1 var2 exp2 body)
+        (value-of/k
+          exp1 env (let2-cont1 var1 var2 exp2 body env cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))
