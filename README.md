@@ -279,6 +279,7 @@ end
 * 5.5.rkt
 * 5.6.rkt
 * 5.7.rkt
+* 5.8.rkt
 
 ## TODO For Interpreter
 

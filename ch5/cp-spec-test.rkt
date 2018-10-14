@@ -30,16 +30,16 @@
       (a-program
         (let-exp
           'x
-          (proc-exp 'x (var-exp 'x))
-          (call-exp (var-exp 'x) (const-exp 10)))))
+          (proc-exp (list 'x) (var-exp 'x))
+          (call-exp (var-exp 'x) (list (const-exp 10))))))
     (check-equal?
-      (scan-parse "letrec rec(x) = (rec x) in (rec 10)")
+      (scan-parse "letrec rec(x y) = (rec x y) in (rec 10 11)")
       (a-program
         (letrec-exp
           'rec
-          'x
-          (call-exp (var-exp 'rec) (var-exp 'x))
-          (call-exp (var-exp 'rec) (const-exp 10)))))
+          (list 'x 'y)
+          (call-exp (var-exp 'rec) (list (var-exp 'x) (var-exp 'y)))
+          (call-exp (var-exp 'rec) (list (const-exp 10) (const-exp 11))))))
     (check-equal?
       (scan-parse "begin a end")
       (a-program

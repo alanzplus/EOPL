@@ -15,6 +15,21 @@
 (provide apply-procedure/k)
 
 ; -----------------------------------------------------------------------------
+; List Utilities
+; -----------------------------------------------------------------------------
+
+; Return the first idx which satifies the predicate
+(define find-idx
+  (lambda (predicate lst)
+    (letrec ((helper
+                (lambda (idx alst)
+                    (if (null? alst)
+                        -1
+                        (if (predicate (car alst))
+                            idx
+                            (helper (+ idx 1) (cdr alst)))))))
+            (helper 0 lst))))
+; -----------------------------------------------------------------------------
 ; Expression Value Representation
 ; -----------------------------------------------------------------------------
 (define-datatype expval expval?
@@ -61,16 +76,16 @@
 ; -----------------------------------------------------------------------------
 (define-datatype proc proc?
   (procedure
-    (var identifier?)
+    (vars (list-of identifier?))
     (body expression?)
     (env environment?)))
 
 ; Proc x ExpVal x Cont -> ExpVal
 (define apply-procedure/k
-  (lambda (proc1 val cont)
+  (lambda (proc1 vals cont)
     (cases proc proc1
-      (procedure (var body env)
-        (value-of/k body (extend-env var val env) cont)))))
+      (procedure (vars body env)
+        (value-of/k body (extend-env-list vars vals env) cont)))))
 
 ; -----------------------------------------------------------------------------
 ; Environment
@@ -81,9 +96,13 @@
     (var identifier?)
     (val expval?)
     (env environment?))
+  (extend-env-list
+    (vars (list-of identifier?))
+    (vals (list-of expval?))
+    (env environment?))
   (extend-env-rec
     (p-name identifier?)
-    (p-var identifier?)
+    (p-vars (list-of identifier?))
     (body expression?)
     (env environment?)))
 
@@ -97,9 +116,18 @@
         (if (eqv? search-var saved-var)
             saved-val
             (apply-env saved-env search-var)))
-      (extend-env-rec (p-name p-var p-body saved-env)
+      (extend-env-list (saved-vars saved-vals saved-env)
+        (let ((idx
+                (find-idx
+                   (lambda (ele)
+                      (eqv? ele search-var))
+                   saved-vars)))
+              (if (eqv? idx -1)
+                  (apply-env saved-env search-var)
+                  (list-ref saved-vals idx))))
+      (extend-env-rec (p-name p-vars p-body saved-env)
         (if (eqv? search-var p-name)
-            (proc-val (procedure p-var p-body env))
+            (proc-val (procedure p-vars p-body env))
             (apply-env saved-env search-var))))))
 
 ; Initilization
@@ -138,11 +166,14 @@
     (val expval?)
     (cont continuation?))
   (rator-cont
-    (exp2 expression?)
+    (exps (list-of expression?))
     (env environment?)
     (cont continuation?))
   (rand-cont
+    (env environment?)
     (val expval?)
+    (exps (list-of expression?))
+    (vals (list-of expval?))
     (cont continuation?))
   (let2-cont1
     (var1 identifier?)
@@ -245,14 +276,18 @@
         (let ((num1 (expval->num val1))
               (num2 (expval->num val)))
             (apply-cont saved-cont (num-val (- num1 num2)))))
-      (rator-cont (exp2 env saved-cont)
+      (rator-cont (exps env saved-cont)
         (value-of/k
-          exp2
+          (car exps)
           env
-          (rand-cont val saved-cont)))
-      (rand-cont (val1 saved-cont)
-        (let ((p (expval->proc val1)))
-          (apply-procedure/k p val saved-cont)))
+          (rand-cont env val (cdr exps) '() saved-cont)))
+      (rand-cont (env rator exps vals saved-cont)
+          (if (null? exps)
+              (apply-procedure/k (expval->proc rator) (append vals (list val)) saved-cont)
+              (value-of/k
+                (car exps)
+                env
+                (rand-cont env rator (cdr exps) (append vals (list val)) saved-cont))))
       (let2-cont1 (var1 var2 exp2 body env saved-cont)
         (value-of/k exp2 env (let2-cont2 var1 val var2 body env saved-cont)))
       (let2-cont2 (var1 val1 var2 body env saved-cont)
@@ -317,12 +352,12 @@
     (cases expression exp
       (const-exp (num) (apply-cont cont (num-val num)))
       (var-exp (var) (apply-cont cont (apply-env env var)))
-      (proc-exp (var body)
-        (apply-cont cont (proc-val (procedure var body env))))
-      (letrec-exp (p-name p-var p-body letrec-body)
+      (proc-exp (vars body)
+        (apply-cont cont (proc-val (procedure vars body env))))
+      (letrec-exp (p-name p-vars p-body letrec-body)
         (value-of/k
           letrec-body
-          (extend-env-rec p-name p-var p-body env)
+          (extend-env-rec p-name p-vars p-body env)
           cont))
       (zero?-exp (exp1)
         (value-of/k exp1 env (zero-cont cont)))
@@ -341,11 +376,11 @@
           exp1
           env
           (diff1-cont exp2 env cont)))
-      (call-exp (exp1 exp2)
+      (call-exp (exp1 exps)
         (value-of/k
           exp1
           env
-          (rator-cont exp2 env cont)))
+          (rator-cont exps env cont)))
       (let2-exp (var1 exp1 var2 exp2 body)
         (value-of/k
           exp1 env (let2-cont1 var1 var2 exp2 body env cont)))
