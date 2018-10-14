@@ -23,6 +23,7 @@
 (provide cdr-exp)
 (provide null?-exp)
 (provide emptylist-exp)
+(provide letmul-exp)
 (provide scanner-spec)
 (provide grammer-spec)
 (provide just-scan)
@@ -61,6 +62,7 @@
    (expression ("null?(" expression ")") null?-exp)
    (expression ("emptylist") emptylist-exp)
    (expression ("list(" (arbno expression) ")") list-exp)
+   (expression ("letmul" (arbno identifier "=" expression) "in" expression) letmul-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)

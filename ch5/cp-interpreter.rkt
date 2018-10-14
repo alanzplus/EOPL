@@ -205,6 +205,13 @@
     (exps expression?)
     (env environment?)
     (cont continuation?))
+  (letmul-cont
+    (vars (list-of identifier?))
+    (exps (list-of expression?))
+    (body expression?)
+    (body-eval-env environment?)
+    (binding-eval-env environment?)
+    (cont continuation?))
 )
 
 (define apply-cont
@@ -272,6 +279,19 @@
           (value-of/k exps env (list-first-cont val saved-cont)))
       (list-first-cont (val1 saved-cont)
           (apply-cont saved-cont (list-val (cons val1 (expval->list val)))))
+      (letmul-cont (vars exps body body-eval-env binding-eval-env saved-cont)
+          (if (null? exps)
+              (value-of/k body (extend-env (car vars) val body-eval-env) saved-cont)
+              (value-of/k
+                (car exps)
+                binding-eval-env
+                (letmul-cont
+                  (cdr vars)
+                  (cdr exps)
+                  body
+                  (extend-env (car vars) val body-eval-env)
+                  binding-eval-env
+                  saved-cont))))
       (else (eopl:error "unkonw type of continuation. ~s" cont))
 )))
 
@@ -349,5 +369,10 @@
               (car exps)
               env
               (list-rest-cont (list-exp (cdr exps)) env cont))))
+      (letmul-exp (vars exps body)
+        (value-of/k
+          (car exps)
+          env
+          (letmul-cont vars (cdr exps) body env env cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))
