@@ -272,6 +272,9 @@ end
 
 ### TODO
 * 5.10.rkt
+* 5.14.rkt
+* 5.15.rkt
+* 5.16.rkt
 
 ### Exercises
 
@@ -285,6 +288,8 @@ end
 * 5.8.rkt
 * 5.9.rkt
 * 5.11.rkt
+* 5.12.rkt
+* 5.13.rkt
 
 ## TODO For Interpreter
 

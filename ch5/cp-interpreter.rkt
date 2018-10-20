@@ -450,12 +450,6 @@
 ; Expression X Environemnt x Continutation -> FinalAnswer (ExpVal)
 (define value-of/k
   (lambda (exp env cont)
-    (begin
-      (eopl:pretty-print (list "(valu-of/k" exp env cont))
-      (value-of/k-inner exp env cont))))
-
-(define value-of/k-inner
-  (lambda (exp env cont)
     (cases expression exp
       (const-exp (num) (apply-cont cont (num-val num)))
       (var-exp (var) (apply-cont cont (deref (apply-env env var))))
