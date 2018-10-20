@@ -77,6 +77,10 @@
       (scan-parse "letmul a = 1 b = 2 in -(a,b)")
       (a-program
         (letmul-exp (list 'a 'b) (list (const-exp 1) (const-exp 2)) (diff-exp (var-exp 'a) (var-exp 'b)))))
+    (check-equal?
+      (scan-parse "set a = 3")
+      (a-program
+        (assign-exp 'a (const-exp 3))))
 ))
 
 (run-tests cp-spec-test)

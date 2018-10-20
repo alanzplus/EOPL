@@ -85,7 +85,67 @@
   (lambda (proc1 vals cont)
     (cases proc proc1
       (procedure (vars body env)
-        (value-of/k body (extend-env-list vars vals env) cont)))))
+        (value-of/k body (extend-env-list vars (newref-list vals) env) cont)))))
+
+; -----------------------------------------------------------------------------
+; Store
+; -----------------------------------------------------------------------------
+(define the-store 'uninitialized)
+
+; () -> Store
+(define empty-store
+  (lambda () '()))
+
+; () -> Store
+(define get-store
+  (lambda () the-store))
+
+; () -> Unspecified
+(define initialize-store!
+  (lambda ()
+    (set! the-store (empty-store))))
+
+; SchemeVal -> Bool
+(define reference?
+  (lambda (v)
+    (integer? v)))
+
+; ExpVal -> Ref
+(define newref
+  (lambda (val)
+    (let ((next-ref (length the-store)))
+      (set! the-store (append the-store (list val)))
+      next-ref)))
+
+; ExpVals -> Refs
+(define newref-list
+  (lambda (vals)
+    (map newref vals)))
+
+; Ref -> ExpVal
+(define deref
+  (lambda (ref)
+    (list-ref the-store ref)))
+
+; Ref x ExpVal -> Unspecified
+(define setref!
+  (lambda (ref val)
+    (set! the-store
+      (letrec
+        ((setref-inner
+          (lambda (store1 ref1)
+            (cond
+              ((null? store1)
+                (eopl:error "cannot set ~s in reference ~s" val ref))
+              ((zero? ref1)
+               (cons val (cdr store1)))
+              (else
+                (cons
+                  (car store1)
+                  (setref-inner
+                    (cdr store1)
+                    (- ref1 1))))))))
+        (setref-inner the-store ref)))))
 
 ; -----------------------------------------------------------------------------
 ; Environment
@@ -94,11 +154,11 @@
   (empty-env)
   (extend-env
     (var identifier?)
-    (val expval?)
+    (val reference?)
     (env environment?))
   (extend-env-list
     (vars (list-of identifier?))
-    (vals (list-of expval?))
+    (vals (list-of reference?))
     (env environment?))
   (extend-env-rec
     (p-name identifier?)
@@ -127,18 +187,18 @@
                   (list-ref saved-vals idx))))
       (extend-env-rec (p-name p-vars p-body saved-env)
         (if (eqv? search-var p-name)
-            (proc-val (procedure p-vars p-body env))
+            (newref (proc-val (procedure p-vars p-body env)))
             (apply-env saved-env search-var))))))
 
 ; Initilization
 (define init-env
   (lambda ()
     (extend-env
-      'i (num-val 1)
+      'i (newref (num-val 1))
       (extend-env
-        'v (num-val 5)
+        'v (newref (num-val 5))
           (extend-env
-            'x (num-val 10)
+            'x (newref (num-val 10))
             (empty-env))))))
 
 ; -----------------------------------------------------------------------------
@@ -243,6 +303,10 @@
     (body-eval-env environment?)
     (binding-eval-env environment?)
     (cont continuation?))
+  (set-rhs-cont
+    (env environment?)
+    (var identifier?)
+    (cont continuation?))
 )
 
 (define apply-cont
@@ -261,7 +325,7 @@
       (let-exp-cont (var body saved-env saved-cont)
         (value-of/k
           body
-          (extend-env var val saved-env)
+          (extend-env var (newref val) saved-env)
           saved-cont))
       (if-test-cont (exp2 exp3 saved-env saved-cont)
         (if (expval->bool val)
@@ -291,13 +355,13 @@
       (let2-cont1 (var1 var2 exp2 body env saved-cont)
         (value-of/k exp2 env (let2-cont2 var1 val var2 body env saved-cont)))
       (let2-cont2 (var1 val1 var2 body env saved-cont)
-        (value-of/k body (extend-env var2 val (extend-env var1 val1 env)) saved-cont))
+        (value-of/k body (extend-env var2 (newref val) (extend-env var1 (newref val1) env)) saved-cont))
       (let3-cont1 (var1 var2 exp2 var3 exp3 body env saved-cont)
         (value-of/k exp2 env (let3-cont2 var1 val var2 var3 exp3 body env saved-cont)))
       (let3-cont2 (var1 val1 var2 var3 exp3 body env saved-cont)
         (value-of/k exp3 env (let3-cont3 var1 val1 var2 val var3 body env saved-cont)))
       (let3-cont3 (var1 val1 var2 val2 var3 body env saved-cont)
-        (value-of/k body (extend-env var3 val (extend-env var2 val2 (extend-env var1 val1 env))) saved-cont))
+        (value-of/k body (extend-env var3 (newref val) (extend-env var2 (newref val2) (extend-env var1 (newref val1) env))) saved-cont))
       (cons-cont1 (exp2 env saved-cont)
         (value-of/k exp2 env (cons-cont2 val saved-cont)))
       (cons-cont2 (val1 saved-cont)
@@ -316,7 +380,7 @@
           (apply-cont saved-cont (list-val (cons val1 (expval->list val)))))
       (letmul-cont (vars exps body body-eval-env binding-eval-env saved-cont)
           (if (null? exps)
-              (value-of/k body (extend-env (car vars) val body-eval-env) saved-cont)
+              (value-of/k body (extend-env (car vars) (newref val) body-eval-env) saved-cont)
               (value-of/k
                 (car exps)
                 binding-eval-env
@@ -324,9 +388,11 @@
                   (cdr vars)
                   (cdr exps)
                   body
-                  (extend-env (car vars) val body-eval-env)
+                  (extend-env (car vars) (newref val) body-eval-env)
                   binding-eval-env
                   saved-cont))))
+      (set-rhs-cont (env var saved-cont)
+        (apply-cont saved-cont (setref! (apply-env env var) val)))
       (else (eopl:error "unkonw type of continuation. ~s" cont))
 )))
 
@@ -344,6 +410,7 @@
   (lambda (pgm)
     (cases program pgm
       (a-program (exp1)
+        (initialize-store!)
         (value-of/k exp1 (init-env) (end-cont))))))
 
 ; Expression X Environemnt x Continutation -> FinalAnswer (ExpVal)
@@ -351,7 +418,7 @@
   (lambda (exp env cont)
     (cases expression exp
       (const-exp (num) (apply-cont cont (num-val num)))
-      (var-exp (var) (apply-cont cont (apply-env env var)))
+      (var-exp (var) (apply-cont cont (deref (apply-env env var))))
       (proc-exp (vars body)
         (apply-cont cont (proc-val (procedure vars body env))))
       (letrec-exp (p-name p-vars p-body letrec-body)
@@ -409,5 +476,8 @@
           (car exps)
           env
           (letmul-cont vars (cdr exps) body env env cont)))
+      (assign-exp (var exp1)
+          (value-of/k
+            exp1 env (set-rhs-cont env var cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))
