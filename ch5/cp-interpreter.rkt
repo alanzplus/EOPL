@@ -218,6 +218,13 @@
     (exp3 expression?)
     (env environment?)
     (cont continuation?))
+  (mul1-cont
+    (exp2 expression?)
+    (env environment?)
+    (cont continuation?))
+  (mul2-cont
+    (val expval?)
+    (cont continuation?))
   (diff1-cont
     (exp2 expression?)
     (env environment?)
@@ -342,6 +349,15 @@
         (if (expval->bool val)
           (value-of/k exp2 saved-env saved-cont)
           (value-of/k exp3 saved-env saved-cont)))
+      (mul1-cont (exp2 env saved-cont)
+        (value-of/k
+          exp2
+          env
+          (mul2-cont val saved-cont)))
+      (mul2-cont (val1 saved-cont)
+        (let ((num1 (expval->num val1))
+              (num2 (expval->num val)))
+            (apply-cont saved-cont (num-val (* num1 num2)))))
       (diff1-cont (exp2 env saved-cont)
         (value-of/k
           exp2
@@ -462,6 +478,11 @@
           exp1
           env
           (if-test-cont exp2 exp3 env cont)))
+      (mul-exp (exp1 exp2)
+        (value-of/k
+          exp1
+          env
+          (mul1-cont exp2 env cont)))
       (diff-exp (exp1 exp2)
         (value-of/k
           exp1
