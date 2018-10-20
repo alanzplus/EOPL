@@ -270,6 +270,9 @@ end
 
 * cp-interpreter.rkt
 
+### TODO
+* 5.10.rkt
+
 ### Exercises
 
 * 5.1.rkt
@@ -280,6 +283,8 @@ end
 * 5.6.rkt
 * 5.7.rkt
 * 5.8.rkt
+* 5.9.rkt
+* 5.11.rkt
 
 ## TODO For Interpreter
 

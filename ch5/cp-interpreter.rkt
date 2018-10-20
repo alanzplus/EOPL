@@ -307,6 +307,10 @@
     (env environment?)
     (var identifier?)
     (cont continuation?))
+  (begin-exp-cont
+    (exps (list-of expression?))
+    (env environment?)
+    (cont continuation?))
 )
 
 (define apply-cont
@@ -393,6 +397,13 @@
                   saved-cont))))
       (set-rhs-cont (env var saved-cont)
         (apply-cont saved-cont (setref! (apply-env env var) val)))
+      (begin-exp-cont (other-exps env saved-cont)
+        (if (null? other-exps)
+            (apply-cont saved-cont val)
+            (value-of/k
+              (car other-exps)
+              env
+              (begin-exp-cont (cdr other-exps) env saved-cont))))
       (else (eopl:error "unkonw type of continuation. ~s" cont))
 )))
 
@@ -479,5 +490,10 @@
       (assign-exp (var exp1)
           (value-of/k
             exp1 env (set-rhs-cont env var cont)))
+      (begin-exp (exp-first other-exps)
+          (value-of/k
+            exp-first
+            env
+            (begin-exp-cont other-exps env cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))
