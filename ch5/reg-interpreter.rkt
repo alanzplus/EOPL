@@ -1,0 +1,527 @@
+#lang eopl
+
+(require "./reg-spec.rkt")
+
+(provide run)
+(provide num-val)
+(provide bool-val)
+(provide proc-val)
+(provide list-val)
+(provide expval->num)
+(provide expval->bool)
+(provide expval->proc)
+(provide expval->list)
+(provide procedure)
+(provide apply-procedure/k)
+
+; -----------------------------------------------------------------------------
+; List Utilities
+; -----------------------------------------------------------------------------
+
+; Return the first idx which satifies the predicate
+(define find-idx
+  (lambda (predicate lst)
+    (letrec ((helper
+                (lambda (idx alst)
+                    (if (null? alst)
+                        -1
+                        (if (predicate (car alst))
+                            idx
+                            (helper (+ idx 1) (cdr alst)))))))
+            (helper 0 lst))))
+; -----------------------------------------------------------------------------
+; Expression Value Representation
+; -----------------------------------------------------------------------------
+(define-datatype expval expval?
+  (num-val
+    (num number?))
+  (bool-val
+    (bool boolean?))
+  (proc-val
+    (proc proc?))
+  (list-val
+    (alist list?))
+)
+
+; ExpVal -> num
+(define expval->num
+  (lambda (val)
+    (cases expval val
+      (num-val (num) num)
+      (else (eopl:error "expected num-val")))))
+
+; ExpVal -> bool
+(define expval->bool
+  (lambda (val)
+    (cases expval val
+      (bool-val (bool) bool)
+      (else (eopl:error "expected bool-val")))))
+
+; ExpVal -> Procedure
+(define expval->proc
+  (lambda (val)
+    (cases expval val
+      (proc-val (proc) proc)
+      (else (eopl:error "expected proc-val")))))
+
+; ExpVal -> list
+(define expval->list
+  (lambda (val)
+    (cases expval val
+      (list-val (alist) alist)
+      (else (eopl:error "expected list-val")))))
+
+; -----------------------------------------------------------------------------
+; Procedure Representation
+; -----------------------------------------------------------------------------
+(define-datatype proc proc?
+  (procedure
+    (vars (list-of identifier?))
+    (body expression?)
+    (env environment?)))
+
+; Proc x ExpVal x Cont -> ExpVal
+(define apply-procedure/k
+  (lambda (proc1 vals cont)
+    (cases proc proc1
+      (procedure (vars body env)
+        (value-of/k body (extend-env-list vars (newref-list vals) env) cont)))))
+
+; -----------------------------------------------------------------------------
+; Store
+; -----------------------------------------------------------------------------
+(define the-store 'uninitialized)
+
+; () -> Store
+(define empty-store
+  (lambda () '()))
+
+; () -> Store
+(define get-store
+  (lambda () the-store))
+
+; () -> Unspecified
+(define initialize-store!
+  (lambda ()
+    (set! the-store (empty-store))))
+
+; SchemeVal -> Bool
+(define reference?
+  (lambda (v)
+    (integer? v)))
+
+; ExpVal -> Ref
+(define newref
+  (lambda (val)
+    (let ((next-ref (length the-store)))
+      (set! the-store (append the-store (list val)))
+      next-ref)))
+
+; ExpVals -> Refs
+(define newref-list
+  (lambda (vals)
+    (map newref vals)))
+
+; Ref -> ExpVal
+(define deref
+  (lambda (ref)
+    (list-ref the-store ref)))
+
+; Ref x ExpVal -> Unspecified
+(define setref!
+  (lambda (ref val)
+    (set! the-store
+      (letrec
+        ((setref-inner
+          (lambda (store1 ref1)
+            (cond
+              ((null? store1)
+                (eopl:error "cannot set ~s in reference ~s" val ref))
+              ((zero? ref1)
+               (cons val (cdr store1)))
+              (else
+                (cons
+                  (car store1)
+                  (setref-inner
+                    (cdr store1)
+                    (- ref1 1))))))))
+        (setref-inner the-store ref)))))
+
+; -----------------------------------------------------------------------------
+; Environment
+; -----------------------------------------------------------------------------
+(define-datatype environment environment?
+  (empty-env)
+  (extend-env
+    (var identifier?)
+    (val reference?)
+    (env environment?))
+  (extend-env-list
+    (vars (list-of identifier?))
+    (vals (list-of reference?))
+    (env environment?))
+  (extend-env-rec
+    (p-name identifier?)
+    (p-vars (list-of identifier?))
+    (body expression?)
+    (env environment?)))
+
+; Environment x Identifier -> ExpVal
+(define apply-env
+  (lambda (env search-var)
+    (cases environment env
+      (empty-env ()
+        (eopl:error "there is no binding for ~s" search-var))
+      (extend-env (saved-var saved-val saved-env)
+        (if (eqv? search-var saved-var)
+            saved-val
+            (apply-env saved-env search-var)))
+      (extend-env-list (saved-vars saved-vals saved-env)
+        (let ((idx
+                (find-idx
+                   (lambda (ele)
+                      (eqv? ele search-var))
+                   saved-vars)))
+              (if (eqv? idx -1)
+                  (apply-env saved-env search-var)
+                  (list-ref saved-vals idx))))
+      (extend-env-rec (p-name p-vars p-body saved-env)
+        (if (eqv? search-var p-name)
+            (newref (proc-val (procedure p-vars p-body env)))
+            (apply-env saved-env search-var))))))
+
+; Initilization
+(define init-env
+  (lambda ()
+    (extend-env
+      'i (newref (num-val 1))
+      (extend-env
+        'v (newref (num-val 5))
+          (extend-env
+            'x (newref (num-val 10))
+            (empty-env))))))
+
+; -----------------------------------------------------------------------------
+; Continuation
+; -----------------------------------------------------------------------------
+(define-datatype continuation continuation?
+  (end-cont)
+  (zero-cont
+    (cont continuation?))
+  (let-exp-cont
+    (var identifier?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (if-test-cont
+    (exp2 expression?)
+    (exp3 expression?)
+    (env environment?)
+    (cont continuation?))
+  (mul1-cont
+    (exp2 expression?)
+    (env environment?)
+    (cont continuation?))
+  (mul2-cont
+    (val expval?)
+    (cont continuation?))
+  (diff1-cont
+    (exp2 expression?)
+    (env environment?)
+    (cont continuation?))
+  (diff2-cont
+    (val expval?)
+    (cont continuation?))
+  (rator-cont
+    (exps (list-of expression?))
+    (env environment?)
+    (cont continuation?))
+  (rand-cont
+    (env environment?)
+    (val expval?)
+    (exps (list-of expression?))
+    (vals (list-of expval?))
+    (cont continuation?))
+  (let2-cont1
+    (var1 identifier?)
+    (var2 identifier?)
+    (exp2 expression?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (let2-cont2
+    (var1 identifier?)
+    (val1 expval?)
+    (var2 identifier?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (let3-cont1
+    (var1 identifier?)
+    (var2 identifier?)
+    (exp2 expression?)
+    (var3 identifier?)
+    (exp3 expression?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (let3-cont2
+    (var1 identifier?)
+    (val1 expval?)
+    (var2 identifier?)
+    (var3 identifier?)
+    (exp3 expression?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (let3-cont3
+    (var1 identifier?)
+    (val1 expval?)
+    (var2 identifier?)
+    (val2 expval?)
+    (var3 identifier?)
+    (body expression?)
+    (env environment?)
+    (cont continuation?))
+  (cons-cont1
+    (exp2 expression?)
+    (env environment?)
+    (cont continuation?))
+  (cons-cont2
+    (val expval?)
+    (cont continuation?))
+  (car-cont
+    (cont continuation?))
+  (cdr-cont
+    (cont continuation?))
+  (null?-cont
+    (cont continuation?))
+  (list-first-cont
+    (val expval?)
+    (cont continuation?))
+  (list-rest-cont
+    (exps expression?)
+    (env environment?)
+    (cont continuation?))
+  (letmul-cont
+    (vars (list-of identifier?))
+    (exps (list-of expression?))
+    (body expression?)
+    (body-eval-env environment?)
+    (binding-eval-env environment?)
+    (cont continuation?))
+  (set-rhs-cont
+    (env environment?)
+    (var identifier?)
+    (cont continuation?))
+  (begin-exp-cont
+    (exps (list-of expression?))
+    (env environment?)
+    (cont continuation?))
+)
+
+(define apply-cont
+  (lambda (cont val)
+    (begin
+      (eopl:pretty-print
+        (list "(apply-cont" cont val ")"))
+      (apply-cont-inner cont val))))
+
+(define apply-cont-inner
+  (lambda (cont val)
+    (cases continuation cont
+      (end-cont ()
+        (begin
+          (eopl:printf "---------------------\n")
+          (eopl:printf "End of computation. Final answer: \n")
+          (eopl:pretty-print val)
+          (eopl:printf "---------------------\n\n")
+          val))
+      (zero-cont (saved-cont)
+        (apply-cont saved-cont
+          (bool-val (zero? (expval->num val)))))
+      (let-exp-cont (var body saved-env saved-cont)
+        (value-of/k
+          body
+          (extend-env var (newref val) saved-env)
+          saved-cont))
+      (if-test-cont (exp2 exp3 saved-env saved-cont)
+        (if (expval->bool val)
+          (value-of/k exp2 saved-env saved-cont)
+          (value-of/k exp3 saved-env saved-cont)))
+      (mul1-cont (exp2 env saved-cont)
+        (value-of/k
+          exp2
+          env
+          (mul2-cont val saved-cont)))
+      (mul2-cont (val1 saved-cont)
+        (let ((num1 (expval->num val1))
+              (num2 (expval->num val)))
+            (apply-cont saved-cont (num-val (* num1 num2)))))
+      (diff1-cont (exp2 env saved-cont)
+        (value-of/k
+          exp2
+          env
+          (diff2-cont val saved-cont)))
+      (diff2-cont (val1 saved-cont)
+        (let ((num1 (expval->num val1))
+              (num2 (expval->num val)))
+            (apply-cont saved-cont (num-val (- num1 num2)))))
+      (rator-cont (exps env saved-cont)
+        (value-of/k
+          (car exps)
+          env
+          (rand-cont env val (cdr exps) '() saved-cont)))
+      (rand-cont (env rator exps vals saved-cont)
+          (if (null? exps)
+              (apply-procedure/k (expval->proc rator) (append vals (list val)) saved-cont)
+              (value-of/k
+                (car exps)
+                env
+                (rand-cont env rator (cdr exps) (append vals (list val)) saved-cont))))
+      (let2-cont1 (var1 var2 exp2 body env saved-cont)
+        (value-of/k exp2 env (let2-cont2 var1 val var2 body env saved-cont)))
+      (let2-cont2 (var1 val1 var2 body env saved-cont)
+        (value-of/k body (extend-env var2 (newref val) (extend-env var1 (newref val1) env)) saved-cont))
+      (let3-cont1 (var1 var2 exp2 var3 exp3 body env saved-cont)
+        (value-of/k exp2 env (let3-cont2 var1 val var2 var3 exp3 body env saved-cont)))
+      (let3-cont2 (var1 val1 var2 var3 exp3 body env saved-cont)
+        (value-of/k exp3 env (let3-cont3 var1 val1 var2 val var3 body env saved-cont)))
+      (let3-cont3 (var1 val1 var2 val2 var3 body env saved-cont)
+        (value-of/k body (extend-env var3 (newref val) (extend-env var2 (newref val2) (extend-env var1 (newref val1) env))) saved-cont))
+      (cons-cont1 (exp2 env saved-cont)
+        (value-of/k exp2 env (cons-cont2 val saved-cont)))
+      (cons-cont2 (val1 saved-cont)
+        (apply-cont saved-cont (list-val (list val1 val))))
+      (car-cont (saved-cont)
+        (apply-cont saved-cont (car (expval->list val))))
+      (cdr-cont (saved-cont)
+        (apply-cont saved-cont (cadr (expval->list val))))
+      (null?-cont (saved-cont)
+        (cases expval val
+          (list-val (alist) (apply-cont saved-cont (bool-val (null? alist))))
+          (else (eopl:error "expected list-val"))))
+      (list-rest-cont (exps env saved-cont)
+          (value-of/k exps env (list-first-cont val saved-cont)))
+      (list-first-cont (val1 saved-cont)
+          (apply-cont saved-cont (list-val (cons val1 (expval->list val)))))
+      (letmul-cont (vars exps body body-eval-env binding-eval-env saved-cont)
+          (if (null? exps)
+              (value-of/k body (extend-env (car vars) (newref val) body-eval-env) saved-cont)
+              (value-of/k
+                (car exps)
+                binding-eval-env
+                (letmul-cont
+                  (cdr vars)
+                  (cdr exps)
+                  body
+                  (extend-env (car vars) (newref val) body-eval-env)
+                  binding-eval-env
+                  saved-cont))))
+      (set-rhs-cont (env var saved-cont)
+        (apply-cont saved-cont (setref! (apply-env env var) val)))
+      (begin-exp-cont (other-exps env saved-cont)
+        (if (null? other-exps)
+            (apply-cont saved-cont val)
+            (value-of/k
+              (car other-exps)
+              env
+              (begin-exp-cont (cdr other-exps) env saved-cont))))
+      (else (eopl:error "unkonw type of continuation. ~s" cont))
+)))
+
+; -----------------------------------------------------------------------------
+; Interpreter
+; -----------------------------------------------------------------------------
+
+; String -> ExpVal
+(define run
+  (lambda (text)
+    (value-of-program (scan-parse text))))
+
+; Program -> ExpVal
+(define value-of-program
+  (lambda (pgm)
+    (cases program pgm
+      (a-program (exp1)
+        (initialize-store!)
+        (value-of/k exp1 (init-env) (end-cont))))))
+
+; Expression X Environemnt x Continutation -> FinalAnswer (ExpVal)
+(define value-of/k
+  (lambda (exp env cont)
+    (cases expression exp
+      (const-exp (num) (apply-cont cont (num-val num)))
+      (var-exp (var) (apply-cont cont (deref (apply-env env var))))
+      (proc-exp (vars body)
+        (apply-cont cont (proc-val (procedure vars body env))))
+      (letrec-exp (p-name p-vars p-body letrec-body)
+        (value-of/k
+          letrec-body
+          (extend-env-rec p-name p-vars p-body env)
+          cont))
+      (zero?-exp (exp1)
+        (value-of/k exp1 env (zero-cont cont)))
+      (let-exp (var exp1 body)
+        (value-of/k
+          exp1
+          env
+          (let-exp-cont var body env cont)))
+      (if-exp (exp1 exp2 exp3)
+        (value-of/k
+          exp1
+          env
+          (if-test-cont exp2 exp3 env cont)))
+      (mul-exp (exp1 exp2)
+        (value-of/k
+          exp1
+          env
+          (mul1-cont exp2 env cont)))
+      (diff-exp (exp1 exp2)
+        (value-of/k
+          exp1
+          env
+          (diff1-cont exp2 env cont)))
+      (call-exp (exp1 exps)
+        (value-of/k
+          exp1
+          env
+          (rator-cont exps env cont)))
+      (let2-exp (var1 exp1 var2 exp2 body)
+        (value-of/k
+          exp1 env (let2-cont1 var1 var2 exp2 body env cont)))
+      (let3-exp (var1 exp1 var2 exp2 var3 exp3 body)
+        (value-of/k
+          exp1 env (let3-cont1 var1 var2 exp2 var3 exp3 body env cont)))
+      (cons-exp (exp1 exp2)
+        (value-of/k exp1 env (cons-cont1 exp2 env cont)))
+      (car-exp (exp1)
+        (value-of/k exp1 env (car-cont cont)))
+      (cdr-exp (exp1)
+        (value-of/k exp1 env (cdr-cont cont)))
+      (null?-exp (exp1)
+        (value-of/k exp1 env (null?-cont cont)))
+      (emptylist-exp ()
+        (apply-cont cont (list-val '())))
+      (list-exp (exps)
+        (if (null? exps)
+            (apply-cont cont (list-val '()))
+            (value-of/k
+              (car exps)
+              env
+              (list-rest-cont (list-exp (cdr exps)) env cont))))
+      (letmul-exp (vars exps body)
+        (value-of/k
+          (car exps)
+          env
+          (letmul-cont vars (cdr exps) body env env cont)))
+      (assign-exp (var exp1)
+          (value-of/k
+            exp1 env (set-rhs-cont env var cont)))
+      (begin-exp (exp-first other-exps)
+          (value-of/k
+            exp-first
+            env
+            (begin-exp-cont other-exps env cont)))
+      (else (eopl:error "cannot handle expression: ~s" exp))
+)))
