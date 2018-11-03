@@ -30,9 +30,22 @@
     (check-equal?
       (run "letrec sum(x y) = if zero?(x) then y else (sum -(x,1) -(1,-(0,y))) in (sum 5 1)")
       (num-val 6))
-    ; (check-equal?
-    ;   (run "let x = 3 in begin x; 4; x end")
-    ;   (num-val 3))
+    (check-equal?
+      (run "try raise 5 catch (x) x")
+      (num-val 5))
+    (check-equal?
+      (run "
+            let index
+                = proc(n)
+                  letrec inner(lst)
+                    = if null?(lst)
+                      then raise 99
+                      else if zero?(-(car(lst),n)) then 0 else -((inner cdr(lst)), 1)
+                    in proc(lst)
+                      try (inner lst)
+                        catch (x) x
+            in ((index 5) list(2 3))")
+      (num-val 99))
   ))
 
 (run-tests cp-interpreter-test)

@@ -31,6 +31,8 @@
 (provide just-scan)
 (provide scan-parse)
 (provide repl-ast)
+(provide try-exp)
+(provide raise-exp)
 
 (define identifier?
   (lambda (x)
@@ -67,6 +69,8 @@
    (expression ("list(" (arbno expression) ")") list-exp)
    (expression ("letmul" (arbno identifier "=" expression) "in" expression) letmul-exp)
    (expression ("set" identifier "=" expression) assign-exp)
+   (expression ("try" expression "catch" "(" identifier ")" expression) try-exp)
+   (expression ("raise" expression) raise-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)

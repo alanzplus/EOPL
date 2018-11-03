@@ -318,16 +318,16 @@
     (exps (list-of expression?))
     (env environment?)
     (cont continuation?))
+  (try-cont
+    (var identifier?)
+    (handler-exp expression?)
+    (env environment?)
+    (cont continuation?))
+  (raise-cont
+    (cont continuation?))
 )
 
 (define apply-cont
-  (lambda (cont val)
-    (begin
-      (eopl:pretty-print
-        (list "(apply-cont" cont val ")"))
-      (apply-cont-inner cont val))))
-
-(define apply-cont-inner
   (lambda (cont val)
     (cases continuation cont
       (end-cont ()
@@ -396,11 +396,11 @@
       (car-cont (saved-cont)
         (apply-cont saved-cont (car (expval->list val))))
       (cdr-cont (saved-cont)
-        (apply-cont saved-cont (cadr (expval->list val))))
+        (apply-cont saved-cont (list-val (cdr (expval->list val)))))
       (null?-cont (saved-cont)
         (cases expval val
           (list-val (alist) (apply-cont saved-cont (bool-val (null? alist))))
-          (else (eopl:error "expected list-val"))))
+          (else (eopl:error "expected list-val " val))))
       (list-rest-cont (exps env saved-cont)
           (value-of/k exps env (list-first-cont val saved-cont)))
       (list-first-cont (val1 saved-cont)
@@ -427,8 +427,73 @@
               (car other-exps)
               env
               (begin-exp-cont (cdr other-exps) env saved-cont))))
+      (try-cont (var handler-exp env saved-cont)
+        (apply-cont saved-cont val))
+      (raise-cont (saved-cont)
+        (apply-handler val saved-cont))
       (else (eopl:error "unkonw type of continuation. ~s" cont))
 )))
+
+(define apply-handler
+  (lambda (val cont)
+    (cases continuation cont
+      (try-cont (var handler-exp env saved-cont)
+        (value-of/k
+          handler-exp
+          (extend-env var (newref val) env)
+          saved-cont))
+      (end-cont ()
+        (eopl:error "uncaught exception"))
+      (zero-cont (saved-cont)
+        (apply-handler val saved-cont))
+      (let-exp-cont (var body saved-env saved-cont)
+        (apply-handler val saved-cont))
+      (if-test-cont (exp2 exp3 saved-env saved-cont)
+        (apply-handler val saved-cont))
+      (mul1-cont (exp2 env saved-cont)
+        (apply-handler val saved-cont))
+      (mul2-cont (val1 saved-cont)
+        (apply-handler val saved-cont))
+      (diff1-cont (exp2 env saved-cont)
+        (apply-handler val saved-cont))
+      (diff2-cont (val1 saved-cont)
+        (apply-handler val saved-cont))
+      (rator-cont (exp2 env saved-cont)
+        (apply-handler val saved-cont))
+      (rand-cont (env rator exps vals saved-cont)
+        (apply-handler val saved-cont))
+      (let2-cont1 (var1 var2 exp2 body env saved-cont)
+        (apply-handler val saved-cont))
+      (let2-cont2 (var1 val1 var2 body env saved-cont)
+        (apply-handler val saved-cont))
+      (let3-cont1 (var1 var2 exp2 var3 exp3 body env saved-cont)
+        (apply-handler val saved-cont))
+      (let3-cont2 (var1 val1 var2 var3 exp3 body env saved-cont)
+        (apply-handler val saved-cont))
+      (let3-cont3 (var1 val1 var2 val2 var3 body env saved-cont)
+        (apply-handler val saved-cont))
+      (cons-cont1 (exp2 env saved-cont)
+        (apply-handler val saved-cont))
+      (cons-cont2 (val1 saved-cont)
+        (apply-handler val saved-cont))
+      (car-cont (saved-cont)
+        (apply-handler val saved-cont))
+      (cdr-cont (saved-cont)
+        (apply-handler val saved-cont))
+      (null?-cont (saved-cont)
+        (apply-handler val saved-cont))
+      (list-rest-cont (exps env saved-cont)
+        (apply-handler val saved-cont))
+      (list-first-cont (val1 saved-cont)
+        (apply-handler val saved-cont))
+      (letmul-cont (vars exps body body-eval-env binding-eval-env saved-cont)
+        (apply-handler val saved-cont))
+      (set-rhs-cont (env var saved-cont)
+        (apply-handler val saved-cont))
+      (begin-exp-cont (other-exps env saved-cont)
+        (apply-handler val saved-cont))
+      (raise-cont (saved-cont)
+        (apply-handler val saved-cont)))))
 
 ; -----------------------------------------------------------------------------
 ; Interpreter
@@ -523,5 +588,9 @@
             exp-first
             env
             (begin-exp-cont other-exps env cont)))
+      (try-exp (exp1 var handler-exp)
+        (value-of/k exp1 env (try-cont var handler-exp env cont)))
+      (raise-exp (exp1)
+        (value-of/k exp1 env (raise-cont cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))

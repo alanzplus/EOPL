@@ -81,6 +81,10 @@
       (scan-parse "set a = 3")
       (a-program
         (assign-exp 'a (const-exp 3))))
+    (check-equal?
+      (scan-parse "try 3 catch (x) -(x,1)")
+      (a-program
+        (try-exp (const-exp 3) 'x (diff-exp (var-exp 'x) (const-exp 1)))))
 ))
 
 (run-tests cp-spec-test)
