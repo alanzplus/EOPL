@@ -7,6 +7,7 @@
 (provide bool-val)
 (provide proc-val)
 (provide list-val)
+(provide string-val)
 (provide expval->num)
 (provide expval->bool)
 (provide expval->proc)
@@ -41,6 +42,8 @@
     (proc proc?))
   (list-val
     (alist list?))
+  (string-val
+    (str string?))
 )
 
 ; ExpVal -> num
@@ -71,6 +74,13 @@
       (list-val (alist) alist)
       (else (eopl:error "expected list-val")))))
 
+; ExpVal -> string
+(define expval->string
+  (lambda (val)
+    (cases expval val
+      (string-val (str) str)
+      (else (eopl:error "expected string-val")))))
+
 ; -----------------------------------------------------------------------------
 ; Procedure Representation
 ; -----------------------------------------------------------------------------
@@ -85,7 +95,9 @@
   (lambda (proc1 vals cont)
     (cases proc proc1
       (procedure (vars body env)
-        (value-of/k body (extend-env-list vars (newref-list vals) env) cont)))))
+        (if (eqv? (length vars) (length vals))
+            (value-of/k body (extend-env-list vars (newref-list vals) env) cont)
+            (apply-cont (raise-cont cont) (string-val "procedure call with wrong number of arguments")))))))
 
 ; -----------------------------------------------------------------------------
 ; Store
@@ -442,8 +454,10 @@
           handler-exp
           (extend-env var (newref val) env)
           saved-cont))
+      ; for unit-testing
       (end-cont ()
-        (eopl:error "uncaught exception"))
+        (begin
+          (eopl:pretty-print "uncaught exception" ) val))
       (zero-cont (saved-cont)
         (apply-handler val saved-cont))
       (let-exp-cont (var body saved-env saved-cont)
