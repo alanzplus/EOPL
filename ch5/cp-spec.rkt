@@ -33,6 +33,7 @@
 (provide repl-ast)
 (provide try-exp)
 (provide raise-exp)
+(provide div-exp)
 
 (define identifier?
   (lambda (x)
@@ -52,6 +53,7 @@
    (expression (number) const-exp)
    (expression ("-" "(" expression "," expression ")") diff-exp)
    (expression ("*" "(" expression "," expression ")") mul-exp)
+   (expression ("/" "(" expression "," expression ")") div-exp)
    (expression ("zero?" "(" expression ")") zero?-exp)
    (expression ("if" expression "then" expression "else" expression) if-exp)
    (expression ("let" identifier "=" expression "in" expression) let-exp)

@@ -46,6 +46,9 @@
                         catch (x) x
             in ((index 5) list(2 3))")
       (num-val 99))
+    (check-equal?
+      (run "/(3,1)")
+      (num-val 3))
   ))
 
 (run-tests cp-interpreter-test)

@@ -337,6 +337,13 @@
     (cont continuation?))
   (raise-cont
     (cont continuation?))
+  (div-cont1
+    (exp2 expression?)
+    (env environment?)
+    (cont continuation?))
+  (div-cont2
+    (val1 expval?)
+    (cont continuation?))
 )
 
 (define apply-cont
@@ -443,6 +450,14 @@
         (apply-cont saved-cont val))
       (raise-cont (saved-cont)
         (apply-handler val saved-cont))
+      (div-cont1 (exp2 saved-env saved-cont)
+        (value-of/k exp2 saved-env (div-cont2 val saved-cont)))
+      (div-cont2 (val1 saved-cont)
+        (let ((num1 (expval->num val1))
+              (num2 (expval->num val)))
+             (if (eqv? num2 0)
+                 (apply-cont (raise-cont saved-cont) (string-val "division by zero"))
+                 (apply-cont saved-cont (num-val (/ num1 num2))))))
       (else (eopl:error "unkonw type of continuation. ~s" cont))
 )))
 
@@ -507,7 +522,11 @@
       (begin-exp-cont (other-exps env saved-cont)
         (apply-handler val saved-cont))
       (raise-cont (saved-cont)
-        (apply-handler val saved-cont)))))
+        (apply-handler val saved-cont))
+      (div-cont1 (exp2 saved-env saved-cont)
+        (apply-handler val saved-cont))
+      (div-cont2 (val1 saved-cont)
+        (apply-cont val saved-cont)))))
 
 ; -----------------------------------------------------------------------------
 ; Interpreter
@@ -606,5 +625,7 @@
         (value-of/k exp1 env (try-cont var handler-exp env cont)))
       (raise-exp (exp1)
         (value-of/k exp1 env (raise-cont cont)))
+      (div-exp (exp1 exp2)
+        (value-of/k exp1 env (div-cont1 exp2 env cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))
