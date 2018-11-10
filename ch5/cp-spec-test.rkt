@@ -97,6 +97,15 @@
       (scan-parse "print(a)")
       (a-program
         (print-exp (var-exp 'a))))
+    (check-equal?
+      (scan-parse "mutex()")
+      (a-program (new-mutex-exp)))
+    (check-equal?
+      (scan-parse "signal(mutex())")
+      (a-program (signal-exp (new-mutex-exp))))
+    (check-equal?
+      (scan-parse "wait(mutex())")
+      (a-program (wait-exp (new-mutex-exp))))
 ))
 
 (run-tests cp-spec-test)
