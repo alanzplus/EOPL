@@ -806,5 +806,9 @@
         (value-of/k exp1 env (wait-cont cont)))
       (signal-exp (exp1)
         (value-of/k exp1 env (signal-cont cont)))
+      (yield-exp ()
+        (place-on-ready-queue!
+          (lambda () (apply-cont cont (num-val 99))))
+        (run-next-thread))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))

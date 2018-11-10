@@ -106,6 +106,9 @@
     (check-equal?
       (scan-parse "wait(mutex())")
       (a-program (wait-exp (new-mutex-exp))))
+    (check-equal?
+      (scan-parse "yield")
+      (a-program (yield-exp)))
 ))
 
 (run-tests cp-spec-test)

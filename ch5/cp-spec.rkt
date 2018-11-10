@@ -39,6 +39,7 @@
 (provide new-mutex-exp)
 (provide wait-exp)
 (provide signal-exp)
+(provide yield-exp)
 
 (define identifier?
   (lambda (x)
@@ -83,6 +84,7 @@
    (expression ("mutex()") new-mutex-exp)
    (expression ("wait(" expression ")") wait-exp)
    (expression ("signal(" expression ")") signal-exp)
+   (expression ("yield") yield-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)
