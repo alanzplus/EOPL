@@ -49,6 +49,35 @@
     (check-equal?
       (run "/(3,1)")
       (num-val 3))
+    (check-equal?
+      (run "print(3)")
+      (num-val 3))
+    (check-equal?
+      (run "
+    let buffer = 0
+    in let producer = proc(n)
+            letrec
+              wait(k) = if zero?(k)
+                        then set buffer = n
+                        else begin
+                              print(-(k,-(0,200)));
+                              (wait -(k,1))
+                             end
+             in (wait 5)
+       in let consumer = proc(d)
+             letrec busywait(k) = if zero?(buffer)
+                                  then begin
+                                        print(-(k, -(0, 100)));
+                                        (busywait -(k, -(0, 1)))
+                                       end
+                                  else buffer
+                    in (busywait 0)
+            in begin
+                spawn(proc(d) (producer 44));
+                print(300);
+                (consumer 86)
+              end")
+      (num-val 44))
   ))
 
 (run-tests cp-interpreter-test)

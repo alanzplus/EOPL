@@ -212,12 +212,73 @@
           (extend-env
             'x (newref (num-val 10))
             (empty-env))))))
+; -----------------------------------------------------------------------------
+; FIFO Queue
+; -----------------------------------------------------------------------------
+(define enqueue
+  (lambda (queue ele)
+    (append queue (list ele))))
 
+(define dequeue
+  (lambda (queue f)
+    (f (car queue) (cdr queue))))
+
+(define empty-queue
+  (lambda ()
+    '()))
+
+(define empty?
+  (lambda (queue)
+    (null? queue)))
+
+; -----------------------------------------------------------------------------
+; Thread Scheduler
+; -----------------------------------------------------------------------------
+(define the-ready-queue 'uninitialized)
+(define the-final-answer 'uninitialized)
+(define the-max-time-slice 'uninitialized)
+(define the-time-remaining 'uninitialized)
+
+(define initialize-scheduler!
+  (lambda (ticks)
+    (set! the-ready-queue (empty-queue))
+    (set! the-final-answer 'uninitialized)
+    (set! the-max-time-slice ticks)
+    (set! the-time-remaining the-max-time-slice)))
+
+(define place-on-ready-queue!
+  (lambda (th)
+    (set! the-ready-queue
+      (enqueue the-ready-queue th))))
+
+(define run-next-thread
+  (lambda ()
+    (if (empty? the-ready-queue)
+      the-final-answer
+      (dequeue the-ready-queue
+        (lambda (first-ready-thread other-ready-threads)
+          (set! the-ready-queue other-ready-threads)
+          (set! the-time-remaining the-max-time-slice)
+          (first-ready-thread))))))
+
+(define set-final-answer!
+  (lambda (val)
+    (set! the-final-answer val)))
+
+(define time-expired?
+  (lambda ()
+    (zero? the-time-remaining)))
+
+(define decrement-timer!
+  (lambda ()
+    (set! the-time-remaining (- the-time-remaining 1))))
 ; -----------------------------------------------------------------------------
 ; Continuation
 ; -----------------------------------------------------------------------------
 (define-datatype continuation continuation?
   (end-cont)
+  (end-main-thread-cont)
+  (end-subthread-cont)
   (zero-cont
     (cont continuation?))
   (let-exp-cont
@@ -344,122 +405,150 @@
   (div-cont2
     (val1 expval?)
     (cont continuation?))
+  (spawn-cont
+    (cont continuation?))
+  (print-cont
+    (cont continuation?))
 )
 
 (define apply-cont
   (lambda (cont val)
-    (cases continuation cont
-      (end-cont ()
-        (begin
-          (eopl:printf "---------------------\n")
-          (eopl:printf "End of computation. Final answer: \n")
-          (eopl:pretty-print val)
-          (eopl:printf "---------------------\n\n")
-          val))
-      (zero-cont (saved-cont)
-        (apply-cont saved-cont
-          (bool-val (zero? (expval->num val)))))
-      (let-exp-cont (var body saved-env saved-cont)
-        (value-of/k
-          body
-          (extend-env var (newref val) saved-env)
-          saved-cont))
-      (if-test-cont (exp2 exp3 saved-env saved-cont)
-        (if (expval->bool val)
-          (value-of/k exp2 saved-env saved-cont)
-          (value-of/k exp3 saved-env saved-cont)))
-      (mul1-cont (exp2 env saved-cont)
-        (value-of/k
-          exp2
-          env
-          (mul2-cont val saved-cont)))
-      (mul2-cont (val1 saved-cont)
-        (let ((num1 (expval->num val1))
-              (num2 (expval->num val)))
-            (apply-cont saved-cont (num-val (* num1 num2)))))
-      (diff1-cont (exp2 env saved-cont)
-        (value-of/k
-          exp2
-          env
-          (diff2-cont val saved-cont)))
-      (diff2-cont (val1 saved-cont)
-        (let ((num1 (expval->num val1))
-              (num2 (expval->num val)))
-            (apply-cont saved-cont (num-val (- num1 num2)))))
-      (rator-cont (exps env saved-cont)
-        (value-of/k
-          (car exps)
-          env
-          (rand-cont env val (cdr exps) '() saved-cont)))
-      (rand-cont (env rator exps vals saved-cont)
-          (if (null? exps)
-              (apply-procedure/k (expval->proc rator) (append vals (list val)) saved-cont)
-              (value-of/k
-                (car exps)
-                env
-                (rand-cont env rator (cdr exps) (append vals (list val)) saved-cont))))
-      (let2-cont1 (var1 var2 exp2 body env saved-cont)
-        (value-of/k exp2 env (let2-cont2 var1 val var2 body env saved-cont)))
-      (let2-cont2 (var1 val1 var2 body env saved-cont)
-        (value-of/k body (extend-env var2 (newref val) (extend-env var1 (newref val1) env)) saved-cont))
-      (let3-cont1 (var1 var2 exp2 var3 exp3 body env saved-cont)
-        (value-of/k exp2 env (let3-cont2 var1 val var2 var3 exp3 body env saved-cont)))
-      (let3-cont2 (var1 val1 var2 var3 exp3 body env saved-cont)
-        (value-of/k exp3 env (let3-cont3 var1 val1 var2 val var3 body env saved-cont)))
-      (let3-cont3 (var1 val1 var2 val2 var3 body env saved-cont)
-        (value-of/k body (extend-env var3 (newref val) (extend-env var2 (newref val2) (extend-env var1 (newref val1) env))) saved-cont))
-      (cons-cont1 (exp2 env saved-cont)
-        (value-of/k exp2 env (cons-cont2 val saved-cont)))
-      (cons-cont2 (val1 saved-cont)
-        (apply-cont saved-cont (list-val (list val1 val))))
-      (car-cont (saved-cont)
-        (apply-cont saved-cont (car (expval->list val))))
-      (cdr-cont (saved-cont)
-        (apply-cont saved-cont (list-val (cdr (expval->list val)))))
-      (null?-cont (saved-cont)
-        (cases expval val
-          (list-val (alist) (apply-cont saved-cont (bool-val (null? alist))))
-          (else (eopl:error "expected list-val " val))))
-      (list-rest-cont (exps env saved-cont)
-          (value-of/k exps env (list-first-cont val saved-cont)))
-      (list-first-cont (val1 saved-cont)
-          (apply-cont saved-cont (list-val (cons val1 (expval->list val)))))
-      (letmul-cont (vars exps body body-eval-env binding-eval-env saved-cont)
-          (if (null? exps)
-              (value-of/k body (extend-env (car vars) (newref val) body-eval-env) saved-cont)
-              (value-of/k
-                (car exps)
-                binding-eval-env
-                (letmul-cont
-                  (cdr vars)
-                  (cdr exps)
-                  body
-                  (extend-env (car vars) (newref val) body-eval-env)
-                  binding-eval-env
-                  saved-cont))))
-      (set-rhs-cont (env var saved-cont)
-        (apply-cont saved-cont (setref! (apply-env env var) val)))
-      (begin-exp-cont (other-exps env saved-cont)
-        (if (null? other-exps)
-            (apply-cont saved-cont val)
+    (if (time-expired?)
+      (begin
+        (place-on-ready-queue!
+          (lambda () (apply-cont cont val)))
+        (run-next-thread))
+      (begin
+        (decrement-timer!)
+        (cases continuation cont
+          (end-cont ()
+            (begin
+              (eopl:printf "---------------------\n")
+              (eopl:printf "End of computation. Final answer: \n")
+              (eopl:pretty-print val)
+              (eopl:printf "---------------------\n\n")
+              val))
+          (zero-cont (saved-cont)
+            (apply-cont saved-cont
+              (bool-val (zero? (expval->num val)))))
+          (let-exp-cont (var body saved-env saved-cont)
             (value-of/k
-              (car other-exps)
+              body
+              (extend-env var (newref val) saved-env)
+              saved-cont))
+          (if-test-cont (exp2 exp3 saved-env saved-cont)
+            (if (expval->bool val)
+              (value-of/k exp2 saved-env saved-cont)
+              (value-of/k exp3 saved-env saved-cont)))
+          (mul1-cont (exp2 env saved-cont)
+            (value-of/k
+              exp2
               env
-              (begin-exp-cont (cdr other-exps) env saved-cont))))
-      (try-cont (var handler-exp env saved-cont)
-        (apply-cont saved-cont val))
-      (raise-cont (saved-cont)
-        (apply-handler val saved-cont))
-      (div-cont1 (exp2 saved-env saved-cont)
-        (value-of/k exp2 saved-env (div-cont2 val saved-cont)))
-      (div-cont2 (val1 saved-cont)
-        (let ((num1 (expval->num val1))
-              (num2 (expval->num val)))
-             (if (eqv? num2 0)
-                 (apply-cont (raise-cont saved-cont) (string-val "division by zero"))
-                 (apply-cont saved-cont (num-val (/ num1 num2))))))
-      (else (eopl:error "unkonw type of continuation. ~s" cont))
-)))
+              (mul2-cont val saved-cont)))
+          (mul2-cont (val1 saved-cont)
+            (let ((num1 (expval->num val1))
+                  (num2 (expval->num val)))
+                (apply-cont saved-cont (num-val (* num1 num2)))))
+          (diff1-cont (exp2 env saved-cont)
+            (value-of/k
+              exp2
+              env
+              (diff2-cont val saved-cont)))
+          (diff2-cont (val1 saved-cont)
+            (let ((num1 (expval->num val1))
+                  (num2 (expval->num val)))
+                (apply-cont saved-cont (num-val (- num1 num2)))))
+          (rator-cont (exps env saved-cont)
+            (value-of/k
+              (car exps)
+              env
+              (rand-cont env val (cdr exps) '() saved-cont)))
+          (rand-cont (env rator exps vals saved-cont)
+              (if (null? exps)
+                  (apply-procedure/k (expval->proc rator) (append vals (list val)) saved-cont)
+                  (value-of/k
+                    (car exps)
+                    env
+                    (rand-cont env rator (cdr exps) (append vals (list val)) saved-cont))))
+          (let2-cont1 (var1 var2 exp2 body env saved-cont)
+            (value-of/k exp2 env (let2-cont2 var1 val var2 body env saved-cont)))
+          (let2-cont2 (var1 val1 var2 body env saved-cont)
+            (value-of/k body (extend-env var2 (newref val) (extend-env var1 (newref val1) env)) saved-cont))
+          (let3-cont1 (var1 var2 exp2 var3 exp3 body env saved-cont)
+            (value-of/k exp2 env (let3-cont2 var1 val var2 var3 exp3 body env saved-cont)))
+          (let3-cont2 (var1 val1 var2 var3 exp3 body env saved-cont)
+            (value-of/k exp3 env (let3-cont3 var1 val1 var2 val var3 body env saved-cont)))
+          (let3-cont3 (var1 val1 var2 val2 var3 body env saved-cont)
+            (value-of/k body (extend-env var3 (newref val) (extend-env var2 (newref val2) (extend-env var1 (newref val1) env))) saved-cont))
+          (cons-cont1 (exp2 env saved-cont)
+            (value-of/k exp2 env (cons-cont2 val saved-cont)))
+          (cons-cont2 (val1 saved-cont)
+            (apply-cont saved-cont (list-val (list val1 val))))
+          (car-cont (saved-cont)
+            (apply-cont saved-cont (car (expval->list val))))
+          (cdr-cont (saved-cont)
+            (apply-cont saved-cont (list-val (cdr (expval->list val)))))
+          (null?-cont (saved-cont)
+            (cases expval val
+              (list-val (alist) (apply-cont saved-cont (bool-val (null? alist))))
+              (else (eopl:error "expected list-val " val))))
+          (list-rest-cont (exps env saved-cont)
+              (value-of/k exps env (list-first-cont val saved-cont)))
+          (list-first-cont (val1 saved-cont)
+              (apply-cont saved-cont (list-val (cons val1 (expval->list val)))))
+          (letmul-cont (vars exps body body-eval-env binding-eval-env saved-cont)
+              (if (null? exps)
+                  (value-of/k body (extend-env (car vars) (newref val) body-eval-env) saved-cont)
+                  (value-of/k
+                    (car exps)
+                    binding-eval-env
+                    (letmul-cont
+                      (cdr vars)
+                      (cdr exps)
+                      body
+                      (extend-env (car vars) (newref val) body-eval-env)
+                      binding-eval-env
+                      saved-cont))))
+          (set-rhs-cont (env var saved-cont)
+            (apply-cont saved-cont (setref! (apply-env env var) val)))
+          (begin-exp-cont (other-exps env saved-cont)
+            (if (null? other-exps)
+                (apply-cont saved-cont val)
+                (value-of/k
+                  (car other-exps)
+                  env
+                  (begin-exp-cont (cdr other-exps) env saved-cont))))
+          (try-cont (var handler-exp env saved-cont)
+            (apply-cont saved-cont val))
+          (raise-cont (saved-cont)
+            (apply-handler val saved-cont))
+          (div-cont1 (exp2 saved-env saved-cont)
+            (value-of/k exp2 saved-env (div-cont2 val saved-cont)))
+          (div-cont2 (val1 saved-cont)
+            (let ((num1 (expval->num val1))
+                  (num2 (expval->num val)))
+                (if (eqv? num2 0)
+                    (apply-cont (raise-cont saved-cont) (string-val "division by zero"))
+                    (apply-cont saved-cont (num-val (/ num1 num2))))))
+          (spawn-cont (saved-cont)
+            (let ((proc1 (expval->proc val)))
+              (place-on-ready-queue!
+                (lambda ()
+                  (apply-procedure/k
+                    proc1
+                    (list (num-val 28))
+                    (end-subthread-cont))))
+              (apply-cont saved-cont (num-val 73))))
+          (end-main-thread-cont ()
+            (set-final-answer! val)
+            (run-next-thread))
+          (end-subthread-cont ()
+            (run-next-thread))
+          (print-cont (saved-cont)
+            (begin
+              (eopl:pretty-print val)
+              (apply-cont saved-cont val)))
+          (else (eopl:error "unkonw type of continuation. ~s" cont)))))))
 
 (define apply-handler
   (lambda (val cont)
@@ -526,7 +615,17 @@
       (div-cont1 (exp2 saved-env saved-cont)
         (apply-handler val saved-cont))
       (div-cont2 (val1 saved-cont)
-        (apply-cont val saved-cont)))))
+        (apply-cont val saved-cont))
+      (spawn-cont (saved-cont)
+        (apply-cont val saved-cont))
+      (print-cont (saved-cont)
+        (apply-cont val saved-cont))
+      (end-main-thread-cont ()
+        (begin
+          (eopl:pretty-print "uncaught exception" ) val))
+      (end-subthread-cont ()
+        (begin
+          (eopl:pretty-print "uncaught exception" ) val)))))
 
 ; -----------------------------------------------------------------------------
 ; Interpreter
@@ -543,7 +642,8 @@
     (cases program pgm
       (a-program (exp1)
         (initialize-store!)
-        (value-of/k exp1 (init-env) (end-cont))))))
+        (initialize-scheduler! 10)
+        (value-of/k exp1 (init-env) (end-main-thread-cont))))))
 
 ; Expression X Environemnt x Continutation -> FinalAnswer (ExpVal)
 (define value-of/k
@@ -627,5 +727,12 @@
         (value-of/k exp1 env (raise-cont cont)))
       (div-exp (exp1 exp2)
         (value-of/k exp1 env (div-cont1 exp2 env cont)))
+      (spawn-exp (exp1)
+        (cases expression exp1
+          (proc-exp (vars body)
+            (value-of/k exp1 env (spawn-cont cont)))
+          (eles (eopl:error "expect proc exp "))))
+      (print-exp (exp1)
+        (value-of/k exp1 env (print-cont cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))

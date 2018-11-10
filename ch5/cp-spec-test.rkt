@@ -89,6 +89,14 @@
       (scan-parse "/(3,4)")
       (a-program
         (div-exp (const-exp 3) (const-exp 4))))
+    (check-equal?
+      (scan-parse "spawn(proc(x) x)")
+      (a-program
+        (spawn-exp (proc-exp (list 'x) (var-exp 'x)))))
+    (check-equal?
+      (scan-parse "print(a)")
+      (a-program
+        (print-exp (var-exp 'a))))
 ))
 
 (run-tests cp-spec-test)

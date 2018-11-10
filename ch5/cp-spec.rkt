@@ -34,6 +34,8 @@
 (provide try-exp)
 (provide raise-exp)
 (provide div-exp)
+(provide spawn-exp)
+(provide print-exp)
 
 (define identifier?
   (lambda (x)
@@ -73,6 +75,8 @@
    (expression ("set" identifier "=" expression) assign-exp)
    (expression ("try" expression "catch" "(" identifier ")" expression) try-exp)
    (expression ("raise" expression) raise-exp)
+   (expression ("spawn(" expression ")") spawn-exp)
+   (expression ("print(" expression ")") print-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)
