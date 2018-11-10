@@ -30,6 +30,7 @@
                             idx
                             (helper (+ idx 1) (cdr alst)))))))
             (helper 0 lst))))
+
 ; -----------------------------------------------------------------------------
 ; Expression Value Representation
 ; -----------------------------------------------------------------------------
@@ -44,6 +45,8 @@
     (alist list?))
   (string-val
     (str string?))
+  (mutex-val
+    (mu mutex?))
 )
 
 ; ExpVal -> num
@@ -80,6 +83,12 @@
     (cases expval val
       (string-val (str) str)
       (else (eopl:error "expected string-val")))))
+
+(define expval->mutex
+  (lambda (val)
+    (cases expval val
+      (mutex-val (mu) mu)
+      (else (eopl:error "expected mutex-val")))))
 
 ; -----------------------------------------------------------------------------
 ; Procedure Representation
@@ -272,6 +281,50 @@
 (define decrement-timer!
   (lambda ()
     (set! the-time-remaining (- the-time-remaining 1))))
+
+; -----------------------------------------------------------------------------
+; Mutex
+; -----------------------------------------------------------------------------
+(define-datatype mutex mutex?
+  (a-mutex
+    (ref-to-closed? reference?)
+    (ref-to-wait-queue reference?)))
+
+(define new-mutex
+  (lambda ()
+    (a-mutex
+      (newref #f)
+      (newref '()))))
+
+(define wait-for-mutex
+  (lambda (mt th)
+    (cases mutex mt
+      (a-mutex (ref-to-closed? ref-to-wait-queue)
+        (cond
+          ((deref ref-to-closed?)
+            (setref! ref-to-wait-queue (enqueue (deref ref-to-wait-queue) th))
+            (run-next-thread))
+          (else
+            (setref! ref-to-closed? #t)
+            (th)))))))
+
+(define signal-mutex
+  (lambda (mt th)
+    (cases mutex mt
+      (a-mutex (ref-to-closed? ref-to-wait-queue)
+        (let ((closed? (deref ref-to-closed?))
+              (wait-queue (deref ref-to-wait-queue)))
+             (if closed?
+               (if (empty? wait-queue)
+                 (setref! ref-to-closed? #f)
+                 (dequeue
+                   wait-queue
+                   (lambda (first rest)
+                     (place-on-ready-queue! first)
+                     (setref! ref-to-wait-queue rest))))
+               '())
+             (th))))))
+          
 ; -----------------------------------------------------------------------------
 ; Continuation
 ; -----------------------------------------------------------------------------
@@ -408,6 +461,10 @@
   (spawn-cont
     (cont continuation?))
   (print-cont
+    (cont continuation?))
+  (wait-cont
+    (cont continuation?))
+  (signal-cont
     (cont continuation?))
 )
 
@@ -548,6 +605,14 @@
             (begin
               (eopl:pretty-print val)
               (apply-cont saved-cont val)))
+          (wait-cont (saved-cont)
+            (wait-for-mutex
+              (expval->mutex val)
+              (lambda () (apply-cont saved-cont (num-val 52)))))
+          (signal-cont (saved-cont)
+            (signal-mutex
+              (expval->mutex val)
+              (lambda () (apply-cont saved-cont (num-val 53)))))
           (else (eopl:error "unkonw type of continuation. ~s" cont)))))))
 
 (define apply-handler
@@ -619,6 +684,10 @@
       (spawn-cont (saved-cont)
         (apply-cont val saved-cont))
       (print-cont (saved-cont)
+        (apply-cont val saved-cont))
+      (wait-cont (saved-cont)
+        (apply-cont val saved-cont))
+      (signal-cont (saved-cont)
         (apply-cont val saved-cont))
       (end-main-thread-cont ()
         (begin
@@ -728,11 +797,14 @@
       (div-exp (exp1 exp2)
         (value-of/k exp1 env (div-cont1 exp2 env cont)))
       (spawn-exp (exp1)
-        (cases expression exp1
-          (proc-exp (vars body)
-            (value-of/k exp1 env (spawn-cont cont)))
-          (eles (eopl:error "expect proc exp "))))
+        (value-of/k exp1 env (spawn-cont cont)))
       (print-exp (exp1)
         (value-of/k exp1 env (print-cont cont)))
+      (new-mutex-exp ()
+        (apply-cont cont (mutex-val (new-mutex))))
+      (wait-exp (exp1)
+        (value-of/k exp1 env (wait-cont cont)))
+      (signal-exp (exp1)
+        (value-of/k exp1 env (signal-cont cont)))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))

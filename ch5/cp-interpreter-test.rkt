@@ -57,13 +57,13 @@
     let buffer = 0
     in let producer = proc(n)
             letrec
-              wait(k) = if zero?(k)
+              wait1(k) = if zero?(k)
                         then set buffer = n
                         else begin
                               print(-(k,-(0,200)));
-                              (wait -(k,1))
+                              (wait1 -(k,1))
                              end
-             in (wait 5)
+             in (wait1 5)
        in let consumer = proc(d)
              letrec busywait(k) = if zero?(buffer)
                                   then begin
@@ -78,6 +78,24 @@
                 (consumer 86)
               end")
       (num-val 44))
+    (check-equal?
+      (run "
+    let x = 0
+    in let mut = mutex()
+    in let incr = proc(id)
+                     proc(dummy)
+                      begin
+                        wait(mut);
+                        set x = -(x, -(0, 1));
+                        print(x);
+                        signal(mut)
+                      end
+    in begin
+        spawn((incr 100));
+        spawn((incr 200));
+        spawn((incr 300))
+       end")
+     (num-val 73))
   ))
 
 (run-tests cp-interpreter-test)

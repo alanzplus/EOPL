@@ -36,6 +36,9 @@
 (provide div-exp)
 (provide spawn-exp)
 (provide print-exp)
+(provide new-mutex-exp)
+(provide wait-exp)
+(provide signal-exp)
 
 (define identifier?
   (lambda (x)
@@ -77,6 +80,9 @@
    (expression ("raise" expression) raise-exp)
    (expression ("spawn(" expression ")") spawn-exp)
    (expression ("print(" expression ")") print-exp)
+   (expression ("mutex()") new-mutex-exp)
+   (expression ("wait(" expression ")") wait-exp)
+   (expression ("signal(" expression ")") signal-exp)
   ))
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)
