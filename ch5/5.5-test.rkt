@@ -8,16 +8,19 @@
     "cp-interpreter-test"
     (check-equal?
       (run "cons(1 cons(2 3))")
-      (list-val (list (num-val 1) (list-val (list (num-val 2) (num-val 3))))))
+      (pair-val (num-val 1) (pair-val (num-val 2) (num-val 3))))
     (check-equal?
       (run "cons(1 cons(2 emptylist))")
-      (list-val (list (num-val 1) (list-val (list (num-val 2) (list-val '()))))))
+      (pair-val (num-val 1) (pair-val (num-val 2) (null-val))))
     (check-equal?
       (run "car(cons(1 cons(2 3)))")
       (num-val 1))
     (check-equal?
       (run "cdr(cons(1 cons(2 3)))")
-      (list-val (list (num-val 2) (num-val 3))))
+      (pair-val (num-val 2) (num-val 3)))
+    (check-equal?
+      (run "car(cdr(cons(1 cons(2 3))))")
+      (num-val 2))
     (check-equal?
       (run "null?(emptylist)")
       (bool-val #t))

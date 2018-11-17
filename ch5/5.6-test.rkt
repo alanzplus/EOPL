@@ -8,13 +8,21 @@
     "cp-interpreter-test"
     (check-equal?
       (run "list()")
-      (list-val '()))
+      (null-val))
     (check-equal?
       (run "list(1 2)")
-      (list-val (list (num-val 1) (num-val 2))))
+      (pair-val (num-val 1) (pair-val (num-val 2) (null-val))))
     (check-equal?
       (run "list(1 list(2 3))")
-      (list-val (list (num-val 1) (list-val (list (num-val 2) (num-val 3))))))
+      (pair-val
+        (num-val 1)
+        (pair-val
+          (pair-val
+            (num-val 2)
+            (pair-val
+              (num-val 3)
+              (null-val)))
+          (null-val))))
 ))
 
 (run-tests cp-interpreter-test)

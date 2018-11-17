@@ -6,12 +6,13 @@
 (provide num-val)
 (provide bool-val)
 (provide proc-val)
-(provide list-val)
+(provide pair-val)
+(provide null-val)
 (provide string-val)
 (provide expval->num)
 (provide expval->bool)
 (provide expval->proc)
-(provide expval->list)
+(provide expval->pair)
 (provide procedure)
 (provide apply-procedure/k)
 
@@ -41,12 +42,14 @@
     (bool boolean?))
   (proc-val
     (proc proc?))
-  (list-val
-    (alist list?))
+  (pair-val
+    (p1 expval?)
+    (p2 expval?))
   (string-val
     (str string?))
   (mutex-val
     (mu mutex?))
+  (null-val)
 )
 
 ; ExpVal -> num
@@ -70,12 +73,11 @@
       (proc-val (proc) proc)
       (else (eopl:error "expected proc-val")))))
 
-; ExpVal -> list
-(define expval->list
+(define expval->pair
   (lambda (val)
     (cases expval val
-      (list-val (alist) alist)
-      (else (eopl:error "expected list-val")))))
+      (pair-val (p1 p2) (cons p1 p2))
+      (else (eopl:error "expected pair-val")))))
 
 ; ExpVal -> string
 (define expval->string
@@ -267,7 +269,6 @@
       (dequeue the-ready-queue
         (lambda (first-ready-thread other-ready-threads)
           (set! the-ready-queue other-ready-threads)
-          (set! the-time-remaining the-max-time-slice)
           (first-ready-thread))))))
 
 (define set-final-answer!
@@ -473,7 +474,9 @@
     (if (time-expired?)
       (begin
         (place-on-ready-queue!
-          (lambda () (apply-cont cont val)))
+          (lambda ()
+            (set! the-time-remaining the-max-time-slice)
+            (apply-cont cont val)))
         (run-next-thread))
       (begin
         (decrement-timer!)
@@ -540,19 +543,19 @@
           (cons-cont1 (exp2 env saved-cont)
             (value-of/k exp2 env (cons-cont2 val saved-cont)))
           (cons-cont2 (val1 saved-cont)
-            (apply-cont saved-cont (list-val (list val1 val))))
+            (apply-cont saved-cont (pair-val val1 val)))
           (car-cont (saved-cont)
-            (apply-cont saved-cont (car (expval->list val))))
+            (apply-cont saved-cont (car (expval->pair val))))
           (cdr-cont (saved-cont)
-            (apply-cont saved-cont (list-val (cdr (expval->list val)))))
+            (apply-cont saved-cont (cdr (expval->pair val))))
           (null?-cont (saved-cont)
             (cases expval val
-              (list-val (alist) (apply-cont saved-cont (bool-val (null? alist))))
-              (else (eopl:error "expected list-val " val))))
+              (null-val () (apply-cont saved-cont (bool-val #t)))
+              (else (apply-cont saved-cont (bool-val #f)))))
           (list-rest-cont (exps env saved-cont)
               (value-of/k exps env (list-first-cont val saved-cont)))
           (list-first-cont (val1 saved-cont)
-              (apply-cont saved-cont (list-val (cons val1 (expval->list val)))))
+              (apply-cont saved-cont (pair-val val1 val))) 
           (letmul-cont (vars exps body body-eval-env binding-eval-env saved-cont)
               (if (null? exps)
                   (value-of/k body (extend-env (car vars) (newref val) body-eval-env) saved-cont)
@@ -769,10 +772,10 @@
       (null?-exp (exp1)
         (value-of/k exp1 env (null?-cont cont)))
       (emptylist-exp ()
-        (apply-cont cont (list-val '())))
+        (apply-cont cont (null-val)))
       (list-exp (exps)
         (if (null? exps)
-            (apply-cont cont (list-val '()))
+            (apply-cont cont (null-val))
             (value-of/k
               (car exps)
               env
@@ -808,7 +811,10 @@
         (value-of/k exp1 env (signal-cont cont)))
       (yield-exp ()
         (place-on-ready-queue!
-          (lambda () (apply-cont cont (num-val 99))))
+          (let ((time-remaining the-time-remaining))
+            (lambda ()
+              (set! the-time-remaining time-remaining)
+              (apply-cont cont (num-val 99)))))
         (run-next-thread))
       (else (eopl:error "cannot handle expression: ~s" exp))
 )))
