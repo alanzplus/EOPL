@@ -271,6 +271,7 @@ end
 * cp-interpreter.rkt
 
 ### TODO
+* Fix letrec grammar definition
 * 5.10.rkt
 * 5.14.rkt
 * 5.15.rkt
