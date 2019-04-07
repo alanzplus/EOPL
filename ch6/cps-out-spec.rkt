@@ -12,6 +12,11 @@
 (provide cps-letrec-exp)
 (provide cps-if-exp)
 (provide cps-call-exp)
+(provide Program)
+(provide TfExpression)
+(provide TfExpression?)
+(provide SimpleExpression)
+(provide SimpleExpression?)
 (provide scan-parse)
 (provide repl-ast)
 
