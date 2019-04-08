@@ -7,12 +7,9 @@
 ; Expression Value Representation
 ; -----------------------------------------------------------------------------
 (define-datatype expval expval?
-								 (num-val
-									 (num number?))
-								 (bool-val
-									 (bool boolean?))
-								 (proc-val
-									 (proc proc?)))
+								 (num-val (num number?))
+								 (bool-val (bool boolean?))
+								 (proc-val (proc proc?)))
 
 (define-datatype proc proc?
 								 (procedure
