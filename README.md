@@ -304,3 +304,17 @@ end
 * Add `begin` to `A` interpreter
 * Move Explicit Reference Implementation to new template
 * Move implementations of interpreter in chapter 3 to new template
+
+## Chapter 6 Continuation-Passing Style
+
+### TODO
+* 6.5 - 6.10
+* 6.15 - 6.19
+
+### Exercises
+* 6.2
+* 6.3
+* 6.11
+* 6.12
+* 6.13
+* 6.14
