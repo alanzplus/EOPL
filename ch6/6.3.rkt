@@ -17,27 +17,27 @@
 
 ;; 4. (zero? (if a (p x) (p y)))
 (if a
-    (p/k x (lambda (val1)
-             (cont (zero? val1))))
-    (p/k y (lambda (val21)
-             (cont (zero? val2)))))
+  (p/k x (lambda (val1)
+           (cont (zero? val1))))
+  (p/k y (lambda (val21)
+           (cont (zero? val2)))))
 
 ;; 5. (zero? (if (f a) (p x) (p y)))
 (f/k a (lambda (val1)
          (if val1
-             (p/k x (lambda (val2)
-                      (cont (zero? val2))))
-             (p/k y (lambda (val2)
-                      (cont (zero? val2)))))))
+           (p/k x (lambda (val2)
+                    (cont (zero? val2))))
+           (p/k y (lambda (val2)
+                    (cont (zero? val2)))))))
 
 ;; 6. (let ((x (let ((y 8)) (p y)))) x)
 (let ((y 8))
-     (p/k y (lambda (val1)
-              (let ((x val1)) (cont x)))))
+  (p/k y (lambda (val1)
+           (let ((x val1)) (cont x)))))
 
 ;; 7. (let ((x (if a (p x) (p y)))) x)
 (if a
-    (p/k x (lambda (val1)
-             (let ((x val1)) (cont x))))
-    (p/k x (lambda (val1)
-             (let ((x val1)) (cont x)))))
+  (p/k x (lambda (val1)
+           (let ((x val1)) (cont x))))
+  (p/k x (lambda (val1)
+           (let ((x val1)) (cont x)))))
