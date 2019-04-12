@@ -1,9 +1,9 @@
 #lang eopl
 
 (provide identifier?)
-(provide a-program)
-(provide const-exp)
-(provide var-exp)
+(provide cps-a-program)
+(provide cps-const-exp)
+(provide cps-var-exp)
 (provide cps-diff-exp)
 (provide cps-zero?-exp)
 (provide cps-proc-exp)
@@ -30,9 +30,9 @@
     (identifier (letter (arbno (or letter digit))) symbol)))
 
 (define grammer-spec
-  '((Program (TfExpression) a-program)
-    (SimpleExpression (identifier) var-exp)
-    (SimpleExpression (number) const-exp)
+  '((Program (TfExpression) cps-a-program)
+    (SimpleExpression (identifier) cps-var-exp)
+    (SimpleExpression (number) cps-const-exp)
     (SimpleExpression ("-" "(" SimpleExpression "," SimpleExpression ")") cps-diff-exp)
     (SimpleExpression ("zero?" "(" SimpleExpression ")") cps-zero?-exp)
     (SimpleExpression ("proc" "(" (separated-list identifier ",") ")" TfExpression) cps-proc-exp)

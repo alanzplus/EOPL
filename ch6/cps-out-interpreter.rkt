@@ -144,8 +144,8 @@
 (define value-of-simple-exp
   (lambda (exp env)
     (cases SimpleExpression exp
-           (var-exp (id) (apply-env env id))
-           (const-exp (num) (num-val num))
+           (cps-var-exp (id) (apply-env env id))
+           (cps-const-exp (num) (num-val num))
            (cps-diff-exp (simple1 simple2)
                          (let ((val1 (value-of-simple-exp simple1 env))
                                (val2 (value-of-simple-exp simple2 env)))
