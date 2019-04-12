@@ -1,6 +1,6 @@
 #lang eopl
 
-(provide identifier?)
+(provide cps-identifier?)
 (provide cps-a-program)
 (provide cps-const-exp)
 (provide cps-var-exp)
@@ -12,15 +12,15 @@
 (provide cps-letrec-exp)
 (provide cps-if-exp)
 (provide cps-call-exp)
-(provide Program)
+(provide CPSProgram)
 (provide TfExpression)
 (provide TfExpression?)
 (provide SimpleExpression)
 (provide SimpleExpression?)
-(provide scan-parse)
-(provide repl-ast)
+(provide cps-scan-parse)
+(provide cps-repl-ast)
 
-(define identifier?
+(define cps-identifier?
   (lambda (x)
     (symbol? x)))
 
@@ -30,7 +30,7 @@
     (identifier (letter (arbno (or letter digit))) symbol)))
 
 (define grammer-spec
-  '((Program (TfExpression) cps-a-program)
+  '((CPSProgram (TfExpression) cps-a-program)
     (SimpleExpression (identifier) cps-var-exp)
     (SimpleExpression (number) cps-const-exp)
     (SimpleExpression ("-" "(" SimpleExpression "," SimpleExpression ")") cps-diff-exp)
@@ -44,13 +44,13 @@
 
 (sllgen:make-define-datatypes scanner-spec grammer-spec)
 
-(define just-scan
+(define cps-just-scan
   (sllgen:make-string-scanner scanner-spec grammer-spec))
 
-(define scan-parse
+(define cps-scan-parse
   (sllgen:make-string-parser scanner-spec grammer-spec))
 
-(define repl-ast
+(define cps-repl-ast
   (sllgen:make-rep-loop
     "ƛ "
     (lambda (tree) (eopl:pretty-print tree))

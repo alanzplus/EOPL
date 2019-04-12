@@ -89,12 +89,12 @@
 ; String -> ExpVal
 (define run
   (lambda (text)
-    (value-of-program (scan-parse text))))
+    (value-of-program (cps-scan-parse text))))
 
-; Program -> ExpVal
+; CPSProgram -> ExpVal
 (define value-of-program
   (lambda (pgm)
-    (cases Program pgm
+    (cases CPSProgram pgm
            (a-program (exp1)
                       (value-of/k exp1 (empty-env) (end-cont))))))
 
