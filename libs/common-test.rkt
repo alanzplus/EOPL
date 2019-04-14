@@ -18,6 +18,9 @@
     2)
    (check-equal?
     (index-of '(a b c) 'd)
-    -1)))
+    -1)
+   (check-equal?
+     (list-index (lambda (x) (eqv? x 'z)) '(a b c))
+     #f)))
 
 (run-tests common-test)
