@@ -307,6 +307,18 @@ end
 
 ## Chapter 6 Continuation-Passing Style
 
+### Examples
+* cps-in-spec-repl.rkt
+* cps-in-spec-test.rkt
+* cps-in-spec.rkt
+* cps-out-interpreter.rkt
+* cps-out-spec-repl.rkt
+* cps-out-spec-test.rkt
+* cps-out-spec.rkt
+* cps-transform-test.rkt
+* cps-transform.rkt
+
+
 ### TODO
 * 6.5 - 6.10
 * 6.15 - 6.19
@@ -318,3 +330,4 @@ end
 * 6.12
 * 6.13
 * 6.14
+* 6.20
