@@ -4,7 +4,6 @@
 (require "cps-in-spec.rkt")
 (require "cps-out-spec.rkt")
 (require "cps-transform.rkt")
-(require rackunit "cps-in-spec.rkt")
 (require rackunit/text-ui)
 
 (define cps-transform-test

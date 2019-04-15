@@ -2,6 +2,9 @@
 
 (provide index-of)
 (provide list-index)
+(provide list-last-index)
+(provide last)
+(provide remove-last)
 
 ; Return the first idx which satifies the predicate otherwise -1 is returned
 (define find-index
@@ -29,3 +32,27 @@
            (lambda (e)
                    (eqv? e search-e))
            lst)))
+
+(define list-last-index
+  (lambda (predicate lst)
+    (let helper ([lst lst] [idx 0])
+      (if (null? lst)
+        #f
+        (let ((res (helper (cdr lst) (+ 1 idx))))
+          (if res
+            res
+            (if (predicate (car lst))
+              idx
+              #f)))))))
+
+(define last
+  (lambda (lst)
+    (cond [(null? lst) 'null]
+          [(null? (cdr lst)) (car lst)]
+          [else (last (cdr lst))])))
+
+(define remove-last
+  (lambda (lst)
+    (cond [(null? lst) 'null]
+          [(null? (cdr lst)) (list)]
+          [else (append (list (car lst)) (remove-last (cdr lst)))])))
