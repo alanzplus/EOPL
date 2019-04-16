@@ -15,6 +15,7 @@
 (provide Expression)
 (provide scan-parse)
 (provide repl-ast)
+(provide create-repl-with)
 
 (define identifier?
   (lambda (x)
@@ -50,3 +51,15 @@
     "ƛ "
     (lambda (tree) (eopl:pretty-print tree))
     (sllgen:make-stream-parser scanner-spec grammer-spec)))
+
+(define create-repl-with
+  (lambda (evaluate-callback)
+    (sllgen:make-rep-loop
+      "ƛ "
+      (lambda (tree)
+        (eopl:printf "------- Parse Tree: ------- \n")
+        (eopl:pretty-print tree)
+        (eopl:printf "\n\n")
+        (eopl:printf "------- Transformed Tree: ------- \n")
+        (eopl:pretty-print (evaluate-callback tree)))
+      (sllgen:make-stream-parser scanner-spec grammer-spec))))
