@@ -60,6 +60,5 @@
         (eopl:printf "------- Parse Tree: ------- \n")
         (eopl:pretty-print tree)
         (eopl:printf "\n\n")
-        (eopl:printf "------- Transformed Tree: ------- \n")
-        (eopl:pretty-print (evaluate-callback tree)))
+        (evaluate-callback tree))
       (sllgen:make-stream-parser scanner-spec grammer-spec))))
