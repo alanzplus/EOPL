@@ -7,9 +7,12 @@
 
 (provide cps-of-program)
 
+(define global-variable-id 0)
+
 ; Expression -> TfExpression
 (define cps-of-program
   (lambda (pgm)
+    (set! global-variable-id 0)
     (cases Program pgm
            (a-program (exp1)
                       (cps-a-program
@@ -94,9 +97,10 @@
   (lambda (exp1 exp2 exp3 cont)
     (cps-of-exps (list exp1)
                  (lambda (simples)
-                   (cps-if-exp (car simples)
-                               (cps-of-exp exp2 cont)
-                               (cps-of-exp exp3 cont))))))
+                   (cps-if-exp
+                     (car simples)
+                     (cps-of-exp exp2 cont)
+                     (cps-of-exp exp3 cont))))))
 
 ; Listof(Vars) x Listof(Listof(Var)) x Listof(Expression) x SimpleExpression -> TfExpression
 (define cps-of-letrec-exp
@@ -140,7 +144,7 @@
                  (lambda (simples)
                    (to-apply-cont-form
                      cont
-                     (car simples))))))
+                     (cps-zero?-exp (car simples)))))))
 
 ; Expression -> Bool
 (define expression-simple?
@@ -156,14 +160,13 @@
 
 ; Given a prefix and append an globally unique id to the prefix
 (define fresh-identifier
-  (let ([id 0])
     (lambda (identifier)
-      (set! id (+ id 1))
+      (set! global-variable-id (+ global-variable-id 1))
       (string->symbol
         (string-append
           (symbol->string identifier)
           "%"
-          (number->string id))))))
+          (number->string global-variable-id)))))
 
 (define list-set
     (lambda (lst n val)

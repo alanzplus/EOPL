@@ -2,6 +2,7 @@
 
 (require "../libs/common.rkt")
 (require "./cps-out-spec.rkt")
+(provide cps-out-value-of-program)
 
 ; -----------------------------------------------------------------------------
 ; Expression Value Representation
@@ -13,7 +14,7 @@
 
 (define-datatype proc proc?
                  (procedure
-                   (vars (list-of identifier?))
+                   (vars (list-of cps-identifier?))
                    (body TfExpression?)
                    (env environment?)))
 
@@ -29,7 +30,7 @@
   (lambda (val)
     (cases expval val
            (bool-val (bool) bool)
-           (else (eopl:error "expected bool-val")))))
+           (else (eopl:error "expected bool-val ~s" val)))))
 
 ; ExpVal -> Procedure
 (define expval->proc
@@ -44,12 +45,12 @@
 (define-datatype environment environment?
                  (empty-env)
                  (extend-env
-                   (vars (list-of identifier?))
+                   (vars (list-of cps-identifier?))
                    (vals (list-of expval?))
                    (env environment?))
                  (extend-env-rec
-                   (p-names (list-of identifier?))
-                   (p-varss (list-of identifier?))
+                   (p-names (list-of cps-identifier?))
+                   (p-varss (list-of cps-identifier?))
                    (p-bodies (list-of TfExpression?))
                    (env environment?)))
 
@@ -89,13 +90,13 @@
 ; String -> ExpVal
 (define run
   (lambda (text)
-    (value-of-program (cps-scan-parse text))))
+    (cps-out-value-of-program (cps-scan-parse text))))
 
 ; CPSProgram -> ExpVal
-(define value-of-program
+(define cps-out-value-of-program
   (lambda (pgm)
     (cases CPSProgram pgm
-           (a-program (exp1)
+           (cps-a-program (exp1)
                       (value-of/k exp1 (empty-env) (end-cont))))))
 
 ; TfExpression x Environment x Continutation -> FinalAnswer
@@ -147,11 +148,11 @@
            (cps-var-exp (id) (apply-env env id))
            (cps-const-exp (num) (num-val num))
            (cps-diff-exp (simple1 simple2)
-                         (let ((val1 (value-of-simple-exp simple1 env))
-                               (val2 (value-of-simple-exp simple2 env)))
+                         (let ((val1 (expval->num (value-of-simple-exp simple1 env)))
+                               (val2 (expval->num (value-of-simple-exp simple2 env))))
                            (num-val (- val1 val2))))
            (cps-zero?-exp (simple1)
                           (let ((val (value-of-simple-exp simple1 env)))
                             (bool-val (eqv? (expval->num val) 0))))
            (cps-proc-exp (vars body)
-                         (procedure vars body env)))))
+                         (proc-val (procedure vars body env))))))
