@@ -9,6 +9,7 @@
 (provide map)
 (provide append)
 (provide reverse)
+(provide fact)
 
 (define countdown
   (lambda (n)
@@ -88,3 +89,7 @@
         ['() res]
         [(list head tail ...)
          (helper tail (cons head res))]))))
+
+(define fact
+  (lambda (n)
+    (if (eqv? 0 n) 1 (* n (fact (- n 1))))))

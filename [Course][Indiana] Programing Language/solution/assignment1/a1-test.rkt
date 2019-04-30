@@ -35,6 +35,9 @@
                 (test-equal? "example1" (append '(a b c) '(1 2 3)) '(a b c 1 2 3)))
     (test-suite "reverse"
                 (test-equal? "example1" (reverse '(a 3 x)) '(x 3 a)))
+    (test-suite "fact"
+                (test-equal? "example1" (fact 0) 1)
+                (test-equal? "example2" (fact 5) 120))
 ))
 
 (run-tests tests)
