@@ -33,6 +33,8 @@
                 (test-equal? "example1" (map add1 '(1 2 3 4)) '(2 3 4 5)))
     (test-suite "append"
                 (test-equal? "example1" (append '(a b c) '(1 2 3)) '(a b c 1 2 3)))
+    (test-suite "reverse"
+                (test-equal? "example1" (reverse '(a 3 x)) '(x 3 a)))
 ))
 
 (run-tests tests)

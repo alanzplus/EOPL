@@ -8,6 +8,7 @@
 (provide zip)
 (provide map)
 (provide append)
+(provide reverse)
 
 (define countdown
   (lambda (n)
@@ -77,3 +78,13 @@
             [(list head tail ...)
              (cons head (helper tail))]
             ['() lst2]))])))
+
+(define reverse
+  (lambda (lst)
+    (let helper
+      ([lst lst]
+       [res '()])
+      (match lst
+        ['() res]
+        [(list head tail ...)
+         (helper tail (cons head res))]))))
