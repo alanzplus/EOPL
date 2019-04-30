@@ -56,6 +56,8 @@
     (test-suite "div"
                 (test-equal? "example1" (div 25 5) 5)
                 (test-equal? "example2" (div 36 6) 6))
+    (test-suite "append-map"
+                (test-equal? "example1" (append-map countdown (countdown 5)) '(5 4 3 2 1 0 4 3 2 1 0 3 2 1 0 2 1 0 1 0 0)))
 ))
 
 (run-tests tests)

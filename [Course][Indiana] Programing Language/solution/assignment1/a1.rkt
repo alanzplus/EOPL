@@ -14,6 +14,7 @@
 (provide binary->natural)
 (provide minus)
 (provide div)
+(provide append-map)
 
 (define countdown
   (lambda (n)
@@ -130,3 +131,10 @@
       (if (eqv? n1 0)
         res
         (helper (- n1 n2) (+ 1 res))))))
+
+(define append-map
+  (lambda (f lst)
+    (match lst
+      ['() '()]
+      [(list head tail ...)
+       (append (f head) (append-map f tail))])))
