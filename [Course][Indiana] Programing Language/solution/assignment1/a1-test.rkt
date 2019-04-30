@@ -43,6 +43,13 @@
                 (test-equal? "example2" (fib 1) 1)
                 (test-equal? "example2" (fib 2) 1)
                 (test-equal? "example3" (fib 7) 13))
+    (test-suite "binary->natural"
+                (test-equal? "example1" (binary->natural '()) 0)
+                (test-equal? "example2" (binary->natural '(0 0 1)) 4)
+                (test-equal? "example3" (binary->natural '(0 0 1 1)) 12)
+                (test-equal? "example4" (binary->natural '(1 1 1 1)) 15)
+                (test-equal? "example5" (binary->natural '(1 0 1 0 1)) 21)
+                (test-equal? "example6" (binary->natural '(1 1 1 1 1 1 1 1 1 1 1 1 1)) 8191))
 ))
 
 (run-tests tests)

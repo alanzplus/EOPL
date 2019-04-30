@@ -11,6 +11,7 @@
 (provide reverse)
 (provide fact)
 (provide fib)
+(provide binary->natural)
 
 (define countdown
   (lambda (n)
@@ -101,3 +102,14 @@
       [(eqv? n 0) 0]
       [(eqv? n 1) 1]
       [else (+ (fib (- n 1)) (fib (- n 2)))])))
+
+(define binary->natural
+  (lambda (lst)
+    (let helper
+      ([lst lst]
+       [p 1]
+       [res 0])
+      (match lst
+        ['() res]
+        [(list head tail ...)
+         (helper tail (* p 2) (+ res (* p head)))]))))
