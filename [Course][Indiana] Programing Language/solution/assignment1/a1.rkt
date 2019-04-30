@@ -18,6 +18,16 @@
 (provide set-difference)
 (provide powerset)
 (provide cartesian-product)
+(provide insertR-fr)
+(provide filter-fr)
+(provide map-fr)
+(provide append-fr)
+(provide reverse-fr)
+(provide binary->natural-fr)
+(provide append-map-fr)
+(provide set-difference-fr)
+(provide powerset-fr)
+(provide cartesian-product-fr)
 
 (define countdown
   (lambda (n)
@@ -164,3 +174,86 @@
        (append
          (map (lambda (ele) (cons head (cons ele '()))) l2)
          (cartesian-product tail l2))])))
+
+(define insertR-fr
+  (lambda (s1 s2 lst)
+    (foldr
+      (lambda (ele res)
+        (if (eqv? s1 ele)
+          (cons s1 (cons s2 res))
+          (cons ele res)))
+      '() lst)))
+
+(define filter-fr
+  (lambda (pred lst)
+    (foldr
+      (lambda (ele res)
+        (if (pred ele)
+          (cons ele res)
+          res))
+      '() lst)))
+
+(define map-fr
+  (lambda (f lst)
+    (foldr
+      (lambda (ele res) (cons (f ele) res))
+      '() lst)))
+(define append-fr
+  (lambda (l1 l2)
+    (foldr
+      (lambda (ele res) (cons ele res))
+      l2 l1)))
+
+(define reverse-fr
+  (lambda (lst)
+    (foldr
+      (lambda (ele res) (append res (list ele)))
+      '()
+      lst)))
+
+(define binary->natural-fr
+  (lambda (lst)
+    (foldr
+      (lambda (ele res)
+        (+ ele (* 2 res)))
+      0
+      lst)))
+
+(define append-map-fr
+  (lambda (f lst)
+    (foldr
+      (lambda (ele res)
+        (append (f ele) res))
+      '()
+      lst)))
+
+(define set-difference-fr
+  (lambda (s1 s2)
+    (foldr
+      (lambda (ele res)
+        (if (not (index-of s2 ele))
+          (cons ele res)
+          res))
+      '()
+      s1)))
+
+(define powerset-fr
+  (lambda (lst)
+    (foldr
+      (lambda (ele res)
+        (append
+          (map (lambda (e)
+                 (cons ele e)) res)
+          res))
+      '(())
+      lst)))
+
+(define cartesian-product-fr
+  (lambda (l1 l2)
+    (foldr
+      (lambda (ele res)
+        (append
+          (map (lambda (e) (cons ele (cons e '()))) l2)
+          res))
+      '()
+      l1)))
