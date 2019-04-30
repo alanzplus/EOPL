@@ -94,6 +94,10 @@
                 (test-equal? "example1" (cartesian-product '(5 4) '(3 2 1)) '((5 3) (5 2) (5 1) (4 3) (4 2) (4 1))))
     (test-suite "cartesian-product-fr"
                 (test-equal? "example1" (cartesian-product-fr '(5 4) '(3 2 1)) '((5 3) (5 2) (5 1) (4 3) (4 2) (4 1))))
+    (test-suite "collatz"
+                (test-equal? "example1" (collatz 12) 1)
+                (test-equal? "example2" (collatz 120) 1)
+                (test-equal? "example3" (collatz 9999) 1))
 ))
 
 (run-tests tests)

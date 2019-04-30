@@ -28,6 +28,7 @@
 (provide set-difference-fr)
 (provide powerset-fr)
 (provide cartesian-product-fr)
+(provide collatz)
 
 (define countdown
   (lambda (n)
@@ -257,3 +258,28 @@
           res))
       '()
       l1)))
+
+(define collatz
+  (letrec
+    ((odd-case
+       (lambda (recur)
+         (lambda (x)
+           (cond 
+             ((and (positive? x) (odd? x)) (collatz (add1 (* x 3)))) 
+             (else (recur x))))))
+     (even-case
+       (lambda (recur)
+         (lambda (x)
+           (cond 
+             ((and (positive? x) (even? x)) (collatz (/ x 2))) 
+             (else (recur x))))))
+     (one-case
+       (lambda (recur)
+         (lambda (x)
+           (cond
+             ((zero? (sub1 x)) 1)
+             (else (recur x))))))
+     (base
+       (lambda (x)
+         (error 'error "Invalid value ~s~n" x))))
+    (one-case (odd-case (even-case base)))))
