@@ -16,6 +16,7 @@
 (provide div)
 (provide append-map)
 (provide set-difference)
+(provide powerset)
 
 (define countdown
   (lambda (n)
@@ -143,3 +144,13 @@
 (define set-difference
   (lambda (s1 s2)
     (filter (lambda (ele) (not (index-of s2 ele))) s1)))
+
+(define powerset
+  (lambda (lst)
+    (match lst
+      ['() (list '())]
+      [(list head tail ...)
+       (let [(res (powerset tail))]
+         (append
+           res
+           (map (lambda (ele) (cons head ele)) res)))])))

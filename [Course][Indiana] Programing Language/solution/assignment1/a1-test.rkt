@@ -60,6 +60,9 @@
                 (test-equal? "example1" (append-map countdown (countdown 5)) '(5 4 3 2 1 0 4 3 2 1 0 3 2 1 0 2 1 0 1 0 0)))
     (test-suite "set-difference"
                 (test-equal? "example1" (set-difference '(1 2 3 4 5) '(2 4 6 8)) '(1 3 5)))
+    (test-suite "powerset"
+                (test-equal? "example1" (powerset '(3 2 1)) '(() (1) (2) (2 1) (3) (3 1) (3 2) (3 2 1)))
+                (test-equal? "example2" (powerset '()) '(())))
 ))
 
 (run-tests tests)
