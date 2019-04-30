@@ -58,6 +58,8 @@
                 (test-equal? "example2" (div 36 6) 6))
     (test-suite "append-map"
                 (test-equal? "example1" (append-map countdown (countdown 5)) '(5 4 3 2 1 0 4 3 2 1 0 3 2 1 0 2 1 0 1 0 0)))
+    (test-suite "set-difference"
+                (test-equal? "example1" (set-difference '(1 2 3 4 5) '(2 4 6 8)) '(1 3 5)))
 ))
 
 (run-tests tests)

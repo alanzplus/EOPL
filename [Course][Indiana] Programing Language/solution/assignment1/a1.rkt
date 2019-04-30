@@ -15,6 +15,7 @@
 (provide minus)
 (provide div)
 (provide append-map)
+(provide set-difference)
 
 (define countdown
   (lambda (n)
@@ -138,3 +139,7 @@
       ['() '()]
       [(list head tail ...)
        (append (f head) (append-map f tail))])))
+
+(define set-difference
+  (lambda (s1 s2)
+    (filter (lambda (ele) (not (index-of s2 ele))) s1)))
