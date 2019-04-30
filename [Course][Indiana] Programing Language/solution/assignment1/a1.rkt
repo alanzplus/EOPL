@@ -10,6 +10,7 @@
 (provide append)
 (provide reverse)
 (provide fact)
+(provide fib)
 
 (define countdown
   (lambda (n)
@@ -93,3 +94,10 @@
 (define fact
   (lambda (n)
     (if (eqv? 0 n) 1 (* n (fact (- n 1))))))
+
+(define fib
+  (lambda (n)
+    (cond
+      [(eqv? n 0) 0]
+      [(eqv? n 1) 1]
+      [else (+ (fib (- n 1)) (fib (- n 2)))])))

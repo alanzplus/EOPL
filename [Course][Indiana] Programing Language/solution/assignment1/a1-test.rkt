@@ -38,6 +38,11 @@
     (test-suite "fact"
                 (test-equal? "example1" (fact 0) 1)
                 (test-equal? "example2" (fact 5) 120))
+    (test-suite "fib"
+                (test-equal? "example1" (fib 0) 0)
+                (test-equal? "example2" (fib 1) 1)
+                (test-equal? "example2" (fib 2) 1)
+                (test-equal? "example3" (fib 7) 13))
 ))
 
 (run-tests tests)
