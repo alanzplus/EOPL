@@ -17,6 +17,7 @@
 (provide append-map)
 (provide set-difference)
 (provide powerset)
+(provide cartesian-product)
 
 (define countdown
   (lambda (n)
@@ -154,3 +155,12 @@
          (append
            res
            (map (lambda (ele) (cons head ele)) res)))])))
+
+(define cartesian-product
+  (lambda (l1 l2)
+    (match l1
+      ['() '()]
+      [(list head tail ...)
+       (append
+         (map (lambda (ele) (cons head (cons ele '()))) l2)
+         (cartesian-product tail l2))])))

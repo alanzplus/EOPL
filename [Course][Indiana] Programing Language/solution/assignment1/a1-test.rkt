@@ -63,6 +63,8 @@
     (test-suite "powerset"
                 (test-equal? "example1" (powerset '(3 2 1)) '(() (1) (2) (2 1) (3) (3 1) (3 2) (3 2 1)))
                 (test-equal? "example2" (powerset '()) '(())))
+    (test-suite "cartesian-product"
+                (test-equal? "example1" (cartesian-product '(5 4) '(3 2 1)) '((5 3) (5 2) (5 1) (4 3) (4 2) (4 1))))
 ))
 
 (run-tests tests)
