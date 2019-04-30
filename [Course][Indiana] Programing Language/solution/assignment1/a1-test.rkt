@@ -50,6 +50,9 @@
                 (test-equal? "example4" (binary->natural '(1 1 1 1)) 15)
                 (test-equal? "example5" (binary->natural '(1 0 1 0 1)) 21)
                 (test-equal? "example6" (binary->natural '(1 1 1 1 1 1 1 1 1 1 1 1 1)) 8191))
+    (test-suite "minus"
+                (test-equal? "example1" (minus 5 3) 2)
+                (test-equal? "example2" (minus 100 50) 50))
 ))
 
 (run-tests tests)

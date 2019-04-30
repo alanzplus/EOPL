@@ -12,6 +12,7 @@
 (provide fact)
 (provide fib)
 (provide binary->natural)
+(provide minus)
 
 (define countdown
   (lambda (n)
@@ -113,3 +114,9 @@
         ['() res]
         [(list head tail ...)
          (helper tail (* p 2) (+ res (* p head)))]))))
+
+(define minus
+  (lambda (n1 n2)
+    (if (eqv? n2 0)
+      n1
+      (minus (- n1 1) (- n2 1)))))
