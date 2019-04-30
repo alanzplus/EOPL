@@ -29,6 +29,8 @@
                 (test-equal? "example1" (zip '(1 2 3) '(a b c)) '((1 . a) (2 . b) (3 . c)))
                 (test-equal? "example2" (zip '(1 2 3 4 5 6) '(a b c)) '((1 . a) (2 . b) (3 . c)))
                 (test-equal? "example3" (zip '(1 2 3) '(a b c d e f)) '((1 . a) (2 . b) (3 . c))))
+    (test-suite "map"
+                (test-equal? "example1" (map add1 '(1 2 3 4)) '(2 3 4 5)))
 ))
 
 (run-tests tests)

@@ -6,6 +6,7 @@
 (provide list-index-ofv?)
 (provide filter)
 (provide zip)
+(provide map)
 
 (define countdown
   (lambda (n)
@@ -55,3 +56,10 @@
     (match* (lst1 lst2)
       [([list h1 t1 ...] [list h2 t2 ...]) (cons (cons h1 h2) (zip t1 t2))]
       [(_ _) '()])))
+
+(define map
+  (lambda (f lst)
+    (match lst
+      [(list head tail ...)
+       (cons (f head) (map f tail))]
+      ['() '()])))
