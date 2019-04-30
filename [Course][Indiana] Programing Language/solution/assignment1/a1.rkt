@@ -7,6 +7,7 @@
 (provide filter)
 (provide zip)
 (provide map)
+(provide append)
 
 (define countdown
   (lambda (n)
@@ -63,3 +64,16 @@
       [(list head tail ...)
        (cons (f head) (map f tail))]
       ['() '()])))
+
+(define append
+  (lambda (lst1 lst2)
+    (cond
+      [(null? lst1) lst2]
+      [(null? lst2) lst1]
+      [else
+        (let helper
+          ([lst lst1])
+          (match lst
+            [(list head tail ...)
+             (cons head (helper tail))]
+            ['() lst2]))])))
