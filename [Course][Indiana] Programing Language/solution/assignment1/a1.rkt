@@ -5,6 +5,7 @@
 (provide remv-1st)
 (provide list-index-ofv?)
 (provide filter)
+(provide zip)
 
 (define countdown
   (lambda (n)
@@ -48,3 +49,9 @@
        (if (pred head)
          (cons head (filter pred tail))
          (filter pred tail))])))
+
+(define zip
+  (lambda (lst1 lst2)
+    (match* (lst1 lst2)
+      [([list h1 t1 ...] [list h2 t2 ...]) (cons (cons h1 h2) (zip t1 t2))]
+      [(_ _) '()])))
