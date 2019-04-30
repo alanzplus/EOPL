@@ -53,6 +53,9 @@
     (test-suite "minus"
                 (test-equal? "example1" (minus 5 3) 2)
                 (test-equal? "example2" (minus 100 50) 50))
+    (test-suite "div"
+                (test-equal? "example1" (div 25 5) 5)
+                (test-equal? "example2" (div 36 6) 6))
 ))
 
 (run-tests tests)

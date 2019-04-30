@@ -13,6 +13,7 @@
 (provide fib)
 (provide binary->natural)
 (provide minus)
+(provide div)
 
 (define countdown
   (lambda (n)
@@ -120,3 +121,12 @@
     (if (eqv? n2 0)
       n1
       (minus (- n1 1) (- n2 1)))))
+
+(define div
+  (lambda (n1 n2)
+    (let helper
+      ([n1 n1]
+       [res 0])
+      (if (eqv? n1 0)
+        res
+        (helper (- n1 n2) (+ 1 res))))))
