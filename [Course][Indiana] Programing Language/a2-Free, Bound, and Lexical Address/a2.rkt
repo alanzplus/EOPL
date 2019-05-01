@@ -2,6 +2,7 @@
 
 (provide list-ref)
 (provide union)
+(provide extend)
 
 (define list-ref
   (lambda (ls n)
@@ -22,3 +23,8 @@
           (cons e res)))
       l1
       l2)))
+
+(define extend
+  (lambda (v pred)
+    (lambda (x)
+      (or (eqv? v x) (pred x)))))
