@@ -6,6 +6,7 @@
 (provide walk-symbol)
 (provide lambda->lumbda)
 (provide var-occurs?)
+(provide vars)
 
 (define list-ref
   (lambda (ls n)
@@ -49,8 +50,9 @@
 
 (define (lambda->lumbda expr)
   (match expr
-    [`(lambda (,id) ,body) `(lumda (,id) ,body)]
-    [e e]))
+    [`(lambda (,id) ,body) `(lumbda (,id) ,(lambda->lumbda body))]
+    [`(,exp1 ,exp2) `(,(lambda->lumbda exp1) ,(lambda->lumbda exp2))]
+    [`,id id]))
 
 (define var-occurs?
   (lambda (var expr)
@@ -60,3 +62,10 @@
       [`(,exp1 ,exp2)
         (or (var-occurs? var exp1) (var-occurs? var exp2))]
       [`,id (eqv? id var)])))
+
+(define (vars expr)
+  (match expr
+      [`(lambda (,id) ,body) (vars body)]
+      [`(,exp1 ,exp2) (append (vars exp1) (vars exp2))]
+      [`,id (list id)]))
+
