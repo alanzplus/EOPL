@@ -8,6 +8,7 @@
 (provide var-occurs?)
 (provide vars)
 (provide unique-vars)
+(provide var-occurs-free?)
 
 (define list-ref
   (lambda (ls n)
@@ -75,3 +76,12 @@
       [`(lambda (,id) ,body) (unique-vars body)]
       [`(,exp1 ,exp2) (union (unique-vars exp1) (unique-vars exp2))]
       [`,id (list id)]))
+
+(define var-occurs-free?
+  (lambda (var expr)
+    (match expr
+      [`(lambda (,id) ,body)
+        (and (not (eqv? id var)) (var-occurs-free? var body))]
+      [`(,exp1 ,exp2)
+        (or (var-occurs-free? var exp1) (var-occurs-free? var exp2))]
+      [`,id (eqv? id var)])))
