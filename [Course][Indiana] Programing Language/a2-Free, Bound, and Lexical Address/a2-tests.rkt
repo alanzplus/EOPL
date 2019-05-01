@@ -36,6 +36,12 @@
                 (test-suite "case4" (lambda->lumbda '(lambda (lambda) lambda)) '(lumbda (lambda) lambda))
                 (test-suite "case5" (lambda->lumbda '((lambda (lambda) lambda) (lambda (y) y))) '((lumbda (lambda) lambda) (lumbda (y) y)))
                 (test-suite "case6" (lambda->lumbda '((lambda (x) x) (lambda (x) x))) '((lumbda (x) x) (lumbda (x) x))))
+    (test-suite "var-occurs"
+                (test-suite "case1" (var-occurs? 'x 'x) #t)
+                (test-suite "case2" (var-occurs? 'x '(lambda (x) y)) #f)
+                (test-suite "case3" (var-occurs? 'x '(lambda (y) x)) #t)
+                (test-suite "case4" (var-occurs? 'x '((z y) x)) #t)
+                (test-suite "case5" (var-occurs? 'x '(lambda (x) x)) #t))
 ))
 
 (run-tests tests)

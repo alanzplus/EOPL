@@ -5,6 +5,7 @@
 (provide extend)
 (provide walk-symbol)
 (provide lambda->lumbda)
+(provide var-occurs?)
 
 (define list-ref
   (lambda (ls n)
@@ -50,3 +51,12 @@
   (match expr
     [`(lambda (,id) ,body) `(lumda (,id) ,body)]
     [e e]))
+
+(define var-occurs?
+  (lambda (var expr)
+    (match expr
+      [`(lambda (,id) ,body)
+        (var-occurs? var body)]
+      [`(,exp1 ,exp2)
+        (or (var-occurs? var exp1) (var-occurs? var exp2))]
+      [`,id (eqv? id var)])))
