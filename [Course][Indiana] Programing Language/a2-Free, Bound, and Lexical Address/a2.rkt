@@ -3,6 +3,7 @@
 (provide list-ref)
 (provide union)
 (provide extend)
+(provide walk-symbol)
 
 (define list-ref
   (lambda (ls n)
@@ -28,3 +29,23 @@
   (lambda (v pred)
     (lambda (x)
       (or (eqv? v x) (pred x)))))
+
+(define walk-symbol
+  (lambda (s lst)
+    (let helper
+      ([sym s]
+       [l lst])
+      (match l
+        ['() sym]
+        [(list head tail ...)
+         (let
+           [(t (car head))
+            (v (cdr head))]
+           (if (eqv? t sym)
+             (if (symbol? v) (helper v lst) v)
+             (helper sym tail)))]))))
+
+
+
+
+

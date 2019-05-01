@@ -21,6 +21,14 @@
                 (test-equal? "case5" (filter (extend 1 even?) '(0 1 2 3 4 5)) '(0 1 2 4))
                 (test-equal? "case6" (filter (extend 3 (extend 1 even?)) '(0 1 2 3 4 5)) '(0 1 2 3 4))
                 (test-equal? "case7" (filter (extend 7 (extend 3 (extend 1 even?))) '(0 1 2 3 4 5)) '(0 1 2 3 4)))
+    (test-suite "walk-symbol"
+                (test-equal? "case1" (walk-symbol 'a '((a . 5))) 5)
+                (test-equal? "case2" (walk-symbol 'a '((b . c) (a . b))) 'c)
+                (test-equal? "case3" (walk-symbol 'a '((a . 5) (b . 6) (c . a))) 5)
+                (test-equal? "case4" (walk-symbol 'c '((a . 5) (b . (a . c)) (c . a))) 5)
+                (test-equal? "case5" (walk-symbol 'b '((a . 5) (b . ((c . a))) (c . a))) '((c . a)))
+                (test-equal? "case6" (walk-symbol 'd '((a . 5) (b . (1 2)) (c . a) (e . c) (d . e))) 5)
+                (test-equal? "case7" (walk-symbol 'd '((a . 5) (b . 6) (c . f) (e . c) (d . e))) 'f))
 ))
 
 (run-tests tests)
