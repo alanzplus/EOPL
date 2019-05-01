@@ -4,6 +4,7 @@
 (provide union)
 (provide extend)
 (provide walk-symbol)
+(provide lambda->lumbda)
 
 (define list-ref
   (lambda (ls n)
@@ -45,7 +46,7 @@
              (if (symbol? v) (helper v lst) v)
              (helper sym tail)))]))))
 
-
-
-
-
+(define (lambda->lumbda expr)
+  (match expr
+    [`(lambda (,id) ,body) `(lumda (,id) ,body)]
+    [e e]))

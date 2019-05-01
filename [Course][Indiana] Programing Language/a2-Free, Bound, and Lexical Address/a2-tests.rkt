@@ -29,6 +29,13 @@
                 (test-equal? "case5" (walk-symbol 'b '((a . 5) (b . ((c . a))) (c . a))) '((c . a)))
                 (test-equal? "case6" (walk-symbol 'd '((a . 5) (b . (1 2)) (c . a) (e . c) (d . e))) 5)
                 (test-equal? "case7" (walk-symbol 'd '((a . 5) (b . 6) (c . f) (e . c) (d . e))) 'f))
+    (test-suite "lambda->lumbda"
+                (test-suite "case1" (lambda->lumbda 'x) 'x)
+                (test-suite "case2" (lambda->lumbda '(lambda (x) x)) '(lumbda (x) x))
+                (test-suite "case3" (lambda->lumbda '(lambda (z) ((lambda (y) (a z)) (h (lambda (x) (h a)))))) '(lumbda (z) ((lumbda (y) (a z)) (h (lumbda (x) (h a))))))
+                (test-suite "case4" (lambda->lumbda '(lambda (lambda) lambda)) '(lumbda (lambda) lambda))
+                (test-suite "case5" (lambda->lumbda '((lambda (lambda) lambda) (lambda (y) y))) '((lumbda (lambda) lambda) (lumbda (y) y)))
+                (test-suite "case6" (lambda->lumbda '((lambda (x) x) (lambda (x) x))) '((lumbda (x) x) (lumbda (x) x))))
 ))
 
 (run-tests tests)
