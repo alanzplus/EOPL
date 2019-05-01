@@ -7,6 +7,7 @@
 (provide lambda->lumbda)
 (provide var-occurs?)
 (provide vars)
+(provide unique-vars)
 
 (define list-ref
   (lambda (ls n)
@@ -69,3 +70,8 @@
       [`(,exp1 ,exp2) (append (vars exp1) (vars exp2))]
       [`,id (list id)]))
 
+(define (unique-vars expr)
+  (match expr
+      [`(lambda (,id) ,body) (unique-vars body)]
+      [`(,exp1 ,exp2) (union (unique-vars exp1) (unique-vars exp2))]
+      [`,id (list id)]))

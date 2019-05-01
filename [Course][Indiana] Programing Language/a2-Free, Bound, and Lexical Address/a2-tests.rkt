@@ -47,7 +47,10 @@
                 (test-equal? "case1" (vars '(lambda (x) x)) '(x))
                 (test-equal? "case1" (vars '((lambda (y) (x x)) (x y))) '(x x x y))
                 (test-equal? "case1" (vars '(lambda (z) ((lambda (y) (a z)) (h (lambda (x) (h a)))))) '(a z h h a)))
-
+    (test-suite "vars-unique"
+                (test-equal? "case1" (unique-vars '((lambda (y) (x x)) (x y))) '(y x))
+                (test-equal? "case1" (unique-vars '((lambda (z) (lambda (y) (z y))) x)) '(x y z))
+                (test-equal? "case1" (unique-vars '((lambda (a) (a b)) ((lambda (c) (a c)) (b a)))) '(c b a)))
 ))
 
 (run-tests tests)
