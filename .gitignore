@@ -1,3 +1,4 @@
 .idea
 *.iml
 .ssh-agent
+.DS_Store
