@@ -72,6 +72,14 @@
                 (test-equal? "case1" (unique-free-vars 'x) '(x))
                 (test-equal? "case2" (unique-free-vars '(lambda (x) (x y))) '(y))
                 (test-equal? "case3" (unique-free-vars '((lambda (x) ((x y) e)) (lambda (c) (x (lambda (x) (x (e c))))))) '(x e y)))
+    (test-suite "unique-bound-vars"
+                (test-equal? "case1" (unique-bound-vars 'x) '())
+                (test-equal? "case2" (unique-bound-vars '(lambda (x) y)) '())
+                (test-equal? "case3" (unique-bound-vars '(lambda (x) (x y))) '(x))
+                (test-equal? "case4" (unique-bound-vars '((lambda (x) ((x y) e)) (lambda (c) (x (lambda (x) (x (e c))))))) '(c x))
+                (test-equal? "case5" (unique-bound-vars '(lambda (y) y)) '(y))
+                (test-equal? "case6" (unique-bound-vars '(lambda (x) (y z))) '())
+                (test-equal? "case7" (unique-bound-vars '(lambda (x) (lambda (x) x))) '(x)))
 ))
 
 (run-tests tests)

@@ -11,6 +11,7 @@
 (provide var-occurs-free?)
 (provide var-occurs-bound?)
 (provide unique-free-vars)
+(provide unique-bound-vars)
 
 (define list-ref
   (lambda (ls n)
@@ -113,5 +114,19 @@
         (union (helper exp1 fps) (helper exp2 fps))]
       [`,id
         (if (not (memv id fps))
+          (list id)
+          '())])))
+
+(define (unique-bound-vars expr)
+  (let helper
+    [(expr expr)
+     (fps '())]
+    (match expr
+      [`(lambda (,id) ,body)
+        (helper body (cons id fps))]
+      [`(,exp1 ,exp2)
+        (union (helper exp1 fps) (helper exp2 fps))]
+      [`,id
+        (if (memv id fps)
           (list id)
           '())])))
