@@ -39,21 +39,21 @@ See [a1.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndian
 ### Assignment 2
 See [a2.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndiana%5D%20Programing%20Language/a2-Free%2C%20Bound%2C%20and%20Lexical%20Address/a2.rkt)
 
-* [DONE] provide list-ref
-* [DONE] provide union
-* [DONE] provide extend
-* [DONE] provide walk-symbol
-* [DONE] provide lambda->lumbda
-* [DONE] provide var-occurs?
-* [DONE] provide vars
-* [DONE] provide unique-vars
-* [DONE] provide var-occurs-free?
-* [DONE] provide var-occurs-bound?
-* [DONE] provide unique-free-vars
-* [DONE] provide unique-bound-vars
-* [DONE] provide lex
-* [DONE] provide walk-symbol-update
-* [DONE] provide var-occurs-both?
+* [DONE] list-ref
+* [DONE] union
+* [DONE] extend
+* [DONE] walk-symbol
+* [DONE] lambda->lumbda
+* [DONE] var-occurs?
+* [DONE] vars
+* [DONE] unique-vars
+* [DONE] var-occurs-free?
+* [DONE] var-occurs-bound?
+* [DONE] unique-free-vars
+* [DONE] unique-bound-vars
+* [DONE] lex
+* [DONE] walk-symbol-update
+* [DONE] var-occurs-both?
 
 ## EOPL
 
