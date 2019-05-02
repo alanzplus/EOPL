@@ -80,6 +80,60 @@
                 (test-equal? "case5" (unique-bound-vars '(lambda (y) y)) '(y))
                 (test-equal? "case6" (unique-bound-vars '(lambda (x) (y z))) '())
                 (test-equal? "case7" (unique-bound-vars '(lambda (x) (lambda (x) x))) '(x)))
+    (test-suite "lex"
+                (test-equal? "case1" (lex '(lambda (x) x) '()) '(lambda (var 0)))
+                (test-equal? "case2" (lex '(lambda (y) (lambda (x) y)) '()) '(lambda (lambda (var 1))))
+                (test-equal? "case3" (lex '(lambda (y) (lambda (x) (x y))) '()) '(lambda (lambda ((var 0) (var 1)))))
+                (test-equal? "case4" (lex '(lambda (x) (lambda (x) (x x))) '()) '(lambda (lambda ((var 0) (var 0)))))
+                (test-equal? "case5" (lex '(lambda (y) ((lambda (x) (x y)) (lambda (c) (lambda (d) (y c))))) '()) '(lambda ((lambda ((var 0) (var 1))) (lambda (lambda ((var 2) (var 1)))))))
+                (test-equal? "case6"
+                             (lex '(lambda (a)
+                                     (lambda (b)
+                                       (lambda (c)
+                                         (lambda (a)
+                                           (lambda (b)
+                                             (lambda (d)
+                                               (lambda (a)
+                                                 (lambda (e)
+                                                   (((((a b) c) d) e) a))))))))) '())
+                             '(lambda
+                                (lambda
+                                  (lambda
+                                    (lambda
+                                      (lambda
+                                        (lambda
+                                          (lambda
+                                            (lambda
+                                              ((((((var 1) (var 3)) (var 5)) (var 2)) (var 0)) (var 1)))))))))))
+                (test-equal? "case7"
+                             (lex '(lambda (a)
+                                     (lambda (b)
+                                       (lambda (c)
+                                         (lambda (w)
+                                           (lambda (x)
+                                             (lambda (y)
+                                               ((lambda (a)
+                                                  (lambda (b)
+                                                    (lambda (c)
+                                                      (((((a b) c) w) x) y))))
+                                                (lambda (w)
+                                                  (lambda (x)
+                                                    (lambda (y)
+                                                      (((((a b) c) w) x) y))))))))))) '())
+                             '(lambda 
+                                (lambda 
+                                  (lambda 
+                                    (lambda 
+                                      (lambda 
+                                        (lambda 
+                                          ((lambda
+                                             (lambda
+                                               (lambda
+                                                 ((((((var 2) (var 1)) (var 0)) (var 5)) (var 4)) (var 3)))))
+                                           (lambda
+                                             (lambda
+                                               (lambda
+                                                 ((((((var 8) (var 7)) (var 6)) (var 2)) (var 1)) (var 0))))))))))))))
 ))
 
 (run-tests tests)

@@ -1,5 +1,7 @@
 #lang racket
 
+(require racket/format)
+
 (provide list-ref)
 (provide union)
 (provide extend)
@@ -12,6 +14,7 @@
 (provide var-occurs-bound?)
 (provide unique-free-vars)
 (provide unique-bound-vars)
+(provide lex)
 
 (define list-ref
   (lambda (ls n)
@@ -130,3 +133,15 @@
         (if (memv id fps)
           (list id)
           '())])))
+
+(define lex
+  (lambda (expr ctx)
+    (match expr
+      [`(lambda (,id) ,body)
+        `(lambda ,(lex body (cons id ctx)))]
+      [`(,exp1 ,exp2)
+        `(,(lex exp1 ctx) ,(lex exp2 ctx))]
+      [`,id
+        (let ([idx (index-of ctx id)])
+          (if idx (list 'var idx) id))])))
+
