@@ -16,6 +16,7 @@
 (provide unique-bound-vars)
 (provide lex)
 (provide walk-symbol-update)
+(provide var-occurs-both?)
 
 (define list-ref
   (lambda (ls n)
@@ -172,3 +173,25 @@
                (helper v lst (cons b boxes))
                (update-boxes v (cons b boxes)))
              (helper s tail boxes)))]))))
+
+(define var-occurs-both?
+  (lambda (s expr)
+    (let helper
+      ([expr expr]
+       [bound? #f])
+      (match expr
+        [`(lambda (,id) ,body)
+          (if (eqv? id s)
+            (helper body #t)
+            (helper body #f))]
+        [`(,exp1 ,exp2)
+          (let-values
+            ([(free1 bound1) (helper exp1 bound?)]
+             [(free2 bound2) (helper exp2 bound?)])
+            (values
+              (or free1 free2)
+              (or bound1 bound2)))]
+        [`,id
+          (values
+            (and (not bound?) (eqv? s id))
+            (and bound? (eqv? s id)))]))))

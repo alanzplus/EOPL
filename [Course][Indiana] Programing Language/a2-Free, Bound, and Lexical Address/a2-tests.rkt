@@ -139,6 +139,13 @@
     (test-suite "walk-symbol-update"
                 (walk-symbol-update 'a a-list)
                 (test-equal? "case1" a-list '((c . #&15) (e . #&f) (b . #&15) (a . #&15))))
+    (test-suite "var-occurs-both?"
+                (test-equal? "case1" (call-with-values (lambda () (var-occurs-both? 'x '(lambda (x) (x (lambda (x) x))))) cons) (cons #f #t))
+                (test-equal? "case2" (call-with-values (lambda () (var-occurs-both? 'x '(x (lambda (x) x)))) cons) (cons #t #t))
+                (test-equal? "case3" (call-with-values (lambda () (var-occurs-both? 'x '(lambda (y) (x (lambda (x) x))))) cons)  (cons #t #t))
+                (test-equal? "case4" (call-with-values (lambda () (var-occurs-both? 'x '(lambda (x) (lambda (x) (x (lambda (x) x)))))) cons) (cons #f #t))
+                (test-equal? "case5" (call-with-values (lambda () (var-occurs-both? 'x '(lambda (x) (lambda (y) (lambda (x) (x (lambda (x) x))))))) cons) (cons #f #t))
+                (test-equal? "case6" (call-with-values (lambda () (var-occurs-both? 'x '(lambda (y) (lambda (x) (lambda (z) (lambda (x) (x (lambda (x) x)))))))) cons) (cons #f #t)))
 ))
 
 (run-tests tests)
