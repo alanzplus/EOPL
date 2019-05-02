@@ -136,29 +136,6 @@ end
 * vector-sum.rkt
 
 ### Exercises
-* 1.13.rkt
-* 1.15.rkt
-* 1.16.rkt
-* 1.17.rkt
-* 1.18.rkt
-* 1.19.rkt
-* 1.20.rkt
-* 1.21.rkt
-* 1.22.rkt
-* 1.23.rkt
-* 1.24.rkt
-* 1.25.rkt
-* 1.26.rkt
-* 1.27.rkt
-* 1.28.rkt
-* 1.29.rkt
-* 1.30.rkt
-* 1.31.rkt
-* 1.32.rkt
-* 1.33.rkt
-* 1.34.rkt
-* 1.35.rkt
-* 1.36.rkt
 
 ## Chapter 2 Data Abstraction
 
@@ -168,26 +145,6 @@ end
 ### Examples
 * env-data-structure.rkt
 * env-procedural.rkt
-
-### Exercises
-* 2.1.rkt
-* 2.3.rkt
-* 2.5.rkt
-* 2.11.rkt
-* 2.12.rkt
-* 2.13.rkt
-* 2.14.rkt
-* 2.15.rkt
-* 2.16.rkt
-* 2.17.rkt
-* 2.18.rkt
-* 2.19.rkt
-* 2.21.rkt
-* 2.22.rkt
-* 2.23.rkt
-* 2.24.rkt
-* 2.25.rkt
-* 2.26.rkt
 
 ## Chapter 3 Expression
 
@@ -212,19 +169,6 @@ end
 
 * let-interpreter.rkt
 
-### Exercises
-
-* 3.6.rkt
-* 3.7.rkt
-* 3.8.rkt
-* 3.9.rkt
-* 3.10.rkt
-* 3.19.rkt
-* 3.20.rkt
-* 3.31.rkt
-* 3.32.rkt
-* 3.33.rkt
-* 3.34.rkt
 
 ## Chapter 4 State
 
@@ -259,10 +203,6 @@ end
 * implicit-refs-interpreter.rkt
 * mutable-pairs-interpreter.rkt
 
-### Exercises
-
-* 4.10.rkt
-* 4.11.rkt
 
 ## Chapter 5 Continuation-Passing Interpreters
 
@@ -279,25 +219,6 @@ end
 * 5.35 - 5.36
 * 5.39 - 5.44
 * 5.47 - 5.58
-
-### Exercises
-
-* 5.1.rkt
-* 5.2.rkt
-* 5.3.rkt
-* 5.4.rkt
-* 5.5.rkt
-* 5.6.rkt
-* 5.7.rkt
-* 5.8.rkt
-* 5.9.rkt
-* 5.11.rkt
-* 5.12.rkt
-* 5.13.rkt
-* 5.37.rkt
-* 5.38.rkt
-* 5.45.rkt
-* 5.46.rkt
 
 ## TODO For Interpreter
 
@@ -322,15 +243,3 @@ end
 ### TODO
 * 6.5 - 6.10
 * 6.15 - 6.19
-
-### Exercises
-* 6.2
-* 6.3
-* 6.11
-* 6.12
-* 6.13
-* 6.14
-* 6.20
-* 6.21
-* 6.22
-* 6.23
