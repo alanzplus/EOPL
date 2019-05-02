@@ -3,6 +3,8 @@
 (require rackunit "a2.rkt")
 (require rackunit/text-ui)
 
+(define a-list `((c . ,(box 15)) (e . ,(box 'f)) (b . ,(box 'c)) (a . ,(box 'b))))
+
 (define tests
   (test-suite "A2:"
     (test-suite "list-ref" 
@@ -134,6 +136,9 @@
                                              (lambda
                                                (lambda
                                                  ((((((var 8) (var 7)) (var 6)) (var 2)) (var 1)) (var 0))))))))))))))
+    (test-suite "walk-symbol-update"
+                (walk-symbol-update 'a a-list)
+                (test-equal? "case1" a-list '((c . #&15) (e . #&f) (b . #&15) (a . #&15))))
 ))
 
 (run-tests tests)

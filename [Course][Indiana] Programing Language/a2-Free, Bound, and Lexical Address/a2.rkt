@@ -15,6 +15,7 @@
 (provide unique-free-vars)
 (provide unique-bound-vars)
 (provide lex)
+(provide walk-symbol-update)
 
 (define list-ref
   (lambda (ls n)
@@ -145,3 +146,29 @@
         (let ([idx (index-of ctx id)])
           (if idx (list 'var idx) id))])))
 
+(define walk-symbol-update
+  (lambda (s lst)
+    (define update-boxes
+      (lambda (val boxes)
+        (foldr
+          (lambda (b v)
+            (set-box! b v)
+            v)
+          val
+          boxes)))
+    (let helper
+      ([s s]
+       [l lst]
+       [boxes '()])
+      (match l
+        ['() (update-boxes s boxes)]
+        [(list head tail ...)
+         (let
+           ([t (car head)]
+            [b (cdr head)]
+            [v (unbox (cdr head))])
+           (if (eqv? t s)
+             (if (symbol? v)
+               (helper v lst (cons b boxes))
+               (update-boxes v (cons b boxes)))
+             (helper s tail boxes)))]))))
