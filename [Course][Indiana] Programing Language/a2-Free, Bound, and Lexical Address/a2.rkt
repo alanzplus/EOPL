@@ -9,6 +9,7 @@
 (provide vars)
 (provide unique-vars)
 (provide var-occurs-free?)
+(provide var-occurs-bound?)
 
 (define list-ref
   (lambda (ls n)
@@ -85,3 +86,18 @@
       [`(,exp1 ,exp2)
         (or (var-occurs-free? var exp1) (var-occurs-free? var exp2))]
       [`,id (eqv? id var)])))
+
+(define var-occurs-bound?
+  (lambda (var expr)
+    (let helper
+      [(expr expr)
+       (formal #f)]
+      (match expr
+        [`(lambda (,id) ,body)
+          (if (eqv? var id)
+            (helper body #t)
+            (helper body #f))]
+        [`(,exp1 ,exp2)
+          (or (helper exp1 formal) (helper exp2 formal))]
+        [`,id (and (eqv? id var) formal)]))))
+

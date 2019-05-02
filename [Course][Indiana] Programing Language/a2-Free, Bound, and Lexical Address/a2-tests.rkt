@@ -59,6 +59,16 @@
                 (test-equal? "case5" (var-occurs-free? 'y '(lambda (x) (x y))) #t)
                 (test-equal? "case6" (var-occurs-free? 'y '((lambda (y) (x y)) (lambda (x) (x y)))) #t)
                 (test-equal? "case7" (var-occurs-free? 'x '((lambda (x) (x x)) (x x))) #t))
+    (test-suite "var-occurs-bound?"
+                (test-equal? "case1" (var-occurs-bound? 'x 'x) #f)
+                (test-equal? "case2" (var-occurs-bound? 'x '(lambda (x) x)) #t)
+                (test-equal? "case3" (var-occurs-bound? 'y '(lambda (x) x)) #f)
+                (test-equal? "case4" (var-occurs-bound? 'x '((lambda (x) (x x)) (x x))) #t)
+                (test-equal? "case5" (var-occurs-bound? 'z '(lambda (y) (lambda (x) (y z)))) #f)
+                (test-equal? "case6" (var-occurs-bound? 'z '(lambda (y) (lambda (z) (y z)))) #t)
+                (test-equal? "case7" (var-occurs-bound? 'x '(lambda (x) y)) #f)
+                (test-equal? "case8" (var-occurs-bound? 'x '(lambda (x) (lambda (x) x))) #t))
+
 ))
 
 (run-tests tests)
