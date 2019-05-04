@@ -17,6 +17,10 @@
 (provide empty-env-fn)
 (provide extend-env-fn)
 (provide apply-env-fn)
+(provide value-of-ds)
+(provide empty-env-ds)
+(provide extend-env-ds)
+(provide apply-env-ds)
 
 (struct expression () #:transparent)
 
@@ -223,3 +227,52 @@
 (define apply-env-fn
   (lambda (env var)
     (env var)))
+
+(define value-of-ds
+  (lambda (expr env)
+    (match expr
+      [num #:when (number? num) num]
+      [var #:when (symbol? var) (apply-env-ds env var)]
+      [b #:when (boolean? b) b]
+      [`(lambda (,id) ,body)
+        (lambda (arg)
+          (value-of-ds
+            body
+            (extend-env-ds id arg env)))]
+      [`(let ,bindings ,body)
+        (value-of-ds
+          body
+          (foldr
+            (lambda (binding aggregate-env)
+              (let ([id (car binding)]
+                    [val (value-of-ds (cadr binding) env)])
+                (extend-env-ds id val aggregate-env)))
+            env
+            bindings))]
+      [`(sub1 ,expr1)
+        (- (value-of-ds expr1 env) 1)]
+      [`(* ,expr1 ,expr2)
+        (* (value-of-ds expr1 env) (value-of-ds expr2 env))]
+      [`(if ,pred-expr ,then-expr ,else-expr)
+        (if (value-of-ds pred-expr env)
+          (value-of-ds then-expr env)
+          (value-of-ds else-expr env))]
+      [`(zero? ,expr1)
+        (zero? (value-of-ds expr1 env))]
+      [`(,expr1 ,expr2)
+        ((value-of-ds expr1 env) (value-of-ds expr2 env))])))
+
+(define empty-env-ds (lambda () '(empty-env)))
+
+(define extend-env-ds
+  (lambda (id val env)
+    `(extend-env ,id ,val ,env)))
+
+(define apply-env-ds
+  (lambda (env var)
+    (match env
+      ['(empty-env) (error "cannot find binding for ~s" var)]
+      [`(extend-env ,id ,val ,env)
+        (if (eqv? id var)
+          val
+          (apply-env-ds env var))])))
