@@ -103,7 +103,7 @@
               (unless (expression? then-expr)
                 (error name " expected expression"))
               (unless (expression? else-expr)
-                (error name " expected expresssion"))
+                (error name " expected expression"))
               (values pred-expr then-expr else-expr))))
 
 (struct zero?-expr expression (exp1)
@@ -146,22 +146,24 @@
   (lambda (expr env)
     (match expr
       [num #:when (number? num) num]
-      [var #:when (symbol? var) (env var)]
+      [var #:when (symbol? var) (unbox (env var))]
       [b #:when (boolean? b) b]
       [`(lambda (,id) ,body)
-        (lambda (arg)
-          (value-of body
-                    (lambda (var)
-                      (if (eqv? var id)
-                        arg
-                        (env var)))))]
+        (let ([arg-box (box 'null)])
+          (lambda (arg)
+            (set-box! arg-box arg)
+            (value-of body
+                      (lambda (var)
+                        (if (eqv? var id)
+                          arg-box
+                          (env var))))))]
       [`(let ,bindings ,body)
         (value-of
           body
           (foldr
             (lambda (binding aggregate-env)
               (let ([id (car binding)]
-                    [val (value-of (cadr binding) env)])
+                    [val (box (value-of (cadr binding) env))])
                 (lambda (var)
                   (if (eqv? var id)
                     val
@@ -178,6 +180,12 @@
           (value-of else-expr env))]
       [`(zero? ,expr1)
         (zero? (value-of expr1 env))]
+      [`(set! ,var ,expr1)
+        (set-box! (env var) (value-of expr1 env))]
+      [`(begin2 ,expr1 ,expr2)
+        (begin
+          (value-of expr1 env)
+          (value-of expr2 env))]
       [`(,expr1 ,expr2)
         ((value-of expr1 env) (value-of expr2 env))])))
 

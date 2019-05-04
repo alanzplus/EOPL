@@ -145,7 +145,73 @@
                                                                 (f) adbmal))) 
                                                             (lambda (y) (error 'fo-eulav "unbound variable ~s" y)))
                                        120)
-
+                          (test-equal? "case23" (value-of
+                                                  '(* (begin2 1 1) 3)
+                                                  (lambda (y) (error 'value-of "unbound variable ~s" y)))
+                                       3)
+                          (test-equal? "case24" (value-of
+                                                  '((lambda (a)
+                                                      ((lambda (p)
+                                                         (begin2
+                                                           (p a)
+                                                           a))
+                                                       (lambda (x) (set! x 4))))
+                                                    3)
+                                                  (lambda (y) (error 'value-of "unbound variable ~s" y)))
+                                       3)
+                          (test-equal? "case25" (value-of
+                                                  '((lambda (f)
+                                                      ((lambda (g)
+                                                         ((lambda (z) (begin2
+                                                                        (g z)
+                                                                        z))
+                                                          55))
+                                                       (lambda (y) (f y)))) (lambda (x) (set! x 44)))
+                                                  (lambda (y) (error 'value-of "unbound variable ~s" y)))
+                                       55)
+                          (test-equal? "case26"  (value-of
+                                                   '((lambda (x)
+                                                       (begin2 (set! x 5) x))
+                                                     6)
+                                                   (lambda (y) (error 'value-of "unbound variable ~s" y)))
+                                       5)
+                          (test-equal? "case27" (value-of 
+                                                  '(let ((a 3)) 
+                                                     (begin2 (begin2 a (set! a 4)) a))
+                                                  (lambda (y) (error 'value-of "unbound variable ~s" y)))
+                                       4)
+                          (test-equal? "case28" (value-of 
+                                                  '((lambda (x)
+                                                      (begin2
+                                                        ((lambda (y)
+                                                           (begin2
+                                                             (set! x 0)
+                                                             98))
+                                                         99)
+                                                        x))
+                                                    97)
+                                                  (lambda (y) (error 'value-of "unbound variable ~s" y)))
+                                       0)
+                          (test-equal? "case29" (value-of 
+                                                  '((lambda (y)
+                                                      (let ((x (begin2
+                                                                 (set! y 7)
+                                                                 8)))
+                                                        (begin2
+                                                          (set! y 3)
+                                                          ((lambda (z) y)
+                                                           x))))
+                                                    4)
+                                                  (lambda (y) (error 'value-of "unbound variable ~s" y)))
+                                       3)
+                          (test-equal? "case30" (value-of 
+                                                  '(let ((a 5))
+                                                     (let ((y (begin2 (set! a (sub1 a)) 6)))
+                                                       (begin2
+                                                         (* y y)
+                                                         a)))
+                                                  (lambda (y) (error 'value-of "unbound variable ~s" y)))
+                                       4)
 )))
 
 (run-tests tests)
