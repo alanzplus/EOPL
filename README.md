@@ -55,6 +55,15 @@ See [a2.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndian
 * [DONE] walk-symbol-update
 * [DONE] var-occurs-both?
 
+### Assignment 3
+See [a3.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndiana%5D%20Programing%20Language/a3-Environments%20and%20Interpreters/a3.rkt)
+
+* [DONE] Part 1: Interpreters and Environments
+* [DONE] Part 2: "fo-eulav"
+* [DONE] Support set! and begin2
+* [DONE] Implement apply-env-lex and extend-env-lex
+* [TODO] csub1
+
 ## EOPL
 
 ### Chapter 1
