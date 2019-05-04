@@ -23,6 +23,10 @@
 (provide apply-env-ds)
 (provide fo-eulav)
 (provide empty-env)
+(provide value-of-lex)
+(provide empty-env-lex)
+(provide apply-env-lex)
+(provide extend-env-lex)
 
 (struct expression () #:transparent)
 
@@ -320,3 +324,25 @@
     (lambda (var)
       (error "cannot find binding of " var))))
 
+(define value-of-lex
+  (lambda (exp env)
+    (match exp
+      [`(const ,expr) expr]
+      [`(mult ,x1 ,x2) (* (value-of-lex x1 env) (value-of-lex x2 env))]
+      [`(zero ,x) (zero? (value-of-lex x env))]
+      (`(sub1 ,body) (sub1 (value-of-lex body env)))
+      (`(if ,t ,c ,a) (if (value-of-lex t env) (value-of-lex c env) (value-of-lex a env)))
+      (`(var ,num) (apply-env-lex env num))
+      (`(lambda ,body) (lambda (a) (value-of-lex body (extend-env-lex a env))))
+      (`(,rator ,rand) ((value-of-lex rator env) (value-of-lex rand env))))))
+ 
+(define empty-env-lex 
+  (lambda () '()))
+
+(define extend-env-lex
+  (lambda (val env)
+    (cons val env)))
+
+(define apply-env-lex
+  (lambda (env num)
+    (list-ref env num)))
