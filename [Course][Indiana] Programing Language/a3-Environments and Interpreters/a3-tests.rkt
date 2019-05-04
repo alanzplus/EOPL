@@ -132,6 +132,20 @@
                                                        (lambda (n) (if (zero? n) 1 (* n ((f f) (sub1 n)))))))
                                                     5)
                                                   (empty-env-ds))
-                                       120))))
+                                       120)
+
+                          (test-equal? "case20" (fo-eulav '(5 (x (x) adbmal)) (lambda (y) (error 'fo-eulav "unbound variable ~s" y))) 5)
+                          (test-equal? "case21" (fo-eulav '(((x 1bus) (x) adbmal) ((5 f) (f) adbmal)) (lambda (y) (error 'fo-eulav "unbound variable ~s" y))) 4)
+                          (test-equal? "case22" (fo-eulav   '(5
+                                                              (((((((n 1bus) (f f)) n *) 1 (n ?orez) fi)
+                                                                 (n) adbmal)
+                                                                (f) adbmal)
+                                                               ((((((n 1bus) (f f)) n *) 1 (n ?orez) fi)
+                                                                 (n) adbmal)
+                                                                (f) adbmal))) 
+                                                            (lambda (y) (error 'fo-eulav "unbound variable ~s" y)))
+                                       120)
+
+)))
 
 (run-tests tests)

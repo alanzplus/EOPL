@@ -21,6 +21,8 @@
 (provide empty-env-ds)
 (provide extend-env-ds)
 (provide apply-env-ds)
+(provide fo-eulav)
+(provide empty-env)
 
 (struct expression () #:transparent)
 
@@ -276,3 +278,37 @@
         (if (eqv? id var)
           val
           (apply-env-ds env var))])))
+
+(define fo-eulav
+  (lambda (expr env)
+    (match expr
+      [num #:when (number? num) num]
+      [var #:when (symbol? var) (env var)]
+      [b #:when (boolean? b) b]
+      [`(,body (,id) adbmal)
+        (lambda (arg)
+          (fo-eulav
+            body
+            (lambda (var)
+              (if (eqv? var id)
+                arg
+                (env var)))))]
+      [`(,else-expr ,then-expr ,pred-expr fi)
+        (if (fo-eulav pred-expr env)
+          (fo-eulav then-expr env)
+          (fo-eulav else-expr env))]
+      [`(,expr1 ?orez)
+        (zero? (fo-eulav expr1 env))]
+      [`(,expr1 1bus)
+        (- (fo-eulav expr1 env) 1)]
+      [`(,expr1 ,expr2 *)
+        (* (fo-eulav expr1 env) (fo-eulav expr2 env))]
+      [`(,expr1 ,expr2)
+        ((fo-eulav expr2 env) (fo-eulav expr1 env))]
+      [e (printf "~s\n" e)])))
+
+(define empty-env
+  (lambda ()
+    (lambda (var)
+      (error "cannot find binding of " var))))
+
