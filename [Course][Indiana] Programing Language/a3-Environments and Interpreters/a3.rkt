@@ -12,6 +12,7 @@
 (provide mul-expr)
 (provide zero?-expr)
 (provide call-expr)
+(provide value-of)
 
 (struct expression () #:transparent)
 
@@ -130,3 +131,42 @@
     [`(if ,pred ,then ,else) (if-expr (parse pred) (parse then) (parse else))]
     [`(zero? ,expr1) (zero?-expr (parse expr1))]
     [`(,expr1 ,expr2) (call-expr (parse expr1) (parse expr2))]))
+
+(define value-of
+  (lambda (expr env)
+    (match expr
+      [num #:when (number? num) num]
+      [var #:when (symbol? var) (env var)]
+      [b #:when (boolean? b) b]
+      [`(lambda (,id) ,body)
+        (lambda (arg)
+          (value-of body
+                    (lambda (var)
+                      (if (eqv? var id)
+                        arg
+                        (env var)))))]
+      [`(let ,bindings, body)
+        (value-of
+          body
+          (foldr
+            (lambda (binding aggregate-env)
+              (let ([id (car binding)]
+                    [val (value-of (cadr binding) env)])
+                (lambda (var)
+                  (if (eqv? var id)
+                    val
+                    (aggregate-env var)))))
+            env
+            bindings))]
+      [`(sub1 ,expr1)
+        (- (value-of expr1 env) 1)]
+      [`(* ,expr1 ,expr2)
+        (* (value-of expr1 env) (value-of expr2 env))]
+      [`(if ,pred-expr ,then-expr ,else-expr)
+        (if (value-of pred-expr env)
+          (value-of then-expr env)
+          (value-of else-expr env))]
+      [`(zero? ,expr1)
+        (zero? (value-of expr1 env))]
+      [`(,expr1 ,expr2)
+        ((value-of expr1 env) (value-of expr2 env))])))
