@@ -13,6 +13,10 @@
 (provide zero?-expr)
 (provide call-expr)
 (provide value-of)
+(provide value-of-fn)
+(provide empty-env-fn)
+(provide extend-env-fn)
+(provide apply-env-fn)
 
 (struct expression () #:transparent)
 
@@ -70,9 +74,9 @@
 (struct sub1-expr expression (expr)
   #:transparent
   #:guard (lambda (expr name)
-           (unless (expression? expr)
-             (error name " expected expression"))
-           expr))
+            (unless (expression? expr)
+              (error name " expected expression"))
+            expr))
 
 (struct mul-expr expression (expr1 expr2)
   #:transparent
@@ -145,7 +149,7 @@
                       (if (eqv? var id)
                         arg
                         (env var)))))]
-      [`(let ,bindings, body)
+      [`(let ,bindings ,body)
         (value-of
           body
           (foldr
@@ -170,3 +174,52 @@
         (zero? (value-of expr1 env))]
       [`(,expr1 ,expr2)
         ((value-of expr1 env) (value-of expr2 env))])))
+
+(define value-of-fn
+  (lambda (expr env)
+    (match expr
+      [num #:when (number? num) num]
+      [var #:when (symbol? var) (apply-env-fn env var)]
+      [b #:when (boolean? b) b]
+      [`(lambda (,id) ,body)
+        (lambda (arg)
+          (value-of-fn body
+                       (extend-env-fn id arg env)))]
+      [`(let ,bindings ,body)
+        (value-of-fn
+          body
+          (foldr
+            (lambda (binding aggregate-env)
+              (let ([id (car binding)]
+                    [val (value-of-fn (cadr binding) env)])
+                (extend-env-fn id val aggregate-env)))
+            env
+            bindings))]
+      [`(sub1 ,expr1)
+        (- (value-of-fn expr1 env) 1)]
+      [`(* ,expr1 ,expr2)
+        (* (value-of-fn expr1 env) (value-of-fn expr2 env))]
+      [`(if ,pred-expr ,then-expr ,else-expr)
+        (if (value-of-fn pred-expr env)
+          (value-of-fn then-expr env)
+          (value-of-fn else-expr env))]
+      [`(zero? ,expr1)
+        (zero? (value-of-fn expr1 env))]
+      [`(,expr1 ,expr2)
+        ((value-of-fn expr1 env) (value-of-fn expr2 env))])))
+
+(define empty-env-fn
+  (lambda ()
+    (lambda (var)
+      (error "No binding for ~s" var))))
+
+(define extend-env-fn
+  (lambda (id val env)
+    (lambda (var)
+      (if (eqv? var id)
+        val
+        (apply-env-fn env var)))))
+
+(define apply-env-fn
+  (lambda (env var)
+    (env var)))
