@@ -3,7 +3,6 @@
 (require rackunit "a3.rkt")
 (require rackunit/text-ui)
 
-
 (define tests
   (test-suite "A3:"
               (test-suite "Part 1: Interpreters and Environments"

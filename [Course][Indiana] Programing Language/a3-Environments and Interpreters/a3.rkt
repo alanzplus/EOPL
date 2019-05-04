@@ -1,1 +1,132 @@
 #lang racket
+
+(provide parse)
+(provide num-expr)
+(provide var-expr)
+(provide boolean-expr)
+(provide lambda-expr)
+(provide binding-expr)
+(provide let-expr)
+(provide if-expr)
+(provide sub1-expr)
+(provide mul-expr)
+(provide zero?-expr)
+(provide call-expr)
+
+(struct expression () #:transparent)
+
+(struct num-expr expression (n)
+  #:transparent
+  #:guard (lambda (n name)
+            (unless (number? n)
+              (error name " expected number" ))
+            n))
+
+(struct var-expr expression (id)
+  #:transparent
+  #:guard (lambda (id name)
+            (unless (symbol? id)
+              (error name " expected symbol"))
+            id))
+
+(struct boolean-expr expression (b)
+  #:transparent
+  #:guard (lambda (b name)
+            (unless (boolean? b)
+              (error name " expected boolean"))
+            b))
+
+(struct lambda-expr expression (id body)
+  #:transparent
+  #:guard (lambda (id body name)
+            (begin
+              (unless (symbol? id)
+                (error name " expected symbol"))
+              (unless (expression? body)
+                (error name " expected expression"))
+              (values id body))))
+
+(struct binding-expr (id init-expr)
+  #:transparent
+  #:guard (lambda (id init-expr name)
+            (begin
+              (unless (symbol? id)
+                (error name " expected symbol"))
+              (unless (expression? init-expr)
+                (error name " expected expression"))
+              (values id init-expr))))
+
+(struct let-expr expression (bindings body)
+  #:transparent
+  #:guard (lambda (bindings body name)
+            (begin
+              (unless (andmap binding-expr? bindings)
+                (error name " expected a list of bindings"))
+              (unless (expression? body)
+                (error name " expected expression"))
+              (values bindings body))))
+
+(struct sub1-expr expression (expr)
+  #:transparent
+  #:guard (lambda (expr name)
+           (unless (expression? expr)
+             (error name " expected expression"))
+           expr))
+
+(struct mul-expr expression (expr1 expr2)
+  #:transparent
+  #:guard (lambda (expr1 expr2 name)
+            (begin
+              (unless (expression? expr1)
+                (error name " expected expression"))
+              (unless (expression? expr2)
+                (error name " expected expression"))
+              (values expr1 expr2))))
+
+(struct if-expr expression (pred-expr then-expr else-expr)
+  #:transparent
+  #:guard (lambda (pred-expr then-expr else-expr name)
+            (begin
+              (unless (expression? pred-expr)
+                (error name " expected expression"))
+              (unless (expression? then-expr)
+                (error name " expected expression"))
+              (unless (expression? else-expr)
+                (error name " expected expresssion"))
+              (values pred-expr then-expr else-expr))))
+
+(struct zero?-expr expression (exp1)
+  #:transparent
+  #:guard (lambda (exp1 name)
+            (unless (expression? exp1)
+              (error name " expected expression"))
+            exp1))
+
+(struct call-expr expression (exp1 exp2)
+  #:transparent
+  #:guard (lambda (exp1 exp2 name)
+            (begin
+              (unless (expression? exp1)
+                (error name " expected expression"))
+              (unless (expression? exp2)
+                (error name " expected expression"))
+              (values exp1 exp2))))
+
+(define (parse expr)
+  (match expr
+    [num #:when (number? num) (num-expr num)]
+    [var #:when (symbol? var) (var-expr var)]
+    [b #:when (boolean? b) (boolean-expr b)]
+    [`(lambda (,id) ,body) (lambda-expr id (parse body))]
+    [`(let ,bindings ,body)
+      (let-expr
+        (map
+          (lambda (b)
+            (binding-expr (car b) (parse (cadr b))))
+          bindings)
+        (parse body))]
+    [`(sub1 ,expr1) (sub1-expr (parse expr1))]
+    [`(* ,expr1 ,expr2) (mul-expr (parse expr1) (parse expr2))]
+    [`(if ,pred ,then ,else) (if-expr (parse pred) (parse then) (parse else))]
+    [`(zero? ,expr1) (zero?-expr (parse expr1))]
+    [`(,expr1 ,expr2) (call-expr (parse expr1) (parse expr2))]))
