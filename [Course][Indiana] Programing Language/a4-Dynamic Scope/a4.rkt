@@ -8,6 +8,7 @@
 (provide apply-closure-fn)
 (provide apply-closure-ds)
 (provide empty-env)
+(provide value-of-dynamic)
 
 (define lex
   (lambda (expr ctx)
@@ -134,3 +135,43 @@
     (match closure
       [(list var body env)
        (value-of-ds body (extend-env var arg env))])))
+
+(define value-of-dynamic
+  (lambda (expr env)
+    (match expr
+      [`(quote ,v) v]
+      [num #:when (number? num) num]
+      [var #:when (symbol? var) (apply-env env var)]
+      [b #:when (boolean? b) b]
+      [`(lambda (,var) ,body)
+        (lambda (arg env)
+          (value-of-dynamic body (extend-env var arg env)))]
+      [`(let ,bindings ,body)
+        (value-of-dynamic
+          body (foldr
+                 (lambda (binding aggregate-env)
+                   (let ([id (car binding)]
+                         [val (value-of-dynamic (cadr binding) env)])
+                     (extend-env id val aggregate-env)))
+                 env
+                 bindings))]
+      [`(sub1 ,expr1)
+        (- (value-of-dynamic expr1 env) 1)]
+      [`(* ,expr1 ,expr2)
+        (* (value-of-dynamic expr1 env) (value-of-dynamic expr2 env))]
+      [`(if ,pred-expr ,then-expr ,else-expr)
+        (if (value-of-dynamic pred-expr env)
+          (value-of-dynamic then-expr env)
+          (value-of-dynamic else-expr env))]
+      [`(zero? ,expr1)
+        (zero? (value-of-dynamic expr1 env))]
+      [`(null? ,expr1)
+        (null? (value-of-dynamic expr1 env))]
+      [`(cons ,expr1 ,expr2)
+        (cons (value-of-dynamic expr1 env) (value-of-dynamic expr2 env))]
+      [`(car ,expr1)
+        (car (value-of-dynamic expr1 env))]
+      [`(cdr ,expr1)
+        (cdr (value-of-dynamic expr1 env))]
+      [`(,expr1 ,expr2)
+        ((value-of-dynamic expr1 env) (value-of-dynamic expr2 env) env)])))

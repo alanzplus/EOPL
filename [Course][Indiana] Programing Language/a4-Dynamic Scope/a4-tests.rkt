@@ -83,7 +83,40 @@
                                                       (* x x)))
                                                  (empty-env))
                                        25))
-
+              (test-suite "dynamic scope"
+                          (test-equal? "case1" (value-of-dynamic '(let ([x 2])
+                                                                    (let ([f (lambda (e) x)])
+                                                                      (let ([x 5])
+                                                                        (f 0))))
+                                                                 (empty-env))
+                                       5)
+                          (test-equal? "case2" (value-of-dynamic
+                                                 '(let ([! (lambda (n)
+                                                             (if (zero? n) 
+                                                               1
+                                                               (* n (! (sub1 n)))))])
+                                                    (! 5))
+                                                 (empty-env))
+                                       120)
+                          (test-equal? "case3" (value-of-dynamic
+                                                 '((lambda (!) (! 5))
+                                                   (lambda (n)
+                                                     (if (zero? n) 
+                                                       1
+                                                       (* n (! (sub1 n))))))
+                                                 (empty-env))
+                                       120)
+                          (test-equal? "case4" (value-of-dynamic
+                                                 '(let ([f (lambda (x) (cons x l))])
+                                                    (let ([cmap 
+                                                            (lambda (f)
+                                                              (lambda (l)               
+                                                                (if (null? l) 
+                                                                  '()
+                                                                  (cons (f (car l)) ((cmap f) (cdr l))))))])
+                                                      ((cmap f) (cons 1 (cons 2 (cons 3 '())))))) 
+                                                 (empty-env))
+                                       '((1 1 2 3) (2 2 3) (3 3))))
 ))
 
 (run-tests tests)
