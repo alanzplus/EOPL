@@ -73,6 +73,16 @@ See [a4.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndian
 * [DONE] value-of-ri
 * [TODO] Dessert
 
+### Assignment 5
+See [a5.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndiana%5D%20Programing%20Language/a5-Parameter-Passing%20Conventions/a5.rkt)
+
+* [DONE] Call-By-Value
+* [DONE] Call-By-Reference
+* [DONE] Call-By-Name
+* [DONE] Call-By-Need
+* [TODO] Braintears
+* [TODO] Dessert
+
 ## EOPL
 
 ### Chapter 1
