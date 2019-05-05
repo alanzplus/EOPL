@@ -117,6 +117,11 @@
                                                       ((cmap f) (cons 1 (cons 2 (cons 3 '())))))) 
                                                  (empty-env))
                                        '((1 1 2 3) (2 2 3) (3 3))))
+              (test-suite "value-of-ri"
+                          (test-equal? "case1" ((value-of-ri empty-env-fn extend-env-fn apply-env-fn closure-fn-ri apply-closure-fn-ri) '((lambda (x) x) 5)) 5)
+                          (test-equal? "case1" ((value-of-ri empty-env-ds extend-env-ds apply-env-ds closure-ds-ri apply-closure-ds-ri) '((lambda (x) x) 5)) 5)
+                          (test-equal? "case1" ((value-of-ri empty-env-fn extend-env-fn apply-env-fn closure-ds-ri apply-closure-ds-ri) '((lambda (x) x) 5)) 5)
+                          (test-equal? "case1" ((value-of-ri empty-env-ds extend-env-ds apply-env-ds closure-fn-ri apply-closure-fn-ri) '((lambda (x) x) 5)) 5))
 ))
 
 (run-tests tests)
