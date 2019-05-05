@@ -63,6 +63,41 @@
                                                             (set! y temp))) x))))
                                                  (empty-env))
                                        44))
+              (test-suite "call-by-value"
+                          (test-equal? "case1" (val-of-cbv
+                                                 '((lambda (a)
+                                                     ((lambda (p)
+                                                        (begin2
+                                                          (p a)
+                                                          a)) (lambda (x) (set! x 4)))) 3)
+                                                 (empty-env))
+                                       3)
+                          (test-equal? "case2" (val-of-cbv
+                                                 '((lambda (f)
+                                                     ((lambda (g)
+                                                        ((lambda (z) (begin2
+                                                                       (g z)
+                                                                       z))
+                                                         55))
+                                                      (lambda (y) (f y)))) (lambda (x) (set! x 44)))
+                                                 (empty-env))
+                                       55)
+                          (test-equal? "case3" (val-of-cbv
+                                                 '((lambda (swap)
+                                                     ((lambda (a)
+                                                        ((lambda (b)
+                                                           (begin2
+                                                             ((swap a) b)
+                                                             a)) 44)) 33))
+                                                   (lambda (x)
+                                                     (lambda (y)
+                                                       ((lambda (temp)
+                                                          (begin2
+                                                            (set! x y)
+                                                            (set! y temp))) x))))
+                                                 (empty-env))
+                                       33)
+                          )
 ))
 
 (run-tests tests)
