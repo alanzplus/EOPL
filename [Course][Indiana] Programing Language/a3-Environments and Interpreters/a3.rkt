@@ -153,13 +153,12 @@
       [var #:when (symbol? var) (unbox (env var))]
       [b #:when (boolean? b) b]
       [`(lambda (,id) ,body)
-        (let ([arg-box (box 'null)])
-          (lambda (arg)
-            (set-box! arg-box arg)
+        (lambda (arg)
+          (let ([boxed-arg (box arg)])
             (value-of body
                       (lambda (var)
                         (if (eqv? var id)
-                          arg-box
+                          boxed-arg
                           (env var))))))]
       [`(let ,bindings ,body)
         (value-of
