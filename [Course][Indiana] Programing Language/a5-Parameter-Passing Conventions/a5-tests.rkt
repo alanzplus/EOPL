@@ -114,6 +114,8 @@
                                                    ((lambda (x) (x x)) (lambda (x) (x x))))
                                                  (empty-env))
                                        100))
+              (test-suite "call-by-need"
+                          (test-equal? "case1" (val-of-cbneed random-sieve (empty-env)) #t))
 ))
 
 (run-tests tests)

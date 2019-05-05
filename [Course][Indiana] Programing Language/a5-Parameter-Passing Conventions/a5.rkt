@@ -3,6 +3,7 @@
 (provide val-of-cbr)
 (provide val-of-cbv)
 (provide val-of-cbname)
+(provide val-of-cbneed)
 (provide empty-env)
 
 (define val-of-cbr
@@ -116,14 +117,63 @@
             (lambda (binding new-env)
               (let
                 ([var (car binding)]
-                 [val (lambda () (val-of-cbname (cadr binding) env))])
+                 [val (val-of-cbname (cadr binding) env)])
                 (extend-env var val new-env)))
             env
             bindings))]
       [`(,expr1 ,var) #:when (symbol? var)
-                      (apply-closure (val-of-cbname expr1 env) ((apply-env env var)))]
+                      (apply-closure (val-of-cbname expr1 env) (apply-env env var))]
       [`(,expr1 ,expr2)
         (apply-closure (val-of-cbname expr1 env) (lambda () (val-of-cbname expr2 env)))])))
+
+(define val-of-cbneed
+  (lambda (expr env)
+    (match expr
+      [num #:when (number? num) num]
+      [var #:when (symbol? var) (unbox/need (apply-env env var))]
+      [b #:when (boolean? b) b]
+      [`(* ,expr1 ,expr2)
+        (* (val-of-cbneed expr1 env) (val-of-cbneed expr2 env))]
+      [`(sub1 ,expr1)
+        (sub1 (val-of-cbneed expr1 env))]
+      [`(zero? ,expr1)
+        (zero? (val-of-cbneed expr1 env))]
+      [`(if ,pred-expr ,then-expr ,else-expr)
+        (if (val-of-cbneed pred-expr env)
+          (val-of-cbneed then-expr env)
+          (val-of-cbneed else-expr env))]
+      [`(random ,n)
+        (random (val-of-cbneed n env))]
+      [`(lambda (,var) ,body)
+        (make-closure-cbneed var body env)]
+      [`(let ,bindings ,body)
+        (val-of-cbneed
+          body
+          (foldr
+            (lambda (binding new-env)
+              (let
+                ([var (car binding)]
+                 [val (val-of-cbneed (cadr binding) env)])
+                (extend-env var val new-env)))
+            env
+            bindings))]
+      [`(,expr1 ,var) #:when (symbol? var)
+                      (apply-closure (val-of-cbneed expr1 env) (apply-env env var))]
+      [`(,expr1 ,expr2)
+        (apply-closure (val-of-cbneed expr1 env) (box (lambda () (val-of-cbneed expr2 env))))])))
+
+(define unbox/need
+  (lambda (b)
+    (let ([val ((unbox b))])
+      (set-box! b (lambda () val))
+      val)))
+
+(define make-closure-cbneed
+  (lambda (var body env)
+    (lambda (arg)
+      (val-of-cbneed
+        body
+        (extend-env var arg env)))))
 
 (define make-closure-cbname
   (lambda (var body env)
