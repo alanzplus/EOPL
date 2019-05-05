@@ -64,6 +64,15 @@ See [a3.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndian
 * [DONE] Implement apply-env-lex and extend-env-lex
 * [TODO] csub1
 
+### Assignment 4
+See [a4.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndiana%5D%20Programing%20Language/a4-Dynamic%20Scope/a4.rkt)
+
+* [DONE] lex
+* [DONE] value-of-fn and value-of-ds
+* [DONE] value-of-dynamic
+* [DONE] value-of-ri
+* [TODO] Dessert
+
 ## EOPL
 
 ### Chapter 1
