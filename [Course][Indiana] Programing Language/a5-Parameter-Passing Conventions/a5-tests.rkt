@@ -3,6 +3,13 @@
 (require rackunit "a5.rkt")
 (require rackunit/text-ui)
 
+(define random-sieve
+  '((lambda (n)
+      (if (zero? n)
+        (if (zero? n) (if (zero? n) (if (zero? n) (if (zero? n) (if (zero? n) (if (zero? n) #t #f) #f) #f) #f) #f) #f)
+        (if (zero? n) #f (if (zero? n) #f (if (zero? n) #f (if (zero? n) #f (if (zero? n) #f (if (zero? n) #f #t))))))))
+    (random 2)))
+
 (define tests
   (test-suite "A5:"
               (test-suite "call-by-reference"
@@ -96,8 +103,17 @@
                                                             (set! x y)
                                                             (set! y temp))) x))))
                                                  (empty-env))
-                                       33)
-                          )
+                                       33))
+              (test-suite "call-by-name"
+                          ;; call-by-name
+                          ;;P(false positive) <= .01
+                          (test-equal? "case1" (val-of-cbname random-sieve (empty-env))
+                                       #f)
+                          (test-equal? "case2" (val-of-cbname
+                                                 '((lambda (z) 100)
+                                                   ((lambda (x) (x x)) (lambda (x) (x x))))
+                                                 (empty-env))
+                                       100))
 ))
 
 (run-tests tests)
