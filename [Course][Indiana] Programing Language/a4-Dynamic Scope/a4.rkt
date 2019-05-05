@@ -7,8 +7,19 @@
 (provide closure-ds)
 (provide apply-closure-fn)
 (provide apply-closure-ds)
-(provide empty-env)
 (provide value-of-dynamic)
+(provide value-of-ri)
+(provide empty-env)
+(provide empty-env-fn)
+(provide empty-env-ds)
+(provide extend-env-fn)
+(provide extend-env-ds)
+(provide apply-env-fn)
+(provide apply-env-ds)
+(provide closure-fn-ri)
+(provide apply-closure-fn-ri)
+(provide closure-ds-ri)
+(provide apply-closure-ds-ri)
 
 (define lex
   (lambda (expr ctx)
@@ -175,3 +186,90 @@
         (cdr (value-of-dynamic expr1 env))]
       [`(,expr1 ,expr2)
         ((value-of-dynamic expr1 env) (value-of-dynamic expr2 env) env)])))
+
+(define value-of-ri
+  (lambda (empty-env extend-env apply-env closure apply-closure)
+    (lambda (expr)
+      (let value-of
+        ([expr expr]
+         [env (empty-env)])
+        (match expr
+          [num #:when (number? num) num]
+          [var #:when (symbol? var) (apply-env env var)]
+          [b #:when (boolean? b) b]
+          [`(lambda (,id) ,body) (closure id body env extend-env)]
+          [`(let ,bindings ,body)
+            (value-of
+              body
+              (foldr
+                (lambda (binding aggregate-env)
+                  (let ([id (car binding)]
+                        [val (value-of (cadr binding) env)])
+                    (extend-env id val aggregate-env)))
+                env
+                bindings))]
+          [`(sub1 ,expr1)
+            (- (value-of expr1 env) 1)]
+          [`(* ,expr1 ,expr2)
+            (* (value-of expr1 env) (value-of expr2 env))]
+          [`(if ,pred-expr ,then-expr ,else-expr)
+            (if (value-of pred-expr env)
+              (value-of then-expr env)
+              (value-of else-expr env))]
+          [`(zero? ,expr1)
+            (zero? (value-of expr1 env))]
+          [`(,expr1 ,expr2)
+            (apply-closure (value-of expr1 env) (value-of expr2 env) value-of)])))))
+
+(define empty-env-ds (lambda () '(empty-env)))
+
+(define extend-env-ds
+  (lambda (id val env)
+    `(extend-env ,id ,val ,env)))
+
+(define apply-env-ds
+  (lambda (env var)
+    (match env
+      ['(empty-env) (error "cannot find binding for ~s" var)]
+      [`(extend-env ,id ,val ,env)
+        (if (eqv? id var)
+          val
+          (apply-env-ds env var))]
+      [e (printf "~s \n" e)]
+      )))
+
+(define empty-env-fn
+  (lambda ()
+    (lambda (var)
+      (error "No binding for ~s" var))))
+
+(define extend-env-fn
+  (lambda (id val env)
+    (lambda (var)
+      (if (eqv? var id)
+        val
+        (apply-env-fn env var)))))
+
+(define apply-env-fn
+  (lambda (env var)
+    (env var)))
+
+(define closure-fn-ri
+  (lambda (var body env extend-env)
+    (lambda (value-of)
+      (lambda (arg)
+        (value-of body (extend-env var arg env))))))
+
+(define apply-closure-fn-ri
+  (lambda (closure arg value-of)
+    ((closure value-of) arg)))
+
+(define closure-ds-ri
+  (lambda (var body env extend-env)
+    (list var body env extend-env)))
+
+(define apply-closure-ds-ri
+  (lambda (closure arg value-of)
+    (match closure
+      [(list var body env extend-env)
+       (value-of body (extend-env var arg env))])))
