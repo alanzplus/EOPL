@@ -5,6 +5,8 @@
 (provide times)
 (provide times-cps)
 (provide times-cps-shortcut)
+(provide plus)
+(provide plus-cps)
 (provide empty-k)
 
 (define empty-k
@@ -64,3 +66,13 @@
           (lambda (v)
             (k (* (car ls) v))))])))
 
+; 4. plus
+(define plus
+  (lambda (m)
+    (lambda (n)
+      (+ m n))))
+
+(define plus-cps
+  (lambda (m k)
+    (lambda (n)
+      (k (+ m n)))))

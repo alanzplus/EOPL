@@ -36,7 +36,15 @@
                                        (times-cps-shortcut '(1 2 3 4 5) (empty-k)) 120)
                           (test-equal? "case2"
                                        (times-cps-shortcut '(1 2 3 0 3) (empty-k)) 0))
-
+              (test-suite "plus"
+                          (test-equal? "case1"
+                                       ((plus 2) 3) 5)
+                          (test-equal? "case2"
+                                       ((plus ((plus 2) 3)) 5) 10)
+                          (test-equal? "case3"
+                                       ((plus-cps 2 (empty-k)) 3) 5)
+                          (test-equal? "case4"
+                                       ((plus-cps ((plus-cps 2 (empty-k)) 3) (empty-k)) 5) 10))
 ))
 
 (run-tests tests)
