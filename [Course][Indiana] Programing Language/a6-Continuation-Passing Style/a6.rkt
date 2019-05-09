@@ -2,6 +2,8 @@
 
 (provide binary-to-decimal)
 (provide binary-to-decimal-cps)
+(provide times)
+(provide times-cps)
 (provide empty-k)
 
 (define empty-k
@@ -30,3 +32,21 @@
           (cdr n) 
           (lambda (v)
             (k (+ (car n) (* 2 v)))))])))
+
+; 2. times
+(define times
+  (lambda (ls)
+    (cond
+      [(null? ls) 1]
+      [(zero? (car ls)) 0]
+      [else (* (car ls) (times (cdr ls)))])))
+
+(define times-cps
+  (lambda (ls k)
+    (cond
+      [(null? ls) (k 1)]
+      [(zero? (car ls)) (k 0)]
+      [else
+        (times-cps (cdr ls)
+                   (lambda (v)
+                     (k (* (car ls) v))))])))

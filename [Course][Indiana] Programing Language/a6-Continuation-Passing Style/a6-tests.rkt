@@ -14,15 +14,23 @@
                                        (binary-to-decimal '(0 1)) 2)
                           (test-equal? "case4"
                                        (binary-to-decimal '(1 1 0 1)) 11)
-                          (test-equal? "case1"
+                          (test-equal? "case5"
                                        (binary-to-decimal-cps '() (empty-k)) 0)
-                          (test-equal? "case2"
+                          (test-equal? "case6"
                                        (binary-to-decimal-cps '(1) (empty-k)) 1)
-                          (test-equal? "case3"
+                          (test-equal? "case7"
                                        (binary-to-decimal-cps '(0 1) (empty-k)) 2)
+                          (test-equal? "case8"
+                                       (binary-to-decimal-cps '(1 1 0 1) (empty-k)) 11)) 
+              (test-suite "times"
+                          (test-equal? "case1"
+                                       (times '(1 2 3 4 5)) 120)
+                          (test-equal? "case2"
+                                       (times '(1 2 3 0 3)) 0)
+                          (test-equal? "case3"
+                                       (times-cps '(1 2 3 4 5) (empty-k)) 120)
                           (test-equal? "case4"
-                                       (binary-to-decimal-cps '(1 1 0 1) (empty-k)) 11)
-                         ) 
+                                       (times-cps '(1 2 3 0 3) (empty-k)) 0))
 
 ))
 
