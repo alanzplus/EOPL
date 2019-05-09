@@ -4,6 +4,7 @@
 (provide binary-to-decimal-cps)
 (provide times)
 (provide times-cps)
+(provide times-cps-shortcut)
 (provide empty-k)
 
 (define empty-k
@@ -50,3 +51,16 @@
         (times-cps (cdr ls)
                    (lambda (v)
                      (k (* (car ls) v))))])))
+
+; 3. times-cps-shortcut
+(define times-cps-shortcut
+  (lambda (ls k)
+    (cond
+      [(null? ls) (k 1)]
+      [(zero? (car ls)) 0]
+      [else
+        (times-cps-shortcut
+          (cdr ls)
+          (lambda (v)
+            (k (* (car ls) v))))])))
+
