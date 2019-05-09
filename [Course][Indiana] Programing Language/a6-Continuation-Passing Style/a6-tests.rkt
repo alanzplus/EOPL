@@ -45,6 +45,23 @@
                                        ((plus-cps 2 (empty-k)) 3) 5)
                           (test-equal? "case4"
                                        ((plus-cps ((plus-cps 2 (empty-k)) 3) (empty-k)) 5) 10))
+              (test-suite "remv-first-9*"
+                          (test-equal? "case1"
+                                       (remv-first-9* '((1 2 (3) 9))) '((1 2 (3))))
+                          (test-equal? "case2"
+                                       (remv-first-9* '(9 (9 (9 (9)))))
+                                       '((9 (9 (9)))))
+                          (test-equal? "case3"
+                                       (remv-first-9* '(((((9) 9) 9) 9) 9))
+                                       '((((() 9) 9) 9) 9))
+                          (test-equal? "case4"
+                                       (remv-first-9*-cps '((1 2 (3) 9)) (empty-k)) '((1 2 (3))))
+                          (test-equal? "case5"
+                                       (remv-first-9*-cps '(9 (9 (9 (9)))) (empty-k))
+                                       '((9 (9 (9)))))
+                          (test-equal? "case6"
+                                       (remv-first-9*-cps '(((((9) 9) 9) 9) 9) (empty-k))
+                                       '((((() 9) 9) 9) 9)))
 ))
 
 (run-tests tests)

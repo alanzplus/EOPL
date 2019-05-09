@@ -7,6 +7,8 @@
 (provide times-cps-shortcut)
 (provide plus)
 (provide plus-cps)
+(provide remv-first-9*)
+(provide remv-first-9*-cps)
 (provide empty-k)
 
 (define empty-k
@@ -76,3 +78,42 @@
   (lambda (m k)
     (lambda (n)
       (k (+ m n)))))
+
+; 5. remv-first-9*
+(define remv-first-9*
+  (lambda (ls)
+    (cond
+      [(null? ls) '()]
+      [(pair? (car ls))
+       (cond
+         [(equal? (car ls) (remv-first-9* (car ls)))
+          (cons (car ls) (remv-first-9* (cdr ls)))]
+         [else
+           (cons (remv-first-9* (car ls))
+                 (cdr ls))])]
+      [(eqv? (car ls) '9) (cdr ls)]
+      [else (cons (car ls) (remv-first-9* (cdr ls)))])))
+
+(define remv-first-9*-cps
+  (lambda (ls k)
+    (cond
+      [(null? ls) (k '())]
+      [(pair? (car ls))
+       (remv-first-9*-cps
+         (car ls)
+         (lambda (v1)
+           (if (equal? (car ls) v1)
+             (remv-first-9*-cps
+               (cdr ls)
+               (lambda (v2)
+                 (k (cons (car ls) v2))))
+             (remv-first-9*-cps
+               (car ls)
+               (lambda (v2)
+                 (k (cons v2 (cdr ls))))))))]
+      [(eqv? (car ls) '9) (k (cdr ls))]
+      [else
+        (remv-first-9*-cps
+          (cdr ls)
+          (lambda (v)
+            (k (cons (car ls) v))))])))
