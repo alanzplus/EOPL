@@ -62,6 +62,27 @@
                           (test-equal? "case6"
                                        (remv-first-9*-cps '(((((9) 9) 9) 9) 9) (empty-k))
                                        '((((() 9) 9) 9) 9)))
+              (test-suite "cons-cell-count"
+                          (test-equal? "case1"
+                                       (cons-cell-count '()) 0)
+                          (test-equal? "case2"
+                                       (cons-cell-count '(1)) 1)
+                          (test-equal? "case3"
+                                       (cons-cell-count '(1 2)) 2)
+                          (test-equal? "case3"
+                                       (cons-cell-count '(1 (3))) 3)
+                          (test-equal? "case4"
+                                       (cons-cell-count '((1 (2)) (3))) 6)
+                          (test-equal? "case5"
+                                       (cons-cell-count-cps '() (empty-k)) 0)
+                          (test-equal? "case2"
+                                       (cons-cell-count-cps '(1) (empty-k)) 1)
+                          (test-equal? "case3"
+                                       (cons-cell-count-cps '(1 2) (empty-k)) 2)
+                          (test-equal? "case3"
+                                       (cons-cell-count-cps '(1 (3)) (empty-k)) 3)
+                          (test-equal? "case4"
+                                       (cons-cell-count-cps '((1 (2)) (3)) (empty-k)) 6))
 ))
 
 (run-tests tests)

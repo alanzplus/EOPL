@@ -9,6 +9,8 @@
 (provide plus-cps)
 (provide remv-first-9*)
 (provide remv-first-9*-cps)
+(provide cons-cell-count)
+(provide cons-cell-count-cps)
 (provide empty-k)
 
 (define empty-k
@@ -117,3 +119,24 @@
           (cdr ls)
           (lambda (v)
             (k (cons (car ls) v))))])))
+
+; 6. cons-cell-count
+(define cons-cell-count
+  (lambda (ls)
+    (cond
+      [(pair? ls)
+       (add1 (+ (cons-cell-count (car ls)) (cons-cell-count (cdr ls))))]
+      [else 0])))
+
+(define cons-cell-count-cps
+  (lambda (ls k)
+    (cond
+      [(pair? ls)
+       (cons-cell-count-cps
+         (car ls)
+         (lambda (v1)
+           (cons-cell-count-cps
+             (cdr ls)
+             (lambda (v2)
+               (k (add1 (+ v1 v2)))))))]
+      [else (k 0)])))
