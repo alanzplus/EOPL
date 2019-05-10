@@ -83,6 +83,27 @@ See [a5.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndian
 * [TODO] Braintears
 * [TODO] Dessert
 
+### Assignment 6
+See [a6.rkt](https://github.com/alanzplus/EOPL/blob/master/%5BCourse%5D%5BIndiana%5D%20Programing%20Language/a6-Continuation-Passing%20Style/a6.rkt)
+
+* [DONE] binary-to-decimal-cps
+* [DONE] times-cps
+* [DONE] times-cps-shortcut
+* [DONE] plus-cps
+* [DONE] remv-first-9-cps
+* [DONE] cons-cell-count-cps
+* [DONE] find-cps
+* [DONE] ack-cps
+* [DONE] fib-cps
+* [DONE] unfold-cps
+* [DONE] unify-cps
+* [DONE] M-cps
+* [DONE] use-of-M-cps
+* [TODO] strange-cps
+* [TODO] use-of-strange-cps
+* [TODO] why-cps
+* [TODO] why-cps-cps
+
 ## EOPL
 
 ### Chapter 1
