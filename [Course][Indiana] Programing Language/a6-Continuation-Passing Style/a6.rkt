@@ -23,6 +23,8 @@
 (provide unify-cps)
 (provide M)
 (provide M-cps)
+(provide use-of-M)
+(provide use-of-M-cps)
 (provide empty-k)
 (provide empty-s)
 
@@ -300,3 +302,10 @@
         [else (f (car ls) (lambda (v1)
                             ((M-cps f) (cdr ls) (lambda (v2)
                                                   (k (cons v1 v2))))))]))))
+
+; 13 use-of-M
+(define use-of-M
+  ((M (lambda (n) (add1 n))) '(1 2 3 4 5)))
+
+(define use-of-M-cps
+  ((M-cps (lambda (n k) (k (add1 n)))) '(1 2 3 4 5) (empty-k)))

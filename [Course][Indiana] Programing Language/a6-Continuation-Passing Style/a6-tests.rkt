@@ -122,6 +122,8 @@
                           (test-equal? "case1"
                                        ((M (lambda (x) (* x 2))) '(1 2 3))
                                        ((M-cps (lambda (x k) (k (* x 2)))) '(1 2 3) (empty-k))))
+              (test-suite "use-of-M"
+                          (test-equal? "case1" use-of-M use-of-M-cps))
 ))
 
 (run-tests tests)
