@@ -83,6 +83,13 @@
                                        (cons-cell-count-cps '(1 (3)) (empty-k)) 3)
                           (test-equal? "case4"
                                        (cons-cell-count-cps '((1 (2)) (3)) (empty-k)) 6))
+              (test-suite "find"
+                          (test-equal? "case1" (find 5 '((5 . a) (6 . b) (7 . c))) 'a)
+                          (test-equal? "case2" (find 7 '((5 . a) (6 . 5) (7 . 6))) 'a)
+                          (test-equal? "case3" (find 5 '((5 . 6) (9 . 6) (2 . 9))) 6)
+                          (test-equal? "case4" (find-cps 5 '((5 . a) (6 . b) (7 . c)) (empty-k)) 'a)
+                          (test-equal? "case5" (find-cps 7 '((5 . a) (6 . 5) (7 . 6)) (empty-k)) 'a)
+                          (test-equal? "case6" (find-cps 5 '((5 . 6) (9 . 6) (2 . 9)) (empty-k)) 6))
 ))
 
 (run-tests tests)

@@ -11,6 +11,8 @@
 (provide remv-first-9*-cps)
 (provide cons-cell-count)
 (provide cons-cell-count-cps)
+(provide find)
+(provide find-cps)
 (provide empty-k)
 
 (define empty-k
@@ -140,3 +142,16 @@
              (lambda (v2)
                (k (add1 (+ v1 v2)))))))]
       [else (k 0)])))
+
+; 7. find
+(define find
+  (lambda (u s)
+    (let ([pr (assv u s)])
+      (if pr (find (cdr pr) s) u))))
+
+(define find-cps
+  (lambda (u s k)
+    (let ([pr (assv u s)])
+      (if pr
+        (find-cps (cdr pr) s k)
+        (k u)))))
