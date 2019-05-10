@@ -19,7 +19,10 @@
 (provide fib-cps)
 (provide unfold)
 (provide unfold-cps)
+(provide unify)
+(provide unify-cps)
 (provide empty-k)
+(provide empty-s)
 
 (define empty-k
   (lambda ()
@@ -221,12 +224,60 @@
          (if (p seed)
            (k ans)
            ((h h) (g seed) (cons (f seed) ans) (lambda (v) (k v)))))))))
-    ;((lambda (h)
-       ;((h h k) seed '()))
-     ;(lambda (h k)
-       ;(lambda (seed ans)
-         ;(printf "~s, ~s\n" seed ans)
-         ;(if (p seed)
-           ;(k ans)
-           ;(h h (lambda (v)
-                  ;(k (v (g seed) (cons (f seed) ans)))))))))))
+
+; 11 unify
+(define empty-s
+  (lambda () '()))
+
+(define unify
+  (lambda (u v s)
+    (cond
+      [(eqv? u v) s]
+      [(number? u) (cons (cons u v) s)]
+      [(number? v) (unify v u s)]
+      [(pair? u)
+       (if (pair? v)
+         (let ([s (unify (find (car u) s) (find (car v) s) s)])
+           (if s (unify (find (cdr u) s) (find (cdr v) s) s) #f))
+         #f)]
+      [else #f])))
+
+(define unify-cps
+  (lambda (u v s k)
+    (cond
+      [(eqv? u v) (k s)]
+      [(number? u) (k (cons (cons u v) s))]
+      [(number? v) (unify-cps v u s k)]
+      [(pair? u)
+       (if (pair? v)
+         (find-cps
+           (car u)
+           s
+           (lambda (v1)
+             (find-cps
+               (car v)
+               s
+               (lambda (v2)
+                 (unify-cps
+                   v1
+                   v2
+                   s
+                   (lambda (v3)
+                     (if v3
+                       (find-cps
+                         (cdr u)
+                         v3
+                         (lambda (v4)
+                           (find-cps
+                             (cdr v)
+                             v3
+                             (lambda (v5)
+                               (unify-cps
+                                 v4
+                                 v5
+                                 v3
+                                 (lambda (v6)
+                                   (k v6)))))))
+                       (k #f))))))))
+         (k #f))]
+       [else (k #f)])))
