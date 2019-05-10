@@ -21,6 +21,8 @@
 (provide unfold-cps)
 (provide unify)
 (provide unify-cps)
+(provide M)
+(provide M-cps)
 (provide empty-k)
 (provide empty-s)
 
@@ -281,3 +283,20 @@
                        (k #f))))))))
          (k #f))]
        [else (k #f)])))
+
+; 12 M
+(define M
+  (lambda (f)
+    (lambda (ls)
+      (cond
+        [(null? ls) '()]
+        [else (cons (f (car ls)) ((M f) (cdr ls)))]))))
+
+(define M-cps
+  (lambda (f)
+    (lambda (ls k)
+      (cond
+        [(null? ls) (k '())]
+        [else (f (car ls) (lambda (v1)
+                            ((M-cps f) (cdr ls) (lambda (v2)
+                                                  (k (cons v1 v2))))))]))))

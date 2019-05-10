@@ -118,6 +118,10 @@
                           (test-equal? "case12" (unify-cps '(x x) '(5 6) (empty-s) (empty-k)) '((6 . x) (5 . x)))
                           (test-equal? "case13" (unify-cps '(1 2 3) '(x 1 2) (empty-s) (empty-k)) '((3 . x) (2 . x) (1 . x)))
                           (test-equal? "case14" (unify-cps 'x 'y (empty-s) (empty-k)) #f))
+              (test-suite "M"
+                          (test-equal? "case1"
+                                       ((M (lambda (x) (* x 2))) '(1 2 3))
+                                       ((M-cps (lambda (x k) (k (* x 2)))) '(1 2 3) (empty-k))))
 ))
 
 (run-tests tests)
