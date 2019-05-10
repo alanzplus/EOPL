@@ -90,6 +90,11 @@
                           (test-equal? "case4" (find-cps 5 '((5 . a) (6 . b) (7 . c)) (empty-k)) 'a)
                           (test-equal? "case5" (find-cps 7 '((5 . a) (6 . 5) (7 . 6)) (empty-k)) 'a)
                           (test-equal? "case6" (find-cps 5 '((5 . 6) (9 . 6) (2 . 9)) (empty-k)) 6))
+              (test-suite "ack"
+                          (test-equal? "case1" (ack-cps 1 0 (empty-k)) (ack 1 0))
+                          (test-equal? "case2" (ack-cps 0 1 (empty-k)) (ack 0 1))
+                          (test-equal? "case3" (ack-cps 1 1 (empty-k)) (ack 1 1))
+                          (test-equal? "case4" (ack-cps 2 2 (empty-k)) (ack 2 2)))
 ))
 
 (run-tests tests)

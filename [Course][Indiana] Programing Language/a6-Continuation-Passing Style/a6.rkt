@@ -13,6 +13,8 @@
 (provide cons-cell-count-cps)
 (provide find)
 (provide find-cps)
+(provide ack)
+(provide ack-cps)
 (provide empty-k)
 
 (define empty-k
@@ -155,3 +157,20 @@
       (if pr
         (find-cps (cdr pr) s k)
         (k u)))))
+
+; 8 ack
+(define ack
+  (lambda (m n)
+    (cond
+      [(zero? m) (add1 n)]
+      [(zero? n) (ack (sub1 m) 1)]
+      [else (ack (sub1 m)
+                 (ack m (sub1 n)))])))
+
+(define ack-cps
+  (lambda (m n k)
+    (cond
+      [(zero? m) (k (add1 n))]
+      [(zero? n) (ack-cps (sub1 m) 1 k)]
+      [else (ack-cps m (sub1 n) (lambda (v)
+                                  (ack-cps (sub1 m) v k)))])))
