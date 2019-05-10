@@ -17,6 +17,8 @@
 (provide ack-cps)
 (provide fib)
 (provide fib-cps)
+(provide unfold)
+(provide unfold-cps)
 (provide empty-k)
 
 (define empty-k
@@ -198,3 +200,33 @@
          [else (fib fib (sub1 n) (lambda (v1)
                                    (fib fib (sub1 (sub1 n)) (lambda (v2)
                                                               (k (+ v1 v2))))))])))))
+
+; 10 unfold
+(define unfold
+  (lambda (p f g seed)
+    ((lambda (h)
+       ((h h) seed '()))
+     (lambda (h)
+       (lambda (seed ans)
+         (if (p seed)
+           ans
+           ((h h) (g seed) (cons (f seed) ans))))))))
+
+(define unfold-cps
+  (lambda (p f g seed k)
+    ((lambda (h)
+       ((h h) seed '() k))
+     (lambda (h)
+       (lambda (seed ans k)
+         (if (p seed)
+           (k ans)
+           ((h h) (g seed) (cons (f seed) ans) (lambda (v) (k v)))))))))
+    ;((lambda (h)
+       ;((h h k) seed '()))
+     ;(lambda (h k)
+       ;(lambda (seed ans)
+         ;(printf "~s, ~s\n" seed ans)
+         ;(if (p seed)
+           ;(k ans)
+           ;(h h (lambda (v)
+                  ;(k (v (g seed) (cons (f seed) ans)))))))))))

@@ -87,7 +87,7 @@
                           (test-equal? "case1" (find 5 '((5 . a) (6 . b) (7 . c))) 'a)
                           (test-equal? "case2" (find 7 '((5 . a) (6 . 5) (7 . 6))) 'a)
                           (test-equal? "case3" (find 5 '((5 . 6) (9 . 6) (2 . 9))) 6)
-                          (test-equal? "case4" (find-cps 5 '((5 . a) (6 . b) (7 . c)) (empty-k)) 'a)
+                          (test-equal? "case5" (find-cps 5 '((5 . a) (6 . b) (7 . c)) (empty-k)) 'a)
                           (test-equal? "case5" (find-cps 7 '((5 . a) (6 . 5) (7 . 6)) (empty-k)) 'a)
                           (test-equal? "case6" (find-cps 5 '((5 . 6) (9 . 6) (2 . 9)) (empty-k)) 6))
               (test-suite "ack"
@@ -99,6 +99,10 @@
                           (test-equal? "case1" (fib-cps 1 (empty-k)) (fib 1))
                           (test-equal? "case2" (fib-cps 2 (empty-k)) (fib 2))
                           (test-equal? "case3" (fib-cps 10 (empty-k)) (fib 10)))
+              (test-suite "unfold"
+                          (test-equal? "case1" (unfold-cps null? car cdr '() (empty-k)) (unfold null? car cdr '()))
+                          (test-equal? "case2" (unfold-cps null? car cdr '(a) (empty-k)) (unfold null? car cdr '(a)))
+                          (test-equal? "case1" (unfold-cps null? car cdr '(a b c d e) (empty-k)) (unfold null? car cdr '(a b c d e))))
 ))
 
 (run-tests tests)
