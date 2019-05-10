@@ -95,6 +95,10 @@
                           (test-equal? "case2" (ack-cps 0 1 (empty-k)) (ack 0 1))
                           (test-equal? "case3" (ack-cps 1 1 (empty-k)) (ack 1 1))
                           (test-equal? "case4" (ack-cps 2 2 (empty-k)) (ack 2 2)))
+              (test-suite "fib"
+                          (test-equal? "case1" (fib-cps 1 (empty-k)) (fib 1))
+                          (test-equal? "case2" (fib-cps 2 (empty-k)) (fib 2))
+                          (test-equal? "case3" (fib-cps 10 (empty-k)) (fib 10)))
 ))
 
 (run-tests tests)

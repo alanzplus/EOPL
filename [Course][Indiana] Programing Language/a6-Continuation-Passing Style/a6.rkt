@@ -15,6 +15,8 @@
 (provide find-cps)
 (provide ack)
 (provide ack-cps)
+(provide fib)
+(provide fib-cps)
 (provide empty-k)
 
 (define empty-k
@@ -174,3 +176,25 @@
       [(zero? n) (ack-cps (sub1 m) 1 k)]
       [else (ack-cps m (sub1 n) (lambda (v)
                                   (ack-cps (sub1 m) v k)))])))
+; 9 fib
+(define fib
+  (lambda (n)
+    ((lambda (fib)
+       (fib fib n))
+     (lambda (fib n)
+       (cond
+         [(zero? n) 0]
+         [(zero? (sub1 n)) 1]
+         [else (+ (fib fib (sub1 n)) (fib fib (sub1 (sub1 n))))])))))
+
+(define fib-cps
+  (lambda (n k)
+    ((lambda (fib)
+       (fib fib n k))
+     (lambda (fib n k)
+       (cond
+         [(zero? n) (k 0)]
+         [(zero? (sub1 n)) (k 1)]
+         [else (fib fib (sub1 n) (lambda (v1)
+                                   (fib fib (sub1 (sub1 n)) (lambda (v2)
+                                                              (k (+ v1 v2))))))])))))
