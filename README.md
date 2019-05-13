@@ -1,14 +1,16 @@
 # Essentials Of Programming Language
-This repository contains notes and solutions of exercises during course of learning essentials of programming languages
-
-On-going plan:
+This repository contains notes and solutions of exercises during course of learning essentials of programming languages from following resources:
 
 * [BOOK] __Essentials Of Programming Lanugage,3rd__, [Douban Review](https://book.douban.com/subject/3136252/)
-* [BOOK] __Engineering A Compiler,2nd__, [Douban Review](https://book.douban.com/subject/5288601/)
 * [BOOK] __Scheme and The Art Of Programing__, [Douban Review](https://book.douban.com/subject/1775442/)
 * [BOOK] __Structure and Interpretation of Computer Programs,2nd__, [Douban Review](https://book.douban.com/subject/1451622/)
+* [BOOK] __Engineering A Compiler,2nd__, [Douban Review](https://book.douban.com/subject/5288601/)
 * [COURSE][Indiana] __Programing Languages__, [CS311](https://cgi.sice.indiana.edu/~c311/doku.php?id=home)
 * [COURSE][Brown] __Introduction to Programing Languages__, [CSCI1730](http://cs.brown.edu/courses/csci1730/2012/)
+
+Reading and solving the puzzles from the resources above is good for your brain ;)
+
+This repo is updated irregularly...
 
 ## CS311
 
