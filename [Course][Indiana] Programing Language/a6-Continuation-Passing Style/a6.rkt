@@ -25,6 +25,8 @@
 (provide M-cps)
 (provide use-of-M)
 (provide use-of-M-cps)
+(provide strange)
+(provide strange-cps)
 (provide empty-k)
 (provide empty-s)
 
@@ -309,3 +311,30 @@
 
 (define use-of-M-cps
   ((M-cps (lambda (n k) (k (add1 n)))) '(1 2 3 4 5) (empty-k)))
+
+; 14 strange
+(define strange
+  (lambda (x)
+    ((lambda (g) (lambda (x) (g g)))
+     (lambda (g) (lambda (x) (g g))))))
+
+(define strange-cps
+  (lambda (x k)
+    ((lambda (g k) (lambda (x k) (g g k)))
+     (lambda (g k) (lambda (x k) (g g k)))
+     k)))
+
+; 15 use-of-strange
+(define use-of-strange
+  (let ([strange^ (((strange 5) 6) 7)])
+    (((strange^ 8) 9) 10)))
+
+(define use-of-strange-cps
+  (strange-cps 5
+               (lambda (v1)
+                 (v1 6 (lambda (v2)
+                         (v2 7 (lambda (v3)
+                                 (v3 8 (lambda (v4)
+                                         (v4 9 (lambda (v5)
+                                                 (v5 10 (lambda (v6)
+                                                          ((empty-k) v6))))))))))))))
