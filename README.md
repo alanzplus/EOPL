@@ -1,4 +1,4 @@
-# Essentials Of Programming Language
+#  😵 😖 💥 🎆 Essentials Of Programming Language
 This repository contains notes and solutions of exercises during course of learning essentials of programming languages from following resources:
 
 * :book: _Essentials Of Programming Lanugage,3rd_ (__EOPL__), [Douban](https://book.douban.com/subject/3136252/), [Amazon](https://www.amazon.com/Essentials-Programming-Languages-MIT-Press/dp/0262062798/ref=sr_1_1?crid=19B2DKYOE1TS6&keywords=essentials+of+programming+languages&qid=1560515381&s=gateway&sprefix=essentials+of+programming+%2Caps%2C281&sr=8-1)
