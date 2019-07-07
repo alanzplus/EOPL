@@ -119,5 +119,16 @@
                                    (value-of-cps body
                                                  (lambda (y) (if (zero? y) v1 (env (sub1 y))))
                                                  (lambda (v2) (cont v2)))))]
+           [`(lambda ,body)
+             (cont
+               (lambda (a cont^)
+                 (value-of-cps body
+                               (lambda (y) (if (zero? y) a (env (sub1 y))))
+                               (lambda (v1)
+                                 (cont^ v1)))))]
+           [`(app ,rator ,rand)
+             (value-of-cps rator env (lambda (v1)
+                                       (value-of-cps rand env (lambda (v2)
+                                                                (v1 v2 cont)))))]
            [`(var ,id) (cont (env id))]
            )))

@@ -62,6 +62,50 @@
                                        (value-of-cps '(let (const 6) (const 4)) (empty-env) (empty-k)) 4)
                           (test-equal? "case13"
                                        (value-of-cps '(let (const 5) (var 0)) (empty-env) (empty-k)) 5)
+                          (test-equal? "case14"
+                                       (value-of-cps '(letcc (throw (app (lambda (var 0)) (var 0)) (mult (const 5) (const 5)))) (empty-env) (empty-k)) 25)
+                          (test-equal? "case15"
+                                       (value-of-cps '(letcc (sub1 (throw (var 0) (const 5)))) (empty-env) (empty-k)) 5)
+                          (test-equal? "case16"
+                                       (value-of-cps '(letcc (throw (throw (var 0) (const 5)) (const 6))) (empty-env) (empty-k)) 5)
+                          (test-equal? "case17"
+                                       (value-of-cps '(letcc (throw (const 5) (throw (var 0) (const 5)))) (empty-env) (empty-k)) 5)
+                          (test-equal? "case18"
+                                       (value-of-cps '(mult (const 3) (letcc (throw (const 5) (throw (var 0) (const 5))))) (empty-env) (empty-k)) 15)
+                          (test-equal? "case19"
+                                       (value-of-cps '(app (lambda (const 5)) (const 6)) (empty-env) (empty-k)) 5)
+                          (test-equal? "case20"
+                                       (value-of-cps '(app (lambda (var 0)) (const 5)) (empty-env) (empty-k)) 5)
+                          (test-equal? "case21"
+                                       (value-of-cps '(app (app (lambda (lambda (var 1))) (const 6)) (const 5)) (empty-env) (empty-k)) 6)
+                          (test-equal? "case22"
+                                       (value-of-cps '(app (lambda (app (lambda (var 1)) (const 6))) (const 5)) (empty-env) (empty-k)) 5)
+                          (test-equal? "case23"
+                                       (value-of-cps '(app (lambda (if (zero (var 0)) (const 4) (const 5))) (const 3)) (empty-env) (empty-k)) 5)
+                          (test-equal? "case24"
+                                       (value-of-cps '(app (if (zero (const 4)) (lambda (var 0)) (lambda (const 5))) (const 3)) (empty-env) (empty-k)) 5)
+                          (test-equal? "case25"
+                                       (value-of-cps '(app (if (zero (const 0)) (lambda (var 0)) (lambda (const 5))) (const 3)) (empty-env) (empty-k)) 3)
+                          (test-equal? "case26"
+                                       (value-of-cps '(if (zero (const 5)) (app (lambda (app (var 0) (var 0))) (lambda (app (var 0) (var 0)))) (const 4))
+                                                     (empty-env)
+                                                     (empty-k))
+                                       4)
+                          (test-equal? "case27"
+                                       (value-of-cps '(if (zero (const 0)) (const 4) (app (lambda (app (var 0) (var 0))) (lambda (app (var 0) (var 0)))))
+                                                     (empty-env)
+                                                     (empty-k))
+                                       4)
+                          (test-equal? "case28"
+                                       (value-of-cps '(app (lambda (app (app (var 0) (var 0)) (const 2)))
+                                                           (lambda
+                                                             (lambda 
+                                                               (if (zero (var 0))  
+                                                                   (const 1)
+                                                                   (app (app (var 1) (var 1)) (sub1 (var 0)))))))
+                                                     (empty-env)
+                                                     (empty-k))
+                                       1)
                           )
               )
   )
