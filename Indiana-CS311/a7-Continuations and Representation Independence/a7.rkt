@@ -114,5 +114,10 @@
              (value-of-cps k-exp env (lambda (v1)
                                        (value-of-cps v-exp env (lambda (v2)
                                                                  (v1 v2)))))]
+           [`(let ,e ,body) 
+             (value-of-cps e env (lambda (v1)
+                                   (value-of-cps body
+                                                 (lambda (y) (if (zero? y) v1 (env (sub1 y))))
+                                                 (lambda (v2) (cont v2)))))]
            [`(var ,id) (cont (env id))]
            )))

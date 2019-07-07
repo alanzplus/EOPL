@@ -58,6 +58,10 @@
                                        (value-of-cps '(letcc (throw (var 0) (const 5))) (empty-env) (empty-k)) 5)
                           (test-equal? "case11"
                                        (value-of-cps '(letcc (throw (var 0) (mult (const 5) (const 5)))) (empty-env) (empty-k)) 25)
+                          (test-equal? "case12"
+                                       (value-of-cps '(let (const 6) (const 4)) (empty-env) (empty-k)) 4)
+                          (test-equal? "case13"
+                                       (value-of-cps '(let (const 5) (var 0)) (empty-env) (empty-k)) 5)
                           )
               )
   )
