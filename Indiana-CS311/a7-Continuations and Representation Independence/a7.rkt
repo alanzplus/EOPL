@@ -92,24 +92,24 @@
 (define value-of-cps
   (lambda (expr env cont)
     (match expr
-           [`(const ,val) (cont val)]
+           [`(const ,val) (apply-k cont val)]
            [`(mult ,x1 ,x2)
              (value-of-cps x1 env (lambda (v1)
                                     (value-of-cps x2 env (lambda (v2)
-                                                           (cont (* v1 v2))))))]
+                                                           (apply-k cont (* v1 v2))))))]
            [`(sub1 ,x) (value-of-cps x env (lambda (v1)
-                                             (cont (- v1 1))))]
+                                             (apply-k cont (- v1 1))))]
            [`(zero ,x) (value-of-cps x env (lambda (v1)
-                                             (cont (zero? v1))))]
+                                             (apply-k cont (zero? v1))))]
            [`(if ,test ,conseq ,alt)
              (value-of-cps test env (lambda (v1)
                                       (if v1
-                                          (value-of-cps conseq env (lambda (v2) (cont v2)))
-                                          (value-of-cps alt env (lambda (v3) (cont v3))))))]
+                                          (value-of-cps conseq env (lambda (v2) (apply-k cont v2)))
+                                          (value-of-cps alt env (lambda (v3) (apply-k cont v3))))))]
            [`(letcc ,body)
              (value-of-cps body
-                           (lambda (y) (if (zero? y) cont (env (sub1 y))))
-                           (lambda (v) (cont v)))]
+                           (extend-env cont env)
+                           (lambda (v) (apply-k cont v)))]
            [`(throw ,k-exp ,v-exp)
              (value-of-cps k-exp env (lambda (v1)
                                        (value-of-cps v-exp env (lambda (v2)
@@ -117,18 +117,36 @@
            [`(let ,e ,body) 
              (value-of-cps e env (lambda (v1)
                                    (value-of-cps body
-                                                 (lambda (y) (if (zero? y) v1 (env (sub1 y))))
-                                                 (lambda (v2) (cont v2)))))]
+                                                 (extend-env v1 env)
+                                                 (lambda (v2) (apply-k cont v2)))))]
            [`(lambda ,body)
              (cont
                (lambda (a cont^)
                  (value-of-cps body
-                               (lambda (y) (if (zero? y) a (env (sub1 y))))
+                               (extend-env a env)
                                (lambda (v1)
-                                 (cont^ v1)))))]
+                                 (apply-k cont^ v1)))))]
            [`(app ,rator ,rand)
              (value-of-cps rator env (lambda (v1)
                                        (value-of-cps rand env (lambda (v2)
-                                                                (v1 v2 cont)))))]
-           [`(var ,id) (cont (env id))]
-           )))
+                                                                (apply-closure v1 v2 cont)))))]
+           [`(var ,address) (apply-k cont (apply-env env address))])))
+
+(define apply-env
+  (lambda (env address)
+    (env address)))
+
+(define extend-env
+  (lambda (val env)
+    (lambda (y)
+      (if (zero? y) val
+          (env (sub1 y))))))
+
+(define apply-closure
+  (lambda (rator rand cont)
+    (rator rand cont)))
+
+(define apply-k
+  (lambda (cont v)
+    (cont v)))
+
