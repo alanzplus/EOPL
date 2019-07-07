@@ -98,4 +98,6 @@
                                                            (cont (* v1 v2))))))]
            [`(sub1 ,x) (value-of-cps x env (lambda (v1)
                                              (cont (- v1 1))))]
+           [`(zero ,x) (value-of-cps x env (lambda (v1)
+                                             (cont (zero? v1))))]
            )))
