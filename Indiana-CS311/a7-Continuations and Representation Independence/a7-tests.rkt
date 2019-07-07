@@ -40,6 +40,10 @@
                                        (value-of-cps '(const 5) (empty-env) (empty-k)) 5)
                           (test-equal? "case2"
                                        (value-of-cps '(mult (const 5) (const 5)) (empty-env) (empty-k)) 25)
+                          (test-equal? "case3"
+                                       (value-of-cps '(sub1 (const 5)) (empty-env) (empty-k)) 4)
+                          (test-equal? "case4"
+                                       (value-of-cps '(sub1 (sub1 (const 5))) (empty-env) (empty-k)) 3)
                           )
               )
   )
