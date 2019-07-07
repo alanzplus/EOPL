@@ -86,6 +86,7 @@
 (define empty-k
   (lambda ()
     (lambda (v)
+      (displayln "should print only once")
       v)))
 
 (define value-of-cps
@@ -105,4 +106,13 @@
                                       (if v1
                                           (value-of-cps conseq env (lambda (v2) (cont v2)))
                                           (value-of-cps alt env (lambda (v3) (cont v3))))))]
+           [`(letcc ,body)
+             (value-of-cps body
+                           (lambda (y) (if (zero? y) cont (env (sub1 y))))
+                           (lambda (v) (cont v)))]
+           [`(throw ,k-exp ,v-exp)
+             (value-of-cps k-exp env (lambda (v1)
+                                       (value-of-cps v-exp env (lambda (v2)
+                                                                 (v1 v2)))))]
+           [`(var ,id) (cont (env id))]
            )))
