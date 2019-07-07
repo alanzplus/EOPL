@@ -35,6 +35,12 @@
                           (test-equal? "case3"
                                        (value-of (lex '(let/cc k (throw k 5)) '()) (empty-env)) 5)
                           )
+              (test-suite "value-of-cps"
+                          (test-equal? "case1"
+                                       (value-of-cps '(const 5) (empty-env) (empty-k)) 5)
+                          (test-equal? "case2"
+                                       (value-of-cps '(mult (const 5) (const 5)) (empty-env) (empty-k)) 25)
+                          )
               )
   )
 
