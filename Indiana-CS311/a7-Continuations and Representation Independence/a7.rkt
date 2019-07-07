@@ -100,4 +100,9 @@
                                              (cont (- v1 1))))]
            [`(zero ,x) (value-of-cps x env (lambda (v1)
                                              (cont (zero? v1))))]
+           [`(if ,test ,conseq ,alt)
+             (value-of-cps test env (lambda (v1)
+                                      (if v1
+                                          (value-of-cps conseq env (lambda (v2) (cont v2)))
+                                          (value-of-cps alt env (lambda (v3) (cont v3))))))]
            )))

@@ -48,6 +48,10 @@
                                        (value-of-cps '(zero (const 5)) (empty-env) (empty-k)) #f)
                           (test-equal? "cass6"
                                        (value-of-cps '(zero (sub1 (const 6))) (empty-env) (empty-k)) #f)
+                          (test-equal? "case7"
+                                       (value-of-cps '(if (zero (const 5)) (const 3) (mult (const 2) (const 2))) (empty-env) (empty-k)) 4)
+                          (test-equal? "case8"
+                                       (value-of-cps '(if (zero (const 0)) (mult (const 2) (const 2)) (const 3)) (empty-env) (empty-k)) 4)
                           )
               )
   )
