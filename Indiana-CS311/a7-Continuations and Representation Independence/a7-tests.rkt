@@ -27,6 +27,14 @@
                           (test-equal? "case3"
                                        (lex '(let/cc k (throw k 5)) '()) '(letcc (throw (var 0) (const 5))))
                           )
+              (test-suite "value-of"
+                          (test-equal? "case1"
+                                       (value-of (lex '(let/cc k 5) '()) (empty-env)) 5)
+                          (test-equal? "case2"
+                                       (value-of (lex '(let/cc k (k 5)) '()) (empty-env)) 5)
+                          (test-equal? "case3"
+                                       (value-of (lex '(let/cc k (throw k 5)) '()) (empty-env)) 5)
+                          )
               )
   )
 
