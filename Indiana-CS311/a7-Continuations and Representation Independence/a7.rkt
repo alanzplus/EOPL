@@ -120,33 +120,36 @@
                                                  (extend-env v1 env)
                                                  (lambda (v2) (apply-k cont v2)))))]
            [`(lambda ,body)
-             (cont
-               (lambda (a cont^)
-                 (value-of-cps body
-                               (extend-env a env)
-                               (lambda (v1)
-                                 (apply-k cont^ v1)))))]
+             (apply-k cont (make-closure body env))]
            [`(app ,rator ,rand)
              (value-of-cps rator env (lambda (v1)
                                        (value-of-cps rand env (lambda (v2)
                                                                 (apply-closure v1 v2 cont)))))]
            [`(var ,address) (apply-k cont (apply-env env address))])))
 
-(define apply-env
-  (lambda (env address)
-    (env address)))
+(define make-closure
+  (lambda (body env)
+    (lambda (a k)
+      (value-of-cps body
+                    (extend-env a env)
+                    (lambda (v1)
+                      (apply-k k v1))))))
 
-(define extend-env
-  (lambda (val env)
-    (lambda (y)
-      (if (zero? y) val
-          (env (sub1 y))))))
+  (define apply-env
+    (lambda (env address)
+      (env address)))
 
-(define apply-closure
-  (lambda (rator rand cont)
-    (rator rand cont)))
+  (define extend-env
+    (lambda (val env)
+      (lambda (y)
+        (if (zero? y) val
+            (env (sub1 y))))))
 
-(define apply-k
-  (lambda (cont v)
-    (cont v)))
+  (define apply-closure
+    (lambda (rator rand cont)
+      (rator rand cont)))
+
+  (define apply-k
+    (lambda (cont v)
+      (cont v)))
 
