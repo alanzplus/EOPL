@@ -8,6 +8,7 @@ This repository contains notes and solutions of exercises during course of learn
 * :book: _Teach Yourself Scheme in Fixnum Days_, [Online Version](https://ds26gte.github.io/tyscheme/index.html)
 * :book: _Lisp in Small Pieces_, [Douban](https://book.douban.com/subject/1456904/), [Amazon](https://www.amazon.com/Lisp-Small-Pieces-Christian-Queinnec/dp/0521545668)
 * :book: _Build Your Own Lisp_, [Online Version](http://www.buildyourownlisp.com/)
+* :book: _Beautiful Racket_, [Online Version](https://beautifulracket.com)
 * :school: _Programing Languages_, [Indiana CS311](https://cgi.sice.indiana.edu/~c311/doku.php?id=home)
 * :school: _Introduction to Programing Languages_, [Brown CSCI1730](http://cs.brown.edu/courses/csci1730/2012/)
 
