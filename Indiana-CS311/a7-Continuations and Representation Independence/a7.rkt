@@ -84,7 +84,7 @@
     (rator rand cont)))
 
 ; Continuation
-; Procedure Presentation
+;   Procedure Presentation
 (define empty-env-fun
   (lambda ()
     (lambda (y)
@@ -96,12 +96,25 @@
       (if (zero? y) val
           (env (sub1 y))))))
 
-(define apply-env
+(define apply-env-fun
   (lambda (env address)
     (env address)))
 
 ; Continuation
-; Procedure Presentation
+;   Data Structure Presentation
+(struct empty-env-ds ())
+
+(struct extend-env-ds (val saved-env))
+
+(define apply-env-ds
+  (lambda (x address)
+    (match x
+      [(extend-env-ds val saved-env)
+       (if (zero? address) val (apply-env saved-env (sub1 address)))]
+      [(empty-env-ds ) (error 'value-of-cps "unbound identifier")])))
+
+; Continuation
+;   Procedure Presentation
 (define empty-k-fun
   (lambda ()
     (lambda (v)
@@ -174,8 +187,9 @@
 (define let-cont let-cont-fun)
 (define app-cont app-cont-fun)
 (define empty-k empty-k-fun)
-(define empty-env empty-env-fun)
-(define extend-env extend-env-fun)
+(define empty-env empty-env-ds)
+(define extend-env extend-env-ds)
+(define apply-env apply-env-ds)
 
 (define value-of-cps
   (lambda (expr env cont)
