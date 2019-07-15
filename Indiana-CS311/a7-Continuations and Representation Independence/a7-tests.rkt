@@ -106,7 +106,15 @@
                                                      (empty-env)
                                                      (empty-k))
                                        1)
+
                           )
+                          (test-suite "brainteaser"
+                                      (test-equal? "case1" (car$ trib$) 0)
+                                      (test-equal? "case2" (car$ (cdr$ trib$)) 1)
+                                      (test-equal? "case3" (car$ (cdr$ (cdr$ trib$))) 1)
+                                      (test-equal? "case4" (car$ (cdr$ (cdr$ (cdr$ trib$)))) 2)
+                                      (test-equal? "case5" (take$ 7 trib$) '(0 1 1 2 4 7 13))
+                         )
               )
   )
 
