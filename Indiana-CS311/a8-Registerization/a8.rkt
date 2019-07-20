@@ -42,21 +42,47 @@
         (ack)))))
 
 (define depth-reg-driver
-  (letrec ([empty-k (lambda () '(empty-k))]
+  (letrec ([ls* 'uninit]
+           [k* 'uninit]
+           [v* 'unint]
+           [empty-k (lambda () '(empty-k))]
            [big-k (lambda (ls k) `(big-k ,ls ,k))]
            [small-k (lambda (l k) `(small-k ,l ,k))]
-           [apply-k (lambda (k v)
-                      (match k
-                             ['(empty-k) v]
+           [apply-k (lambda ()
+                      (match k*
+                             ['(empty-k) v*]
                              [`(big-k ,ls ,k)
-                               (depth (cdr ls) (small-k v k))]
+                               (begin
+                                 (set! ls* (cdr ls))
+                                 (set! k* (small-k v* k))
+                                 (depth))]
                              [`(small-k ,l ,k)
                                (let ([l (add1 l)])
-                                 (if (< l v) (apply-k k v) (apply-k k l)))]))]
-           [depth (lambda (ls k)
+                                 (if (< l v*)
+                                     (begin
+                                       (set! k* k)
+                                       (apply-k))
+                                     (begin
+                                       (set! k* k)
+                                       (set! v* l)
+                                       (apply-k))))]))]
+           [depth (lambda ()
                     (cond
-                      [(null? ls) (apply-k k 1)]
-                      [(pair? (car ls)) (depth (car ls) (big-k ls k))]
-                      [else (depth (cdr ls) k)]))])
+                      [(null? ls*)
+                       (begin
+                         (set! v* 1)
+                         (apply-k))]
+                      [(pair? (car ls*))
+                       (begin
+                         (set! k* (big-k ls* k*))
+                         (set! ls* (car ls*))
+                         (depth))]
+                      [else 
+                        (begin
+                          (set! ls* (cdr ls*))
+                          (depth))]))])
     (lambda (ls)
-      (depth ls (empty-k)))))
+      (begin
+        (set! ls* ls)
+        (set! k* (empty-k))
+        (depth)))))
