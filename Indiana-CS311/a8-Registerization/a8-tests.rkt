@@ -33,6 +33,17 @@
          [else (fact fact (sub1 n) (lambda (v) (k (* n v))))]))
      k)))
 
+(define pascal
+  (lambda (n k)
+    (let ((pascal
+            (lambda (pascal k)
+              (k (lambda (m a k)
+                   (cond
+                     [(> m n) (k '())]
+                     [else (let ((a (+ a m)))
+                             (pascal pascal (lambda (f) (f (add1 m) a (lambda (v) (k (cons a v)))))))]))))))
+      (pascal pascal (lambda (f) (f 1 0 k))))))
+
 (define tests
   (test-suite "A8:"
               (test-suite "ack"
@@ -57,7 +68,18 @@
                                        (fact-reg-driver 2) (fact 2 (lambda (v) v)))
                           (test-equal? "case4"
                                        (fact-reg-driver 3) (fact 3 (lambda (v) v))))
+              (test-suite "pascal"
+                          (test-equal? "case1"
+                                       (pascal-reg-driver 1) (pascal 1 (lambda (v) v)))
+                          (test-equal? "case2"
+                                       (pascal-reg-driver 2) (pascal 2 (lambda (v) v)))
+                          (test-equal? "case3"
+                                       (pascal-reg-driver 3) (pascal 3 (lambda (v) v)))
+                          (test-equal? "case4"
+                                       (pascal-reg-driver 5) (pascal 5 (lambda (v) v)))
+                          (test-equal? "case5"
+                                       (pascal-reg-driver 10) (pascal 10 (lambda (v) v))))
               )
-)
+  )
 
 (run-tests tests)

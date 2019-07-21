@@ -2,6 +2,7 @@
 (provide ack-reg-driver)
 (provide depth-reg-driver)
 (provide fact-reg-driver)
+(provide pascal-reg-driver)
 
 (define ack-reg-driver
   (letrec ([m* 'uninit]
@@ -118,3 +119,28 @@
         (set! n* n)
         (set! k* (empty-k))
         (fact)))))
+
+(define pascal-reg-driver
+  (letrec ([empty-k (lambda () '(empty-k))]
+           [init-k (lambda (saved-k) `(init-k ,saved-k))]
+           [big-k (lambda (a m saved-k) `(big-k ,a ,m ,saved-k))]
+           [small-k (lambda (a saved-k) `(small-k ,a ,saved-k))]
+           [apply-k (lambda (k v)
+                      (match k
+                             ['(empty-k) v]
+                             [`(init-k ,saved-k) (v 1 0 saved-k)]
+                             [`(big-k ,a ,m ,saved-k)
+                               (v (add1 m) a (small-k a saved-k))]
+                             [`(small-k ,a ,saved-k)
+                               (apply-k saved-k (cons a v))]))]
+           [pascal (lambda (n k)
+                     (let ([pascal
+                             (lambda (pascal k)
+                               (apply-k k (lambda (m a k)
+                                            (cond
+                                              [(> m n) (apply-k k '())]
+                                              [else (let ([a (+ a m)])
+                                                      (pascal pascal (big-k a m k)))]))))])
+                       (pascal pascal (init-k k))))])
+    (lambda (n)
+      (pascal n (empty-k)))))
