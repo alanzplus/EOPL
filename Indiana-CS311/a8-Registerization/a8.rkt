@@ -89,20 +89,32 @@
         (depth)))))
 
 (define fact-reg-driver
-  (letrec ([empty-k (lambda () '(empty-k))]
+  (letrec ([n* 'uninit]
+           [k* 'uninit]
+           [v* 'uninit]
+           [empty-k (lambda () '(empty-k))]
            [cont (lambda (k n) `(cont ,k ,n))]
-           [apply-k (lambda (k v)
-                      (match k
-                             ['(empty-k) v]
+           [apply-k (lambda ()
+                      (match k*
+                             ['(empty-k) v*]
                              [`(cont ,saved-k ,n)
-                               (apply-k saved-k (* n v))]))]
-           [fact (lambda (n k)
-                   ((lambda (fact k)
-                      (fact fact n k))
-                    (lambda (fact n k)
-                      (cond
-                        [(zero? n) (apply-k k 1)]
-                        [else (fact fact (sub1 n) (cont k n))]))
-                    k))])
+                               (begin
+                                 (set! k* saved-k)
+                                 (set! v* (* n v*))
+                                 (apply-k))]))]
+           [fact (lambda ()
+                   (cond
+                     [(zero? n*)
+                      (begin
+                        (set! v* 1)
+                        (apply-k))]
+                     [else
+                       (begin
+                         (set! k* (cont k* n*))
+                         (set! n* (sub1 n*))
+                         (fact))]))])
     (lambda (n)
-      (fact n (empty-k)))))
+      (begin
+        (set! n* n)
+        (set! k* (empty-k))
+        (fact)))))
