@@ -5,6 +5,7 @@
 (provide pascal-reg-driver)
 (provide fib)
 (provide fib-ramp-driver)
+(provide bi-tramp-driver)
 
 (define ack-reg-driver
   (letrec ([m* 'uninit]
@@ -231,3 +232,32 @@
                 (lambda () (fib-trampoline n1 (ramp-empty-k jumpout)))
                 (lambda () (fib-trampoline n2 (ramp-empty-k jumpout)))
                 (lambda () (fib-trampoline n3 (ramp-empty-k jumpout))))))))
+
+(define trib
+  (lambda (n k)
+    (lambda ()
+      (cond
+        [(< n 3) (k 1)]
+        [else
+          (trib (- n 3) (lambda (v1)
+                          (trib (- n 2) (lambda (v2)
+                                          (trib (- n 1) (lambda (v3)
+                                                          (k (+ v1 v2 v3))))))))]))))
+
+(define bi-tramp-driver
+  (letrec ([trampline (lambda (th1 th2)
+                        (let ([nth1 (th1)]
+                              [nth2 (th2)])
+                          (cond
+                            [(and (number? nth1) (number? nth2))
+                             (list nth1 nth2)]
+                            [(number? nth1)
+                             (trampline (lambda () nth1) nth2)]
+                            [(number? nth2)
+                             (trampline (lambda () nth2) nth1)]
+                            [else (trampline nth1 nth2)])))]
+           [empty-k (lambda (v) v)])
+    (lambda (n1 n2)
+      (trampline
+        (lambda () (trib n1 empty-k))
+        (lambda () (trib n2 empty-k))))))
