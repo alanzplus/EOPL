@@ -87,15 +87,15 @@
                                        (pascal-reg-driver 10) (pascal 10 (lambda (v) v))))
               (test-suite "fib"
                           (test-equal? "case1"
-                                       (fib-cps 1) (fib-test 1))
+                                       (fib 1) (fib-test 1))
                           (test-equal? "case2"
-                                       (fib-cps 2) (fib-test 2))
+                                       (fib 2) (fib-test 2))
                           (test-equal? "case3"
-                                       (fib-cps 3) (fib-test 3))
+                                       (fib 3) (fib-test 3))
                           (test-equal? "case4"
-                                       (fib-cps 4) (fib-test 4))
+                                       (fib 4) (fib-test 4))
                           (test-equal? "case5"
-                                       (fib-cps 5) (fib-test 5)))
+                                       (fib 5) (fib-test 5)))
               )
   )
 

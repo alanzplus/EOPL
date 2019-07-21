@@ -3,7 +3,7 @@
 (provide depth-reg-driver)
 (provide fact-reg-driver)
 (provide pascal-reg-driver)
-(provide fib-cps)
+(provide fib)
 
 (define ack-reg-driver
   (letrec ([m* 'uninit]
@@ -168,11 +168,13 @@
         (set! v* f)
         (apply-k)))))
 
-(define fib-cps
-  (letrec ([n* 'uninit]
+(define fib
+  (letrec ([pc* 'unint]
+           [n* 'uninit]
            [k* 'uninit]
            [v* 'uninit]
-           [empty-k (lambda () '(empty-k))]
+           [trampoline (lambda () (pc*) (trampoline))]
+           [empty-k (lambda (exit-k) `(empty-k ,exit-k))]
            [big-k (lambda (n saved-k) `(big-k ,n ,saved-k))]
            [small-k (lambda (v saved-k) `(small-k ,v ,saved-k))]
            [apply-k (lambda ()
@@ -181,26 +183,28 @@
                                (begin
                                  (set! n* (sub1 n))
                                  (set! k* (small-k v* saved-k))
-                                 (fib))]
+                                 (set! pc* f))]
                              [`(small-k ,v1 ,saved-k) 
                                (begin
                                  (set! k* saved-k)
                                  (set! v* (+ v1 v*))
-                                 (apply-k))]
-                             [`(empty-k) v*]))]
-           [fib (lambda ()
-                  (cond
-                    [(and (not (negative? n*)) (< n* 2))
-                     (begin
-                       (set! v* n*)
-                       (apply-k))]
-                    [else
-                      (begin
-                        (set! k* (big-k (sub1 n*) k*))
-                        (set! n* (sub1 n*))
-                        (fib))]))])
+                                 (set! pc* apply-k))]
+                             [`(empty-k ,exit-k) (exit-k v*)]))]
+           [f (lambda ()
+                (cond
+                  [(and (not (negative? n*)) (< n* 2))
+                   (begin
+                     (set! v* n*)
+                     (set! pc* apply-k))]
+                  [else
+                    (begin
+                      (set! k* (big-k (sub1 n*) k*))
+                      (set! n* (sub1 n*))
+                      (set! pc* f))]))])
     (lambda (n)
-      (begin
-        (set! n* n)
-        (set! k* (empty-k))
-        (fib)))))
+      (call/cc (lambda (exit-cont)
+                 (begin
+                   (set! n* n)
+                   (set! k* (empty-k exit-cont))
+                   (set! pc* f)
+                   (trampoline)))))))
