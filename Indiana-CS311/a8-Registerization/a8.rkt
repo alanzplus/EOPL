@@ -169,9 +169,15 @@
         (apply-k)))))
 
 (define fib-cps
-  (lambda (n k)
-    (cond
-      [(and (not (negative? n)) (< n 2)) (k n)]
-      [else (fib-cps (sub1 n) (lambda (v1)
-                                (fib-cps (sub1 (sub1 n)) (lambda (v2)
-                                                           (k (+ v1 v2))))))])))
+  (letrec ([emtpy-k (lambda () '(empty-k))]
+           [big-k (lambda (n saved-k) `(big-k ,n ,saved-k))]
+           [small-k (lambda (v saved-k) `(small-k ,v ,saved-k))]
+           [apply-k (lambda (k v)
+                      (match k
+                             [`(big-k ,n ,saved-k) (fib-cps (sub1 n) (small-k v saved-k))]
+                             [`(small-k ,v1 ,saved-k) (apply-k saved-k (+ v1 v))]
+                             [`(empty-k) v]))])
+    (lambda (n k)
+      (cond
+        [(and (not (negative? n)) (< n 2)) (apply-k k n)]
+        [else (fib-cps (sub1 n) (big-k (sub1 n) k))]))))
