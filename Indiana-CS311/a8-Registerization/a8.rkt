@@ -121,26 +121,48 @@
         (fact)))))
 
 (define pascal-reg-driver
-  (letrec ([empty-k (lambda () '(empty-k))]
+  (letrec ([n* 'uninit]
+           [k* 'uninit]
+           [v* 'uninit]
+           [m* 'uninit]
+           [a* 'uninit]
+           [empty-k (lambda () '(empty-k))]
            [init-k (lambda (saved-k) `(init-k ,saved-k))]
            [big-k (lambda (a m saved-k) `(big-k ,a ,m ,saved-k))]
            [small-k (lambda (a saved-k) `(small-k ,a ,saved-k))]
-           [apply-k (lambda (k v)
-                      (match k
-                             ['(empty-k) v]
-                             [`(init-k ,saved-k) (v 1 0 saved-k)]
+           [apply-k (lambda ()
+                      (match k*
+                             ['(empty-k) v*]
+                             [`(init-k ,saved-k)
+                               (begin
+                                 (set! m* 1)
+                                 (set! a* 0)
+                                 (set! k* saved-k)
+                                 (v*))]
                              [`(big-k ,a ,m ,saved-k)
-                               (v (add1 m) a (small-k a saved-k))]
+                               (begin
+                                 (set! m* (add1 m))
+                                 (set! a* a)
+                                 (set! k* (small-k a saved-k))
+                                 (v*))]
                              [`(small-k ,a ,saved-k)
-                               (apply-k saved-k (cons a v))]))]
-           [pascal (lambda (n k)
-                     (let ([pascal
-                             (lambda (pascal k)
-                               (apply-k k (lambda (m a k)
-                                            (cond
-                                              [(> m n) (apply-k k '())]
-                                              [else (let ([a (+ a m)])
-                                                      (pascal pascal (big-k a m k)))]))))])
-                       (pascal pascal (init-k k))))])
+                               (begin
+                                 (set! k* saved-k)
+                                 (set! v* (cons a v*))
+                                 (apply-k))]))]
+           [f (lambda ()
+                (cond
+                  [(> m* n*)
+                   (begin
+                     (set! v* '())
+                     (apply-k))]
+                  [else (let ([a (+ a* m*)])
+                          (begin
+                            (set! k* (big-k a m* k*))
+                            (apply-k)))]))])
     (lambda (n)
-      (pascal n (empty-k)))))
+      (begin
+        (set! n* n)
+        (set! k* (init-k (empty-k)))
+        (set! v* f)
+        (apply-k)))))
