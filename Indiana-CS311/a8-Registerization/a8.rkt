@@ -1,6 +1,7 @@
 #lang racket
 (provide ack-reg-driver)
 (provide depth-reg-driver)
+(provide fact-reg-driver)
 
 (define ack-reg-driver
   (letrec ([m* 'uninit]
@@ -86,3 +87,22 @@
         (set! ls* ls)
         (set! k* (empty-k))
         (depth)))))
+
+(define fact-reg-driver
+  (letrec ([empty-k (lambda () '(empty-k))]
+           [cont (lambda (k n) `(cont ,k ,n))]
+           [apply-k (lambda (k v)
+                      (match k
+                             ['(empty-k) v]
+                             [`(cont ,saved-k ,n)
+                               (apply-k saved-k (* n v))]))]
+           [fact (lambda (n k)
+                   ((lambda (fact k)
+                      (fact fact n k))
+                    (lambda (fact n k)
+                      (cond
+                        [(zero? n) (apply-k k 1)]
+                        [else (fact fact (sub1 n) (cont k n))]))
+                    k))])
+    (lambda (n)
+      (fact n (empty-k)))))

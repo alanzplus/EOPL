@@ -23,6 +23,16 @@
                            (if (< l r) (k r) (k l)))))))]
       [else (depth (cdr ls) k)])))
 
+(define fact
+  (lambda (n k)
+    ((lambda (fact k)
+       (fact fact n k))
+     (lambda (fact n k)
+       (cond
+         [(zero? n) (k 1)]
+         [else (fact fact (sub1 n) (lambda (v) (k (* n v))))]))
+     k)))
+
 (define tests
   (test-suite "A8:"
               (test-suite "ack"
@@ -38,7 +48,16 @@
                                        (depth-reg-driver '(1 (2 (3 (4))))) (depth '(1 (2 (3 (4)))) (lambda (v) v)))
                           (test-equal? "case2"
                                        (depth-reg-driver '(1 2 2 (2 (3 (4))))) (depth '(1 2 2 (2 (3 (4)))) (lambda (v) v))))
+              (test-suite "fact"
+                          (test-equal? "case1"
+                                       (fact-reg-driver 5) (fact 5 (lambda (v) v)))
+                          (test-equal? "case2"
+                                       (fact-reg-driver 1) (fact 1 (lambda (v) v)))
+                          (test-equal? "case3"
+                                       (fact-reg-driver 2) (fact 2 (lambda (v) v)))
+                          (test-equal? "case4"
+                                       (fact-reg-driver 3) (fact 3 (lambda (v) v))))
               )
-  )
+)
 
 (run-tests tests)
