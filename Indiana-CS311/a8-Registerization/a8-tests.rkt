@@ -33,12 +33,6 @@
          [else (fact fact (sub1 n) (lambda (v) (k (* n v))))]))
      k)))
 
-(define fib
-  (lambda (n)
-    (cond
-      [(and (not (negative? n)) (< n 2)) n]
-      [else (+ (fib (sub1 n)) (fib (sub1 (sub1 n))))])))
-
 (define pascal
   (lambda (n k)
     (let ((pascal
@@ -49,6 +43,12 @@
                      [else (let ((a (+ a m)))
                              (pascal pascal (lambda (f) (f (add1 m) a (lambda (v) (k (cons a v)))))))]))))))
       (pascal pascal (lambda (f) (f 1 0 k))))))
+
+(define fib-test
+  (lambda (n)
+    (cond
+      [(and (not (negative? n)) (< n 2)) n]
+      [else (+ (fib-test (sub1 n)) (fib-test (sub1 (sub1 n))))])))
 
 (define tests
   (test-suite "A8:"
@@ -87,15 +87,15 @@
                                        (pascal-reg-driver 10) (pascal 10 (lambda (v) v))))
               (test-suite "fib"
                           (test-equal? "case1"
-                                       (fib-cps 1 '(empty-k)) (fib 1))
+                                       (fib-cps 1) (fib-test 1))
                           (test-equal? "case2"
-                                       (fib-cps 2 '(empty-k)) (fib 2))
+                                       (fib-cps 2) (fib-test 2))
                           (test-equal? "case3"
-                                       (fib-cps 3 '(empty-k)) (fib 3))
+                                       (fib-cps 3) (fib-test 3))
                           (test-equal? "case4"
-                                       (fib-cps 4 '(empty-k)) (fib 4))
+                                       (fib-cps 4) (fib-test 4))
                           (test-equal? "case5"
-                                       (fib-cps 5 '(empty-k)) (fib 5)))
+                                       (fib-cps 5) (fib-test 5)))
               )
   )
 

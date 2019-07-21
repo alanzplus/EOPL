@@ -169,15 +169,38 @@
         (apply-k)))))
 
 (define fib-cps
-  (letrec ([emtpy-k (lambda () '(empty-k))]
+  (letrec ([n* 'uninit]
+           [k* 'uninit]
+           [v* 'uninit]
+           [empty-k (lambda () '(empty-k))]
            [big-k (lambda (n saved-k) `(big-k ,n ,saved-k))]
            [small-k (lambda (v saved-k) `(small-k ,v ,saved-k))]
-           [apply-k (lambda (k v)
-                      (match k
-                             [`(big-k ,n ,saved-k) (fib-cps (sub1 n) (small-k v saved-k))]
-                             [`(small-k ,v1 ,saved-k) (apply-k saved-k (+ v1 v))]
-                             [`(empty-k) v]))])
-    (lambda (n k)
-      (cond
-        [(and (not (negative? n)) (< n 2)) (apply-k k n)]
-        [else (fib-cps (sub1 n) (big-k (sub1 n) k))]))))
+           [apply-k (lambda ()
+                      (match k*
+                             [`(big-k ,n ,saved-k)
+                               (begin
+                                 (set! n* (sub1 n))
+                                 (set! k* (small-k v* saved-k))
+                                 (fib))]
+                             [`(small-k ,v1 ,saved-k) 
+                               (begin
+                                 (set! k* saved-k)
+                                 (set! v* (+ v1 v*))
+                                 (apply-k))]
+                             [`(empty-k) v*]))]
+           [fib (lambda ()
+                  (cond
+                    [(and (not (negative? n*)) (< n* 2))
+                     (begin
+                       (set! v* n*)
+                       (apply-k))]
+                    [else
+                      (begin
+                        (set! k* (big-k (sub1 n*) k*))
+                        (set! n* (sub1 n*))
+                        (fib))]))])
+    (lambda (n)
+      (begin
+        (set! n* n)
+        (set! k* (empty-k))
+        (fib)))))
