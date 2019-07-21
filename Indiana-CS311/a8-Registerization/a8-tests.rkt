@@ -50,6 +50,8 @@
       [(and (not (negative? n)) (< n 2)) n]
       [else (+ (fib-test (sub1 n)) (fib-test (sub1 (sub1 n))))])))
 
+(define empty-k (lambda () (lambda (v) v)))
+
 (define tests
   (test-suite "A8:"
               (test-suite "ack"

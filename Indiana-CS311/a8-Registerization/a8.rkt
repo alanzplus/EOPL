@@ -4,6 +4,7 @@
 (provide fact-reg-driver)
 (provide pascal-reg-driver)
 (provide fib)
+(provide fib-ramp-driver)
 
 (define ack-reg-driver
   (letrec ([m* 'uninit]
@@ -208,3 +209,25 @@
                    (set! k* (empty-k exit-cont))
                    (set! pc* f)
                    (trampoline)))))))
+
+(define fib-trampoline
+  (lambda (n k)
+    (lambda ()
+      (cond
+        [(and (not (negative? n)) (< n 2)) (k n)]
+        [else
+          (fib-trampoline (sub1 n) (lambda (v1)
+                                     (fib-trampoline (sub1 (sub1 n))
+                                                     (lambda (v2) (k (+ v1 v2))))))]))))
+
+(define fib-ramp-driver
+  (letrec ([rampoline (lambda (th1 th2 th3)
+                        (let ([thunks (shuffle (list th1 th2 th3))])
+                          (rampoline ((car thunks)) ((cadr thunks)) ((caddr thunks)))))]
+           [ramp-empty-k (lambda (k) (lambda (v) (k v)))])
+    (lambda (n1 n2 n3)
+      (let/cc jumpout
+              (rampoline
+                (lambda () (fib-trampoline n1 (ramp-empty-k jumpout)))
+                (lambda () (fib-trampoline n2 (ramp-empty-k jumpout)))
+                (lambda () (fib-trampoline n3 (ramp-empty-k jumpout))))))))
