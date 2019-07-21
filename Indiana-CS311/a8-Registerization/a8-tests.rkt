@@ -33,6 +33,12 @@
          [else (fact fact (sub1 n) (lambda (v) (k (* n v))))]))
      k)))
 
+(define fib
+  (lambda (n)
+    (cond
+      [(and (not (negative? n)) (< n 2)) n]
+      [else (+ (fib (sub1 n)) (fib (sub1 (sub1 n))))])))
+
 (define pascal
   (lambda (n k)
     (let ((pascal
@@ -79,6 +85,17 @@
                                        (pascal-reg-driver 5) (pascal 5 (lambda (v) v)))
                           (test-equal? "case5"
                                        (pascal-reg-driver 10) (pascal 10 (lambda (v) v))))
+              (test-suite "fib"
+                          (test-equal? "case1"
+                                       (fib-cps 1 (lambda (v) v)) (fib 1))
+                          (test-equal? "case2"
+                                       (fib-cps 2 (lambda (v) v)) (fib 2))
+                          (test-equal? "case3"
+                                       (fib-cps 3 (lambda (v) v)) (fib 3))
+                          (test-equal? "case4"
+                                       (fib-cps 4 (lambda (v) v)) (fib 4))
+                          (test-equal? "case5"
+                                       (fib-cps 5 (lambda (v) v)) (fib 5)))
               )
   )
 

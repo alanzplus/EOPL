@@ -3,6 +3,7 @@
 (provide depth-reg-driver)
 (provide fact-reg-driver)
 (provide pascal-reg-driver)
+(provide fib-cps)
 
 (define ack-reg-driver
   (letrec ([m* 'uninit]
@@ -166,3 +167,11 @@
         (set! k* (init-k (empty-k)))
         (set! v* f)
         (apply-k)))))
+
+(define fib-cps
+  (lambda (n k)
+    (cond
+      [(and (not (negative? n)) (< n 2)) (k n)]
+      [else (fib-cps (sub1 n) (lambda (v1)
+                                (fib-cps (sub1 (sub1 n)) (lambda (v2)
+                                                           (k (+ v1 v2))))))])))
