@@ -14,17 +14,16 @@
               (lambda body)
               (app rator rand))
 
-; Continuation
-(struct empty-env-ds ())
-
-(struct extend-env-ds (val saved-env))
+(define-union env
+              (empty)
+              (extend val saved-env))
 
 (define apply-env-ds
-  (lambda (x address)
-    (match x
-           [(extend-env-ds val saved-env)
-            (if (zero? address) val (apply-env saved-env (sub1 address)))]
-           [(empty-env-ds ) (error 'value-of-cps "unbound identifier")])))
+  (lambda (e address)
+    (union-case e env
+                [(empty) (error 'value-of-cps "unbound identifier")]
+                [(extend val saved-env)
+                 (if (zero? address) val (apply-env saved-env (sub1 address)))])))
 
 ; Closure
 (define-union closure
@@ -34,7 +33,7 @@
   (lambda (p v cont)
     (union-case p closure
                 [(procedure body env)
-                 (value-of-cps body (extend-env v env) (closure-cont cont))])))
+                 (value-of-cps body (env_extend v env) (closure-cont cont))])))
 
 ; Continuation
 (struct empty-k-ds ())
@@ -79,7 +78,7 @@
            [(throw-inner-cont-ds saved-cont v1) (apply-k-ds v1 v)]
            [(let-cont-ds saved-env saved-cont body)
             (value-of-cps body
-                          (extend-env v saved-env)
+                          (env_extend v saved-env)
                           (let-inner-cont-ds saved-cont))]
            [(let-inner-cont-ds saved-cont) (apply-k-ds saved-cont v)]
            [(app-cont-ds saved-env saved-cont rand)
@@ -103,8 +102,6 @@
 (define apply-closure apply-closure-ds)
 (define empty-k empty-k-ds)
 
-(define empty-env empty-env-ds)
-(define extend-env extend-env-ds)
 (define apply-env apply-env-ds)
 
 (define value-of-cps
@@ -116,7 +113,7 @@
                 [(sub1 x) (value-of-cps x env (sub1-cont cont))]
                 [(zero x) (value-of-cps x env (zero-cont cont))]
                 [(if test conseq alt) (value-of-cps test env (if-cont conseq alt env cont))]
-                [(letcc body) (value-of-cps body (extend-env cont env) (letcc-cont cont))]
+                [(letcc body) (value-of-cps body (env_extend cont env) (letcc-cont cont))]
                 [(throw k-exp v-exp) (value-of-cps k-exp env (throw-cont env cont v-exp))]
                 [(let e body) (value-of-cps e env (let-cont env cont body))]
                 [(lambda body)
@@ -140,7 +137,7 @@
               (expr_app (expr_var 1) (expr_var 1))
               (expr_throw (expr_var 0) (expr_app (expr_app (expr_var 1) (expr_var 1)) (expr_const 4)))))
           (expr_const 5)))
-      (empty-env)
+      (env_empty)
       (empty-k))))
 
 (main)
