@@ -29,11 +29,11 @@
                                (begin
                                  (set! cont^ cont^)
                                  (set! v^ val)
-                                 (apply-k))
+                                 (set! pc apply-k))
                                (begin (set! env^ saved-env)
                                       (set! address^ (sub1 address^))
                                       (set! cont^ cont^)
-                                      (apply-env)))]))
+                                      (set! pc apply-env)))]))
 
 (define-union closure
               (procedure body env))
@@ -44,10 +44,10 @@
                            (begin (set! expr^ body)
                                   (set! env^ (env_extend v^ env))
                                   (set! cont^ (kt_closure cont^))
-                                  (value-of-cps))]))
+                                  (set! pc value-of-cps))]))
 
 (define-union kt
-              (empty)
+              (empty dismount)
               (mult x2 saved-env saved-cont)
               (mult-inner v saved-cont)
               (sub1 saved-cont)
@@ -66,137 +66,137 @@
 
 (define-label apply-k
               (union-case cont^ kt
-                          [(empty) v^]
+                          [(empty dismount) (dismount-trampoline dismount)]
                           [(mult x2 saved-env saved-cont)
                            (begin (set! expr^ x2)
                                   (set! env^ saved-env)
                                   (set! cont^ (kt_mult-inner v^ saved-cont))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(mult-inner v1 saved-cont)
                            (begin (set! cont^ saved-cont)
                                   (set! v^ (* v1 v^))
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(sub1 saved-cont)
                            (begin (set! cont^ saved-cont)
                                   (set! v^ (- v^ 1))
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(zero saved-cont)
                            (begin (set! cont^ saved-cont)
                                   (set! v^ (zero? v^))
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(if conseq alt saved-env saved-cont)
                            (if v^
                                (begin (set! expr^ conseq)
                                       (set! env^ saved-env)
                                       (set! cont^ (kt_if-conseq saved-cont))
-                                      (value-of-cps))
+                                      (set! pc value-of-cps))
                                (begin (set! expr^ alt)
                                       (set! env^ saved-env)
                                       (set! cont^ (kt_if-alt saved-cont))
-                                      (value-of-cps)))]
+                                      (set! pc value-of-cps)))]
                           [(if-conseq saved-cont)
                            (begin (set! cont^ saved-cont)
                                   (set! v^ v^)
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(if-alt saved-cont)
                            (begin (set! cont^ saved-cont)
                                   (set! v^ v^)
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(letcc saved-cont)
                            (begin (set! cont^ saved-cont)
                                   (set! v^ v^)
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(throw saved-env saved-cont v-exp)
                            (begin (set! expr^ v-exp)
                                   (set! env^ saved-env)
                                   (set! cont^ (kt_throw-inner saved-cont v^))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(throw-inner saved-cont v1)
                            (begin (set! cont^ v1)
                                   (set! v^ v^)
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(let saved-env saved-cont body)
                            (begin (set! expr^ body)
                                   (set! env^ (env_extend v^ saved-env))
                                   (set! cont^ (kt_let-inner saved-cont))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(let-inner saved-cont)
                            (begin 
                              (set! cont^ saved-cont)
                              (set! v^ v^)
-                             (apply-k))]
+                             (set! pc apply-k))]
                           [(app saved-env saved-cont rand)
                            (begin (set! expr^ rand)
                                   (set! env^ saved-env)
                                   (set! cont^ (kt_app-inner v^ saved-cont))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(app-inner v1 saved-cont)
                            (begin (set! closure^ v1)
                                   (set! v^ v^)
                                   (set! cont^ saved-cont)
-                                  (apply-closure))]
+                                  (set! pc apply-closure))]
                           [(closure saved-cont)
                            (begin (set! cont^ saved-cont)
                                   (set! v^ v^)
-                                  (apply-k))]))
+                                  (set! pc apply-k))]))
 
 (define-label value-of-cps
               (union-case expr^ expr
                           [(const val)
                            (begin (set! cont^ cont^)
                                   (set! v^ val)
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(mult x1 x2)
                            (begin (set! expr^ x1)
                                   (set! env^ env^)
                                   (set! cont^ (kt_mult x2 env^ cont^))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(sub1 x)
                            (begin (set! expr^ x)
                                   (set! env^ env^)
                                   (set! cont^ (kt_sub1 cont^))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(zero x)
                            (begin (set! expr^ x)
                                   (set! env^ env^)
                                   (set! cont^ (kt_zero cont^))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(if test conseq alt)
                            (begin (set! expr^ test)
                                   (set! conseq conseq)
                                   (set! alt alt)
                                   (set! env^ env^)
                                   (set! cont^ (kt_if conseq alt env^ cont^))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(letcc body)
                            (begin (set! expr^ body)
                                   (set! env^ (env_extend cont^ env^))
                                   (set! cont^ (kt_letcc cont^))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(throw k-exp v-exp)
                            (begin (set! expr^ k-exp)
                                   (set! env^ env^)
                                   (set! cont^ (kt_throw env^ cont^ v-exp))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(let e body)
                            (begin (set! expr^ e)
                                   (set! env^ env^)
                                   (set! cont^ (kt_let env^ cont^ body))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(lambda body)
                            (begin (set! cont^ cont^)
                                   (set! v^ (closure_procedure body env^))
-                                  (apply-k))]
+                                  (set! pc apply-k))]
                           [(app rator rand)
                            (begin (set! expr^ rator)
                                   (set! env^ env^)
                                   (set! cont^ (kt_app env^ cont^ rand))
-                                  (value-of-cps))]
+                                  (set! pc value-of-cps))]
                           [(var address)
                            (begin (set! env^ env^)
                                   (set! address^ address)
                                   (set! cont^ cont^)
-                                  (apply-env))]))
+                                  (set! pc apply-env))]))
 
 (define-label main 
               (begin (set! expr^ (expr_let 
@@ -213,7 +213,8 @@
                                          (expr_throw (expr_var 0) (expr_app (expr_app (expr_var 1) (expr_var 1)) (expr_const 4)))))
                                      (expr_const 5))))
                      (set! env^ (env_empty))
-                     (set! cont^ (kt_empty))
-                     (value-of-cps)))
+                     (set! pc value-of-cps)
+                     (mount-trampoline kt_empty cont^ pc)
+                     (printf "Answer: ~a\n" v^)))
 
 (main)
