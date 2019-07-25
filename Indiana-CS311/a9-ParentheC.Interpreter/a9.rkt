@@ -14,30 +14,7 @@
               (lambda body)
               (app rator rand))
 
-; Closure
-(define apply-closure
-  (lambda (rator rand cont)
-    (rator rand cont)))
-
 ; Continuation
-;   Procedure Presentation
-(define empty-env-fun
-  (lambda ()
-    (lambda (y)
-      (error 'value-of "unbound identifier"))))
-
-(define extend-env-fun
-  (lambda (val env)
-    (lambda (y)
-      (if (zero? y) val
-          (env (sub1 y))))))
-
-(define apply-env-fun
-  (lambda (env address)
-    (env address)))
-
-; Continuation
-;   Data Structure Presentation
 (struct empty-env-ds ())
 
 (struct extend-env-ds (val saved-env))
@@ -49,72 +26,17 @@
             (if (zero? address) val (apply-env saved-env (sub1 address)))]
            [(empty-env-ds ) (error 'value-of-cps "unbound identifier")])))
 
-; Continuation
-;   Procedure Presentation
-(define empty-k-fun
-  (lambda ()
-    (lambda (v)
-      (displayln "should print only once")
-      v)))
+; Closure
+(define-union closure
+              (procedure body env))
 
-(define mult-cont-fun
-  (lambda (x2 env saved-cont)
-    (lambda (v1)
-      (value-of-cps x2 env (lambda (v2)
-                             (apply-k saved-cont (* v1 v2)))))))
-
-(define sub1-cont-fun
-  (lambda (saved-cont)
-    (lambda (v1)
-      (apply-k saved-cont (- v1 1)))))
-
-(define zero-cont-fun
-  (lambda (saved-cont)
-    (lambda (v1)
-      (apply-k saved-cont (zero? v1)))))
-
-(define if-cont-fun
-  (lambda (conseq alt env saved-cont)
-    (lambda (v1)
-      (if v1
-          (value-of-cps conseq env (lambda (v2) (apply-k saved-cont v2)))
-          (value-of-cps alt env (lambda (v2) (apply-k saved-cont v2)))))))
-
-(define letcc-cont-fun
-  (lambda (saved-cont)
-    (lambda (v1)
-      (apply-k saved-cont v1))))
-
-(define throw-cont-fun
-  (lambda (env saved-cont v-exp)
-    (lambda (v1)
-      (value-of-cps v-exp env (lambda (v2) (apply-k-fun v1 v2))))))
-
-(define let-cont-fun
-  (lambda (env cont body)
-    (lambda (v1)
-      (value-of-cps body
-                    (extend-env v1 env)
-                    (lambda (v2) (apply-k cont v2))))))
-
-(define app-cont-fun
-  (lambda (env saved-cont rand)
-    (lambda (v1)
-      (value-of-cps rand env (lambda (v2) (apply-closure v1 v2 saved-cont))))))
-
-(define apply-k-fun
-  (lambda (cont v) (cont v)))
-
-(define make-closure-fun
-  (lambda (body env)
-    (lambda (a k)
-      (value-of-cps body
-                    (extend-env a env)
-                    (lambda (v1)
-                      (apply-k-fun k v1))))))
+(define apply-closure-ds
+  (lambda (p v cont)
+    (union-case p closure
+                [(procedure body env)
+                 (value-of-cps body (extend-env v env) (closure-cont cont))])))
 
 ; Continuation
-;   Data Structure Presentation
 (struct empty-k-ds ())
 (struct mult-cont-ds (x2 saved-env saved-cont))
 (struct mult-cont-inner-ds (v saved-cont))
@@ -168,11 +90,6 @@
             (apply-k-ds saved-cont v)]
            )))
 
-(define make-closure-ds
-  (lambda (body env)
-    (lambda (a k)
-      (value-of-cps body (extend-env a env) (closure-cont k)))))
-
 ; Bind to different implementations for environment and continuation
 (define mult-cont mult-cont-ds)
 (define sub1-cont sub1-cont-ds)
@@ -183,7 +100,7 @@
 (define let-cont let-cont-ds)
 (define app-cont app-cont-ds)
 (define apply-k apply-k-ds)
-(define make-closure make-closure-ds)
+(define apply-closure apply-closure-ds)
 (define empty-k empty-k-ds)
 
 (define empty-env empty-env-ds)
@@ -203,7 +120,7 @@
                 [(throw k-exp v-exp) (value-of-cps k-exp env (throw-cont env cont v-exp))]
                 [(let e body) (value-of-cps e env (let-cont env cont body))]
                 [(lambda body)
-                 (apply-k cont (make-closure body env))]
+                 (apply-k cont (closure_procedure body env))]
                 [(app rator rand) (value-of-cps rator env (app-cont env cont rand))]
                 [(var address) (apply-k cont (apply-env env address))])))
 
