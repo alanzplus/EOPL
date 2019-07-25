@@ -33,75 +33,68 @@
   (lambda (p v cont)
     (union-case p closure
                 [(procedure body env)
-                 (value-of-cps body (env_extend v env) (closure-cont cont))])))
+                 (value-of-cps body (env_extend v env) (kt_closure cont))])))
 
 ; Continuation
 (struct empty-k-ds ())
-(struct mult-cont-ds (x2 saved-env saved-cont))
-(struct mult-cont-inner-ds (v saved-cont))
-(struct sub1-cont-ds (saved-cont))
-(struct zero-cont-ds (saved-cont))
-(struct if-cont-ds (conseq alt saved-env saved-cont))
-(struct if-conseq-cont-ds (saved-cont))
-(struct if-alt-cont-ds (saved-cont))
-(struct letcc-cont-ds (saved-cont))
-(struct throw-cont-ds (saved-env saved-cont v-exp))
-(struct throw-inner-cont-ds (saved-cont v))
-(struct let-cont-ds (saved-env saved-cont body))
-(struct let-inner-cont-ds (saved-cont))
-(struct app-cont-ds (saved-env saved-cont rand))
-(struct app-inner-cont-ds (v saved-cont))
-(struct closure-cont (saved-cont))
+
+(define-union kt
+              (empty)
+              (mult x2 saved-env saved-cont)
+              (mult-inner v saved-cont)
+              (sub1 saved-cont)
+              (zero saved-cont)
+              (if conseq alt saved-env saved-cont)
+              (if-conseq saved-cont)
+              (if-alt saved-cont)
+              (letcc saved-cont)
+              (throw saved-env saved-cont v-exp)
+              (throw-inner saved-cont v)
+              (let saved-env saved-cont body)
+              (let-inner saved-cont)
+              (app saved-env saved-cont rand)
+              (app-inner v saved-cont)
+              (closure saved-cont))
 
 (define apply-k-ds
   (lambda (cont v)
-    (match cont
-           [(empty-k-ds) v]
-           [(mult-cont-ds x2 saved-env saved-cont)
-            (value-of-cps x2 saved-env (mult-cont-inner-ds v saved-cont))]
-           [(mult-cont-inner-ds v1 saved-cont)
-            (apply-k-ds saved-cont (* v1 v))]
-           [(sub1-cont-ds saved-cont)
-            (apply-k-ds saved-cont (- v 1))]
-           [(zero-cont-ds saved-cont)
-            (apply-k-ds saved-cont (zero? v))]
-           [(if-cont-ds conseq alt saved-env saved-cont)
-            (if v
-                (value-of-cps conseq saved-env (if-conseq-cont-ds saved-cont))
-                (value-of-cps alt saved-env (if-alt-cont-ds saved-cont)))]
-           [(if-conseq-cont-ds saved-cont) (apply-k-ds saved-cont v)]
-           [(if-alt-cont-ds saved-cont) (apply-k-ds saved-cont v)]
-           [(letcc-cont-ds saved-cont)
-            (apply-k-ds saved-cont v)]
-           [(throw-cont-ds saved-env saved-cont v-exp)
-            (value-of-cps v-exp saved-env (throw-inner-cont-ds saved-cont v))]
-           [(throw-inner-cont-ds saved-cont v1) (apply-k-ds v1 v)]
-           [(let-cont-ds saved-env saved-cont body)
-            (value-of-cps body
-                          (env_extend v saved-env)
-                          (let-inner-cont-ds saved-cont))]
-           [(let-inner-cont-ds saved-cont) (apply-k-ds saved-cont v)]
-           [(app-cont-ds saved-env saved-cont rand)
-            (value-of-cps rand saved-env (app-inner-cont-ds v saved-cont))]
-           [(app-inner-cont-ds v1 saved-cont)
-            (apply-closure v1 v saved-cont)]
-           [(closure-cont saved-cont)
-            (apply-k-ds saved-cont v)]
-           )))
+    (union-case cont kt
+                [(empty) v]
+                [(mult x2 saved-env saved-cont)
+                 (value-of-cps x2 saved-env (kt_mult-inner v saved-cont))]
+                [(mult-inner v1 saved-cont)
+                 (apply-k-ds saved-cont (* v1 v))]
+                [(sub1 saved-cont)
+                 (apply-k-ds saved-cont (- v 1))]
+                [(zero saved-cont)
+                 (apply-k-ds saved-cont (zero? v))]
+                [(if conseq alt saved-env saved-cont)
+                 (if v
+                     (value-of-cps conseq saved-env (kt_if-conseq saved-cont))
+                     (value-of-cps alt saved-env (kt_if-alt saved-cont)))]
+                [(if-conseq saved-cont) (apply-k-ds saved-cont v)]
+                [(if-alt saved-cont) (apply-k-ds saved-cont v)]
+                [(letcc saved-cont)
+                 (apply-k-ds saved-cont v)]
+                [(throw saved-env saved-cont v-exp)
+                 (value-of-cps v-exp saved-env (kt_throw-inner saved-cont v))]
+                [(throw-inner saved-cont v1) (apply-k-ds v1 v)]
+                [(let saved-env saved-cont body)
+                 (value-of-cps body
+                               (env_extend v saved-env)
+                               (kt_let-inner saved-cont))]
+                [(let-inner saved-cont) (apply-k-ds saved-cont v)]
+                [(app saved-env saved-cont rand)
+                 (value-of-cps rand saved-env (kt_app-inner v saved-cont))]
+                [(app-inner v1 saved-cont)
+                 (apply-closure v1 v saved-cont)]
+                [(closure saved-cont)
+                 (apply-k-ds saved-cont v)]
+                )))
 
-; Bind to different implementations for environment and continuation
-(define mult-cont mult-cont-ds)
-(define sub1-cont sub1-cont-ds)
-(define zero-cont zero-cont-ds)
-(define if-cont if-cont-ds)
-(define letcc-cont letcc-cont-ds)
-(define throw-cont throw-cont-ds)
-(define let-cont let-cont-ds)
-(define app-cont app-cont-ds)
 (define apply-k apply-k-ds)
 (define apply-closure apply-closure-ds)
 (define empty-k empty-k-ds)
-
 (define apply-env apply-env-ds)
 
 (define value-of-cps
@@ -109,16 +102,16 @@
     (union-case expr^ expr
                 [(const val) (apply-k cont val)]
                 [(mult x1 x2)
-                 (value-of-cps x1 env (mult-cont x2 env cont))]
-                [(sub1 x) (value-of-cps x env (sub1-cont cont))]
-                [(zero x) (value-of-cps x env (zero-cont cont))]
-                [(if test conseq alt) (value-of-cps test env (if-cont conseq alt env cont))]
-                [(letcc body) (value-of-cps body (env_extend cont env) (letcc-cont cont))]
-                [(throw k-exp v-exp) (value-of-cps k-exp env (throw-cont env cont v-exp))]
-                [(let e body) (value-of-cps e env (let-cont env cont body))]
+                 (value-of-cps x1 env (kt_mult x2 env cont))]
+                [(sub1 x) (value-of-cps x env (kt_sub1 cont))]
+                [(zero x) (value-of-cps x env (kt_zero cont))]
+                [(if test conseq alt) (value-of-cps test env (kt_if conseq alt env cont))]
+                [(letcc body) (value-of-cps body (env_extend cont env) (kt_letcc cont))]
+                [(throw k-exp v-exp) (value-of-cps k-exp env (kt_throw env cont v-exp))]
+                [(let e body) (value-of-cps e env (kt_let env cont body))]
                 [(lambda body)
                  (apply-k cont (closure_procedure body env))]
-                [(app rator rand) (value-of-cps rator env (app-cont env cont rand))]
+                [(app rator rand) (value-of-cps rator env (kt_app env cont rand))]
                 [(var address) (apply-k cont (apply-env env address))])))
 
 (define main 
@@ -138,6 +131,6 @@
               (expr_throw (expr_var 0) (expr_app (expr_app (expr_var 1) (expr_var 1)) (expr_const 4)))))
           (expr_const 5)))
       (env_empty)
-      (empty-k))))
+      (kt_empty))))
 
 (main)
