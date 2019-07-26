@@ -112,10 +112,10 @@
 (struct extend-env-ds (val saved-env))
 
 (define apply-env-ds
-  (lambda (x address)
+  (lambda (x address k)
     (match x
            [(extend-env-ds val saved-env)
-            (if (zero? address) val (apply-env saved-env (sub1 address)))]
+            (if (zero? address) (apply-k k val) (apply-env saved-env (sub1 address) k))]
            [(empty-env-ds ) (error 'value-of-cps "unbound identifier")])))
 
 ; Continuation
@@ -274,7 +274,7 @@
            [`(lambda ,body)
              (apply-k cont (make-closure body env))]
            [`(app ,rator ,rand) (value-of-cps rator env (app-cont env cont rand))]
-           [`(var ,address) (apply-k cont (apply-env env address))])))
+           [`(var ,address) (apply-env env address cont)])))
 
 
 (define thaw
