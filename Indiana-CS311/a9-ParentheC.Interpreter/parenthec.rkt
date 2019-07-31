@@ -214,7 +214,9 @@
     (syntax-case x ()
       [(__ union-type [sub-tn arg* ...] ...)
        (let ([ut-val (syntax->datum #'union-type)]
+             ; (sub-tn ...) creates a list of subtypes
              [st*-val (syntax->datum #'(sub-tn ...))]
+             ; ((arg* ...) ...) creates a list of list of arguments for each subtype
              [arg-count*-val (map length (syntax->datum #'((arg* ...) ...)))])
          (with-syntax
              ([(constructor-fn* ...)
