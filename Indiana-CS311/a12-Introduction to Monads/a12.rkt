@@ -6,6 +6,7 @@
 (provide powerXpartials)
 (provide replace-with-count)
 (provide reciprocal)
+(provide traverse-reciprocal)
 
 (define findf-maybe
   (lambda (predicate? ls)
@@ -71,3 +72,19 @@
 (define reciprocal
   (lambda (n)
     (if (zero? n) (Nothing) (Just (/ 1 n)))))
+
+(define traverse
+  (lambda (inj bind f)
+    (letrec
+      ([trav
+         (lambda (tree)
+           (cond
+             [(pair? tree)
+              (go-on ([a (trav (car tree))]
+                      [b (trav (cdr tree))])
+                     (inj (cons a b)))]
+             [else (f tree)]))])
+      trav)))
+
+(define traverse-reciprocal
+  (traverse Just bind-maybe reciprocal))

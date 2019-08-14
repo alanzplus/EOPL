@@ -51,6 +51,13 @@
                           (test-equal? "case2"
                                        (reciprocal 2)
                                        (Just (/ 1 2))))
+              (test-suite "traverse-reciprocal"
+                          (test-equal? "case1"
+                                       (traverse-reciprocal '((1 . 2) . (3 . (4 . 5))))
+                                       (Just '((1 . 1/2) . (1/3 . (1/4 . 1/5)))))
+                          (test-equal? "case2"
+                                       (traverse-reciprocal '((1 . 2) . (0 . (4 . 5))))
+                                       (Nothing)))
               ))
 
 (run-tests tests)
