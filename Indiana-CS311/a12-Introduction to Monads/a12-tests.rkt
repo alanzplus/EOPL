@@ -69,6 +69,19 @@
                           (test-equal? "case1"
                                        (run-writer (traverse-halve '((1 . 2) . (3 . (4 . 5)))))
                                        '((1 3 5) . ((1 . 1) . (3 . (2 . 5))))))
+              (test-suite "state/sum"
+                          (test-equal? "case1"
+                                       ((run-state (state/sum 5)) 0)
+                                       '(5 . 0))
+                          (test-equal? "case2"
+                                       ((run-state (state/sum 2)) 0)
+                                       '(2 . 0))
+                          (test-equal? "cas3"
+                                       ((run-state (state/sum 2)) 3)
+                                       '(5 . 3)))
+              (test-suite "traverse-state/sum"
+                          ((run-state (traverse-state/sum '((1 . 2) . (3 . (4 . 5))))) 0)
+                          '(15 . ((0 . 1) 3 6 . 10)))
               ))
 
 (run-tests tests)

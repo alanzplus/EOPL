@@ -9,6 +9,8 @@
 (provide traverse-reciprocal)
 (provide halve)
 (provide traverse-halve)
+(provide state/sum)
+(provide traverse-state/sum)
 
 (define findf-maybe
   (lambda (predicate? ls)
@@ -99,3 +101,16 @@
 
 (define traverse-halve
   (traverse inj-writer bind-writer halve))
+
+(define state/sum
+  (lambda (n)
+    (bind-state
+      (get)
+      (lambda (s)
+        (bind-state
+          (put (+ s n))
+          (lambda (_)
+            (inj-state s)))))))
+
+(define traverse-state/sum
+  (traverse inj-state bind-state state/sum))
