@@ -40,11 +40,17 @@
                                        '(4 . (a 0 (t 1 (e 2 t ((n . m) . 3) . f) . t) . r)))
                           (test-equal? "case2"
                                        ((run-state (replace-with-count 'o '(((h (i s . o) . a) o s o e . n) . m))) 0)
-                                       ;'())
                                        '(3 . (((h (i s . 0) . a) 1 s 2 e . n) . m)))
                           (test-equal? "case3"
                                        ((run-state (replace-with-count 'o '(o (h (o s . o) . o) . o))) 1)
                                        '(6 . (1 (h (2 s . 3) . 4) . 5))))
+              (test-suite "reciprocal"
+                          (test-equal? "case1"
+                                       (reciprocal 0)
+                                       (Nothing))
+                          (test-equal? "case2"
+                                       (reciprocal 2)
+                                       (Just (/ 1 2))))
               ))
 
 (run-tests tests)

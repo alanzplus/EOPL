@@ -5,6 +5,7 @@
 (provide partition-writer)
 (provide powerXpartials)
 (provide replace-with-count)
+(provide reciprocal)
 
 (define findf-maybe
   (lambda (predicate? ls)
@@ -67,5 +68,6 @@
                (inj-state s)))))]
       [else (inj-state tr)])))
 
-
-
+(define reciprocal
+  (lambda (n)
+    (if (zero? n) (Nothing) (Just (/ 1 n)))))
