@@ -7,6 +7,8 @@
 (provide replace-with-count)
 (provide reciprocal)
 (provide traverse-reciprocal)
+(provide halve)
+(provide traverse-halve)
 
 (define findf-maybe
   (lambda (predicate? ls)
@@ -88,3 +90,12 @@
 
 (define traverse-reciprocal
   (traverse Just bind-maybe reciprocal))
+
+(define halve
+  (lambda (n)
+    (if (zero? (modulo n 2))
+      (inj-writer (/ n 2))
+      (Writer (list n) n))))
+
+(define traverse-halve
+  (traverse inj-writer bind-writer halve))

@@ -58,6 +58,17 @@
                           (test-equal? "case2"
                                        (traverse-reciprocal '((1 . 2) . (0 . (4 . 5))))
                                        (Nothing)))
+              (test-suite "halve"
+                          (test-equal? "case1"
+                                       (run-writer (halve 6))
+                                       '(() . 3))
+                          (test-equal? "case2"
+                                       (run-writer (halve 5))
+                                       '((5) . 5)))
+              (test-suite "traverse-halve"
+                          (test-equal? "case1"
+                                       (run-writer (traverse-halve '((1 . 2) . (3 . (4 . 5)))))
+                                       '((1 3 5) . ((1 . 1) . (3 . (2 . 5))))))
               ))
 
 (run-tests tests)
