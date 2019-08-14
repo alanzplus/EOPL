@@ -24,6 +24,7 @@
 (struct Unit
   ())
 
+; writer message is the first part
 (struct (W A) Writer
   ([log : (Listof W)]
    [a : A]))
