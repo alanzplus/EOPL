@@ -4,6 +4,7 @@
 (provide findf-maybe)
 (provide partition-writer)
 (provide powerXpartials)
+(provide replace-with-count)
 
 (define findf-maybe
   (lambda (predicate? ls)
@@ -44,3 +45,27 @@
          (powerXpartials x (/ n 2))
          (lambda (a)
            (Writer (list a) (* a a))))])))
+
+(define replace-with-count
+  (lambda (s tr)
+    (cond
+      [(pair? tr)
+       (bind-state
+         (replace-with-count s (car tr))
+         (lambda (a)
+           (bind-state
+             (replace-with-count s (cdr tr))
+             (lambda (b)
+               (inj-state (cons a b))))))]
+      [(eq? s tr)
+       (bind-state
+         (get)
+         (lambda (s)
+           (bind-state
+             (put (add1 s))
+             (lambda (_)
+               (inj-state s)))))]
+      [else (inj-state tr)])))
+
+
+

@@ -34,6 +34,17 @@
                           (test-equal? "case3"
                                        (run-writer (powerXpartials 5 7))
                                        '((5 25 125 15625) . 78125)))
+              (test-suite "replace-with-count"
+                          (test-equal? "case1"
+                                       ((run-state (replace-with-count 'o '(a o (t o (e o t ((n . m) . o) . f) . t) . r))) 0)
+                                       '(4 . (a 0 (t 1 (e 2 t ((n . m) . 3) . f) . t) . r)))
+                          (test-equal? "case2"
+                                       ((run-state (replace-with-count 'o '(((h (i s . o) . a) o s o e . n) . m))) 0)
+                                       ;'())
+                                       '(3 . (((h (i s . 0) . a) 1 s 2 e . n) . m)))
+                          (test-equal? "case3"
+                                       ((run-state (replace-with-count 'o '(o (h (o s . o) . o) . o))) 1)
+                                       '(6 . (1 (h (2 s . 3) . 4) . 5))))
               ))
 
 (run-tests tests)
