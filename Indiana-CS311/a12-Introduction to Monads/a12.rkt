@@ -3,6 +3,7 @@
 (require "monads.rkt")
 (provide findf-maybe)
 (provide partition-writer)
+(provide powerXpartials)
 
 (define findf-maybe
   (lambda (predicate? ls)
@@ -27,3 +28,19 @@
           (tell (car ls))
           (lambda (_)
             (partition-writer predicate? (cdr ls))))])))
+
+(define powerXpartials
+  (lambda (x n)
+    (cond
+      [(zero? n) (inj-writer 1)]
+      [(zero? (sub1 n)) (inj-writer x)]
+      [(odd? n)
+       (bind-writer
+         (powerXpartials x (sub1 n))
+         (lambda (a)
+           (Writer (list a) (* a x))))]
+      [(even? n)
+       (bind-writer
+         (powerXpartials x (/ n 2))
+         (lambda (a)
+           (Writer (list a) (* a a))))])))

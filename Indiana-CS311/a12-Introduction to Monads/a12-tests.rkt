@@ -24,6 +24,16 @@
                           (test-equal? "case2"
                                        (run-writer (partition-writer odd? '(1 2 3 4 5 6 7 8 9 10)))
                                        '((2 4 6 8 10) . (1 3 5 7 9))))
+              (test-suite "power"
+                          (test-equal? "case1"
+                                       (run-writer (powerXpartials 2 6))
+                                       '((2 4 8) . 64))
+                          (test-equal? "case2"
+                                       (run-writer (powerXpartials 3 5))
+                                       '((3 9 81) . 243))
+                          (test-equal? "case3"
+                                       (run-writer (powerXpartials 5 7))
+                                       '((5 25 125 15625) . 78125)))
               ))
 
 (run-tests tests)
