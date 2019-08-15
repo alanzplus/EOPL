@@ -82,6 +82,39 @@
               (test-suite "traverse-state/sum"
                           ((run-state (traverse-state/sum '((1 . 2) . (3 . (4 . 5))))) 0)
                           '(15 . ((0 . 1) 3 6 . 10)))
+              (test-suite "value-of-cps"
+                          (test-equal? "case1"
+                                       ((run-cont (value-of-cps '1 (empty-env))) (lambda (v) v)) 1)
+                          (test-equal? "case2"
+                                       ((run-cont (value-of-cps '#f (empty-env))) (lambda (v) v)) #f)
+                          (test-equal? "case3"
+                                       ((run-cont (value-of-cps 'a (extend-env 'a 10 (empty-env)))) (lambda (v) v)) 10)
+                          (test-equal? "case4"
+                                       ((run-cont (value-of-cps '(* a 20) (extend-env 'a 10 (empty-env)))) (lambda (v) v)) 200)
+                          (test-equal? "case5"
+                                       ((run-cont (value-of-cps '(sub1 a) (extend-env 'a 10 (empty-env)))) (lambda (v) v)) 9)
+                          (test-equal? "case6"
+                                       ((run-cont (value-of-cps '(zero? (sub1 a)) (extend-env 'a 1 (empty-env)))) (lambda (v) v)) #t)
+                          (test-equal? "case7"
+                                       ((run-cont (value-of-cps '(if (zero? 0) (sub1 20) (sub1 10)) (empty-env))) (lambda (v) v)) 19)
+                          (test-equal? "case8"
+                                       ((run-cont (value-of-cps '((lambda (x) (* x 3)) 10) (empty-env))) (lambda (v) v)) 30)
+                          (test-equal? "case9"
+                                       ((run-cont (value-of-cps
+                                                    '((lambda (f)
+                                                        ((f f) 5))
+                                                      (lambda (f)
+                                                        (lambda (n)
+                                                          (if (zero? n)
+                                                            1
+                                                            (* n ((f f) (sub1 n)))))))
+                                                    (empty-env))) (lambda (v) v)) 120)
+                          (test-equal? "case10"
+                                       ((run-cont (value-of-cps
+                                                    '(* 3 (capture q (* 2 (return q 4))))
+                                                    (empty-env))) (lambda (v) v)) 12)
+
+                          )
               ))
 
 (run-tests tests)

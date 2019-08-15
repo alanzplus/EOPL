@@ -58,6 +58,7 @@
   (match ma
     [(Writer la a) (Writer la (cons la a))]))
 
+; A is the return value of the function
 (struct (Store A) State
   ([run-state : (-> Store (Pair Store A))]))
 

@@ -24,7 +24,7 @@ time-for-eval and space-for-eval.
 |#
 
 (define test-file
-  (lambda (#:file-name (file "./a13.rkt")
+  (lambda (#:file-name (file "./a12.rkt")
 	   #:sec-of-eval (sec 5)
 	   #:mb-of-eval (mb 5))
     (run-tests tests)

@@ -51,4 +51,5 @@
 * TODO
 
 ## A12 - Introduction to Monads
-* [W.I.P] manymonads.pdf
+* [DONE] Assignment, see a12.rkt
+* [DONE] Brainteaser, see 12.rkt
